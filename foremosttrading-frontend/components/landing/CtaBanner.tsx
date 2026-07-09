@@ -1,0 +1,26 @@
+import React from "react";
+import { Button } from "@/components/ui/button";
+
+export function CtaBanner() {
+  return (
+    <section className="w-full py-16 bg-white">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="w-full bg-[#111] rounded-[24px] p-8 md:p-16 flex flex-col items-start justify-center text-white">
+          <p className="text-gray-400 text-xs md:text-sm tracking-widest font-bold uppercase mb-4">
+            FOR TEAMS &bull; FOR SCHOOLS &bull; FOR BRANDS
+          </p>
+          <h2 className="text-4xl md:text-6xl font-bold uppercase tracking-tight leading-tight mb-4">
+            Outfit the whole roster.
+          </h2>
+          <p className="text-gray-400 text-sm md:text-lg max-w-2xl mb-8">
+            Volume pricing, dedicated production manager, name & number sheets.
+            Submit a bulk inquiry and we'll quote within 24 hours.
+          </p>
+          <Button className="bg-[#F97316] hover:bg-[#EA580C] text-white font-bold px-8 h-12 text-base rounded-md">
+            Request bulk quote &gt;
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}
