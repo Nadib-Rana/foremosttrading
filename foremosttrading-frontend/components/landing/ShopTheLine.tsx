@@ -56,7 +56,7 @@ const categories = [
 
 export function ShopTheLine() {
   return (
-    <section className="w-full py-16 md:py-24 bg-white">
+    <section className="w-full py-8 md:py-12 bg-[#F4F5F7]">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="mb-10">
           <h2 className="text-4xl md:text-5xl font-bold uppercase tracking-tight text-black mb-2">

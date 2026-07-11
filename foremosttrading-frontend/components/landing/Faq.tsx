@@ -30,7 +30,7 @@ export function Faq() {
   const [openIndex, setOpenIndex] = useState<number>(0);
 
   return (
-    <section className="w-full py-16 md:py-24 bg-white">
+    <section className="w-full py-8 md:py-12 bg-[#F4F5F7]">
       <div className="container mx-auto px-4 sm:px-6 flex flex-col md:flex-row gap-12 md:gap-24">
         <div className="w-full md:w-1/3">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold uppercase tracking-tight text-black">

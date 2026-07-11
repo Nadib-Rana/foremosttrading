@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export function CtaBanner() {
   return (
-    <section className="w-full py-16 bg-white">
+    <section className="w-full py-8 md:py-12 bg-[#F4F5F7]">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="w-full bg-[#111] rounded-[24px] p-8 md:p-16 flex flex-col items-start justify-center text-white">
           <p className="text-gray-400 text-xs md:text-sm tracking-widest font-bold uppercase mb-4">

@@ -7,7 +7,7 @@ import {
   PrismaClientKnownRequestError,
   PrismaClientUnknownRequestError,
 } from "@prisma/client/runtime/client";
-import { PrismaClient } from "@/prisma/generated/client";
+import { PrismaClient } from "@/generated/client";
 
 export class PrismaProvider implements InfrastructureProvider<PrismaClient> {
   public name = "Prisma Database";

@@ -1,9 +1,11 @@
-import { PrismaClient } from "@/generated/prisma/client";
-// import { Redis } from "ioredis";
+import { PrismaClient } from "@/generated/client";
+import { Redis } from "ioredis";
 // import Stripe from "stripe";
+
+import { EmailProvider } from "@/providers/EmailProvider";
 
 export interface ServiceMap {
   prisma: PrismaClient;
-  // redis: Redis;
-  // stripe: Stripe;
+  redis: Redis;
+  email: EmailProvider;
 }

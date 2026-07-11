@@ -1,0 +1,51 @@
+model Product {
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String
+  slug            String           @unique
+  description     String?          @db.Text
+  category        ProductCategory
+  
+  basePrice       Decimal          @db.Decimal(10, 2)
+  isCustomizable  Boolean          @default(true)
+  
+  images          String[]         // URLs of product images
+  shapes          ProductShape[]   // SVG shapes/views for the configurator
+  
+  variants        ProductVariant[] @relation("ProductToVariant")
+  savedDesigns    SavedDesign[]
+  orderItems      OrderItem[]
+  cartItems       CartItem[]
+  
+  isActive        Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now()) @updatedAt
+}
+
+model ProductVariant {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  productId       String    @db.Uuid
+  product         Product   @relation("ProductToVariant", fields: [productId], references: [id], onDelete: Cascade)
+  
+  name            String    // e.g., "Size S", "Pro Version", "Player Version"
+  sku             String    @unique
+  
+  priceModifier   Decimal   @default(0) @db.Decimal(10, 2) // Added to base price
+  stockQuantity   Int       @default(0)
+  
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now()) @updatedAt
+}
+
+model ProductShape {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  productId   String   @db.Uuid
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  name        String   // e.g., "Front", "Back", "Left", "Right"
+  svgUrl      String   // URL to the uploaded SVG file
+  layers      Json?    // Array of customizable parts (e.g., ["Jersey Body", "Collar"]) extracted from the SVG
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+}

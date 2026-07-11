@@ -27,8 +27,10 @@
         "add:module": "bun scripts/generate-module.ts"
     },
     "dependencies": {
+        "@aws-sdk/client-s3": "^3.1085.0",
         "@prisma/adapter-pg": "^7.5.0",
         "@prisma/client": "^7.2.0",
+        "@types/nodemailer": "^8.0.1",
         "axios": "^1.12.2",
         "bcrypt": "^6.0.0",
         "chalk": "^5.6.0",
@@ -41,9 +43,11 @@
         "express": "^5.1.0",
         "express-rate-limit": "^8.0.1",
         "helmet": "^8.1.0",
+        "ioredis": "^5.11.1",
         "jsonwebtoken": "^9.0.2",
         "lodash": "^4.17.21",
         "multer": "^2.0.2",
+        "nodemailer": "^9.0.3",
         "pg": "^8.16.3",
         "prisma": "^7.2.0",
         "uuid": "^11.1.0",
@@ -63,7 +67,7 @@
         "@types/jsonwebtoken": "^9.0.10",
         "@types/lodash": "^4.17.20",
         "@types/multer": "^2.0.0",
-        "@types/node": "^25.0.3"
+        "@types/node": "^26.1.1"
     },
     "peerDependencies": {
         "typescript": "^5"

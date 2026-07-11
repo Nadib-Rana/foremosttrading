@@ -6,7 +6,13 @@ import { config } from "./core/config";
 // Providers (Infrastructure)
 import { PrismaProvider } from "./providers/PrismaProvider";
 import { prisma } from "./lib/prisma";
+import { RedisProvider } from "./providers/RedisProvider";
+import { redis } from "./lib/redis";
+import { EmailProvider } from "./providers/EmailProvider";
 import { AuthModule } from "./Modules/Auth/AuthModule";
+import { CartModule } from "./Modules/Cart/CartModule";
+import { ProductModule } from "./Modules/Product/ProductModule";
+import { UploadModule } from "./Modules/Upload/UploadModule";
 
 // Modules (Business Logic)
 
@@ -20,14 +26,44 @@ async function bootstrap() {
     // 2. Register Infrastructure Providers
     AppLogger.info("⚙ Registering infrastructure...");
     app.getContext().registerProvider("prisma", new PrismaProvider(prisma));
+    app.getContext().registerProvider("redis", new RedisProvider(redis));
+    app.getContext().registerProvider("email", new EmailProvider());
 
     // 3. Register Application Modules
     AppLogger.info("⚙ Registering modules...");
     app.registerModule(new AuthModule());
-    // app.registerModule(new ProductModule());
+    app.registerModule(new CartModule());
+    app.registerModule(new ProductModule());
+    app.registerModule(new UploadModule());
     AppLogger.info("✔ All modules registered successfully");
 
-    // 4. Spark the server!
+    // 4. Seed Default Admin
+    AppLogger.info("⚙ Seeding default admin...");
+    const adminEmail = process.env.DEFAULT_ADMIN_EMAIL;
+    const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD;
+    
+    if (adminEmail && adminPassword) {
+      const existingAdmin = await prisma.user.findUnique({ where: { email: adminEmail } });
+      if (!existingAdmin) {
+        const bcrypt = await import("bcrypt");
+        const passwordHash = await bcrypt.hash(adminPassword, 10);
+        await prisma.user.create({
+          data: {
+            email: adminEmail,
+            password: passwordHash,
+            fullName: "Default Admin",
+            phone: "0000000000",
+            role: "ADMIN",
+            status: "ACTIVE"
+          }
+        });
+        AppLogger.info("✔ Default admin seeded successfully");
+      } else {
+        AppLogger.info("✔ Default admin already exists");
+      }
+    }
+
+    // 5. Spark the server!
     await app.spark(config.server.port);
 
     AppLogger.info("✷ Ignitor sparked successfully");

@@ -1,0 +1,22 @@
+info:
+  name: login
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{local}}/auth/v1/login"
+  body:
+    type: json
+    data: |-
+      {
+        "email":"admin@example.com",
+        "password":"change-me-immediately"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,63 @@
+model User {
+  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email           String        @unique
+  phone           String        @unique
+  fullName        String
+  role            UserRole      @default(USER)
+  status          AccountStatus @default(PENDING_VERIFICATION)
+  password        String
+  emailVerifiedAt DateTime?
+  
+  // Relations
+  profile         UserProfile?
+  addresses       Address[]
+  orders          Order[]
+  savedDesigns    SavedDesign[]
+  cart            Cart?
+
+  isDeleted       Boolean       @default(false)
+  lastLoginAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @default(now()) @updatedAt
+  deletedAt       DateTime?
+}
+
+model UserProfile {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String    @unique @db.Uuid
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  phoneNumber     String?
+  dateOfBirth     DateTime?
+  avatarUrl       String?
+  bio             String?
+  
+  // Preferences
+  newsletterOpts  Boolean   @default(false)
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now()) @updatedAt
+}
+
+model Address {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String    @db.Uuid
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type            String    @default("SHIPPING") // "SHIPPING" or "BILLING"
+  isDefault       Boolean   @default(false)
+  
+  fullName        String
+  streetLine1     String
+  streetLine2     String?
+  city            String
+  state           String
+  postalCode      String
+  country         String
+  phoneNumber     String?
+  
+  orders          Order[]   // Orders that used this address
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now()) @updatedAt
+}

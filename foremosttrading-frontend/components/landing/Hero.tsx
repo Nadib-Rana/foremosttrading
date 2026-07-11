@@ -1,7 +1,26 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
+
+const slideImages = [
+  "/image/athlete.png",
+  "/image/athlete2.png",
+  "/image/athlete3.png"
+];
 
 export function Hero() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slideImages.length);
+    }, 4000); // Slide every 4 seconds
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <section className="relative w-full min-h-[600px] lg:min-h-[800px] flex items-center bg-black overflow-hidden">
       {/* Background Image (Stadium) */}
@@ -27,9 +46,11 @@ export function Hero() {
           </p>
           
           <div className="mt-10 flex flex-col sm:flex-row gap-4">
-            <Button className="font-bold tracking-wide rounded-sm px-8 h-12 text-base font-heading" size="lg">
-              Start Designing &rarr;
-            </Button>
+            <Link href="/customize">
+              <Button className="font-bold tracking-wide rounded-sm px-8 h-12 text-base font-heading w-full sm:w-auto" size="lg">
+                Start Designing &rarr;
+              </Button>
+            </Link>
             <Button variant="outline" className="text-white border-white/30 hover:bg-white/10 rounded-sm px-8 h-12 text-base font-heading" size="lg">
               Request a Quote
             </Button>
@@ -54,15 +75,33 @@ export function Hero() {
           </div>
         </div>
 
-        {/* Right Content - Athlete Image */}
+        {/* Right Content - Athlete Image Slider */}
         <div className="w-full md:w-1/2 relative h-[500px] lg:h-[724px] hidden md:block">
-          <Image
-             src="/image/athlete.png"
-             alt="Athlete wearing custom jersey"
-             fill
-             className="object-contain object-bottom mix-blend-lighten"
-             priority
-          />
+          {slideImages.map((src, index) => (
+            <Image
+              key={index}
+              src={src}
+              alt={`Athlete wearing custom jersey ${index + 1}`}
+              fill
+              className={`object-contain object-bottom mix-blend-lighten transition-opacity duration-1000 ease-in-out ${
+                index === currentSlide ? "opacity-100" : "opacity-0"
+              }`}
+              priority={index === 0}
+            />
+          ))}
+          
+          {/* Slider Indicators */}
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+            {slideImages.map((_, index) => (
+              <button
+                key={index}
+                className={`h-2 w-8 rounded-full transition-colors duration-300 ${
+                  index === currentSlide ? "bg-[#F97316]" : "bg-white/30 hover:bg-white/50"
+                }`}
+                onClick={() => setCurrentSlide(index)}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>

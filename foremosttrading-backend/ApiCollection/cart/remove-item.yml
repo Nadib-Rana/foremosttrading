@@ -1,0 +1,18 @@
+info:
+  name: Remove Item
+  type: http
+  seq: 4
+
+http:
+  method: DELETE
+  url: "{{local}}/cart/items/ITEM-ID-HERE"
+  headers:
+    - name: x-session-id
+      value: guest-session-123
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

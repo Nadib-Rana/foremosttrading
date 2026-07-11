@@ -23,22 +23,22 @@ const steps = [
 
 export function ProcessSteps() {
   return (
-    <section className="w-full py-16 md:py-24 bg-white">
-      <div className="container mx-auto px-4 sm:px-6">
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold uppercase tracking-tight text-black mb-16">
-          Three Steps. Zero Compromise.
+    <section className="w-full py-8 md:py-12 bg-[#F4F5F7]">
+      <div className="container mx-auto px-4 sm:px-6 ">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold uppercase tracking-tight text-black mb-10">
+          THREE STEPS. ZERO COMPROMISE.
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {steps.map((step, i) => (
-            <div key={i} className="flex flex-col">
-              <span className="text-5xl md:text-6xl font-bold text-[#F97316] mb-6 font-heading tracking-tight">
+            <div key={i} className="flex flex-col bg-white rounded-xl p-6 md:p-8 shadow-sm">
+              <span className="text-2xl md:text-3xl font-bold text-[#F97316] mb-4">
                 {step.number}
               </span>
-              <h3 className="text-lg md:text-xl font-bold text-black uppercase mb-3">
+              <h3 className="text-sm md:text-base font-bold text-black uppercase mb-3">
                 {step.title}
               </h3>
-              <p className="text-gray-500 text-base md:text-lg leading-relaxed">
+              <p className="text-gray-500 text-sm leading-relaxed">
                 {step.description}
               </p>
             </div>

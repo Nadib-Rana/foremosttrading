@@ -3,7 +3,15 @@ import { AppLogger } from "@/core/logging/logger";
 import { AuthServices } from "./auth.service";
 import { AuthController } from "./auth.controller";
 import { validateRequest } from "@/middleware/validation";
-import { createUserSchema } from "./AuthDTO";
+import { authMiddleware } from "@/middleware/auth";
+import { 
+  createUserSchema, 
+  loginSchema, 
+  refreshTokenSchema,
+  requestPasswordResetSchema,
+  verifyOtpSchema,
+  resetPasswordSchema
+} from "./AuthDTO";
 
 export class AuthModule extends BaseModule {
   public name: string = "AuthModule";
@@ -15,7 +23,9 @@ export class AuthModule extends BaseModule {
 
   protected async setupUseCases(): Promise<void> {
     const prisma = this.context.getService("prisma");
-    this.registerService("AuthService", new AuthServices(prisma));
+    const redis = this.context.getService("redis");
+    const email = this.context.getService("email");
+    this.registerService("AuthService", new AuthServices(prisma, redis, email));
   }
   protected async setupControllers(): Promise<void> {
     const authService = this.getService<AuthServices>("AuthService");
@@ -29,6 +39,54 @@ export class AuthModule extends BaseModule {
       "/register",
       validateRequest(createUserSchema), // 1. Intercepts & validates request
       controller.createUser.bind(controller),
+    );
+
+    // POST /auth/v1/login
+    this.router.post(
+      "/login",
+      validateRequest(loginSchema),
+      controller.loginUser.bind(controller),
+    );
+
+    // POST /auth/v1/admin/login
+    this.router.post(
+      "/admin/login",
+      validateRequest(loginSchema),
+      controller.loginAdmin.bind(controller),
+    );
+
+    // POST /auth/v1/refresh
+    this.router.post(
+      "/refresh",
+      validateRequest(refreshTokenSchema),
+      controller.refreshToken.bind(controller),
+    );
+    // POST /auth/v1/password/reset-request
+    this.router.post(
+      "/password/reset-request",
+      validateRequest(requestPasswordResetSchema),
+      controller.requestPasswordReset.bind(controller)
+    );
+
+    // POST /auth/v1/password/verify-otp
+    this.router.post(
+      "/password/verify-otp",
+      validateRequest(verifyOtpSchema),
+      controller.verifyOTP.bind(controller)
+    );
+
+    // POST /auth/v1/password/reset
+    this.router.post(
+      "/password/reset",
+      validateRequest(resetPasswordSchema),
+      controller.resetPassword.bind(controller)
+    );
+
+    // GET /auth/v1/me
+    this.router.get(
+      "/me",
+      authMiddleware,
+      controller.getMe.bind(controller)
     );
   }
 }

@@ -28,7 +28,7 @@ const features = [
 
 export function Features() {
   return (
-    <section className="w-full py-16 md:py-24 bg-[#111] text-white">
+    <section className="w-full py-8 md:py-12 bg-[#111] text-white">
       <div className="container mx-auto px-4 sm:px-6 flex flex-col lg:flex-row gap-12 lg:gap-24 items-start">
         <div className="w-full lg:w-1/3">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tight leading-[1.1]">

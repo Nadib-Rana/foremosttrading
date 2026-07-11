@@ -27,7 +27,7 @@ const builds = [
 
 export function FeaturedBuilds() {
   return (
-    <section className="w-full py-16 md:py-24 bg-[#F4F5F7]">
+    <section className="w-full py-8 md:py-12 bg-[#F4F5F7]">
       <div className="container mx-auto px-4 sm:px-6">
         <h2 className="text-3xl md:text-4xl font-bold uppercase tracking-tight text-black mb-10">
           Featured Builds
@@ -35,9 +35,9 @@ export function FeaturedBuilds() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
           {builds.map((build, i) => (
-            <div key={i} className="group cursor-pointer bg-white rounded-3xl p-4 shadow-sm hover:shadow-md transition-shadow">
+            <div key={i} className="group cursor-pointer bg-white rounded-[24px] p-4 shadow-sm hover:shadow-md transition-shadow">
               {/* Image Container */}
-              <div className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden bg-gray-100">
+              <div className="relative w-full aspect-[4/5] rounded-[16px] overflow-hidden bg-gray-100">
                 <Image
                   src={build.image}
                   alt={build.title}

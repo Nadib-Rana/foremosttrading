@@ -1,0 +1,21 @@
+info:
+  name: Password Reset Request
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{local}}/auth/v1/password/reset-request"
+  body:
+    type: json
+    data: |-
+      {
+        "identifier": "testuser@example.com"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
