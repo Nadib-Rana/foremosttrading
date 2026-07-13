@@ -7,16 +7,19 @@ import { OrbitControls, Stage } from '@react-three/drei';
 import Image from 'next/image';
 
 const shapeImageMap: Record<string, string> = {
-  "Full Body": "/shapes/full-body-v2.png",
-  "Full Hand & Body": "/shapes/full-hand-body-v2.png",
-  "Half Body (Full Hand)": "/shapes/half-body-full-hand-v2.png",
-  "Half Body (Half Hand)": "/shapes/half-body-half-hand.png",
-  "Legs": "/shapes/legs-v2.png",
-  "Others": "/shapes/others.png",
+  "Full Body": "/shapes/cloth-full-body.png",
+  "Full Hand & Body": "/shapes/cloth-full-hand-body.png",
+  "Half Body (Full Hand)": "/shapes/cloth-half-body-full-hand.png",
+  "Half Body (Half Hand)": "/shapes/cloth-half-body-half-hand.png",
+  "Legs": "/shapes/cloth-legs.png",
+  "Full Pant": "/shapes/cloth-full-pant.png",
+  "Half Shirt & Full Pant": "/shapes/cloth-half-shirt-full-pant.png",
+  "Full Shirt & Pant": "/shapes/cloth-full-shirt-full-pant.png",
+  "Others": "/shapes/cloth-others.png",
 };
 
-export function BodyShape3D({ shapeName, interactive = true }: { shapeName: string, interactive?: boolean }) {
-  const imageSrc = shapeImageMap[shapeName] || "/shapes/full-body.png";
+export function BodyShape3D({ shapeName, interactive = true, customShapeUrl }: { shapeName: string, interactive?: boolean, customShapeUrl?: string }) {
+  const imageSrc = customShapeUrl || shapeImageMap[shapeName] || "/shapes/full-body.png";
   
   return (
     <div className="w-full h-full relative flex items-center justify-center min-h-[100px]">
