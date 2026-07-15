@@ -1,0 +1,95 @@
+"use client";
+
+import { useState, useRef, useEffect } from "react";
+import { FilterCustomizable, SortOption, Product } from "../types";
+import { MOCK_PRODUCTS, ITEMS_PER_PAGE } from "../constants";
+
+export function useShop() {
+  const [filterCustomizable, setFilterCustomizable] = useState<FilterCustomizable>("all");
+  const [sortBy, setSortBy] = useState<SortOption>("newest");
+  const [currentPage, setCurrentPage] = useState<number>(2); // Start on page 2 to match Figma active bar indicator default state
+
+  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
+  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+
+  const filterRef = useRef<HTMLDivElement>(null);
+  const sortRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+        setIsFilterDropdownOpen(false);
+      }
+      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
+        setIsSortDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Filter products
+  let filtered = MOCK_PRODUCTS.filter((product) => {
+    if (filterCustomizable === "customizable") {
+      return product.isCustomizable;
+    }
+    return true;
+  });
+
+  // Sort products
+  if (sortBy === "price-asc") {
+    filtered = [...filtered].sort((a, b) => a.salePrice - b.salePrice);
+  } else if (sortBy === "price-desc") {
+    filtered = [...filtered].sort((a, b) => b.salePrice - a.salePrice);
+  }
+
+  // Setup pagination
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const safeCurrentPage = Math.min(currentPage, totalPages || 1);
+  const startIndex = (safeCurrentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedProducts = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const handleNextPage = () => {
+    if (safeCurrentPage < totalPages) {
+      setCurrentPage(safeCurrentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (safeCurrentPage > 1) {
+      setCurrentPage(safeCurrentPage - 1);
+    }
+  };
+
+  const selectFilter = (filter: FilterCustomizable) => {
+    setFilterCustomizable(filter);
+    setCurrentPage(1); // Reset to page 1 on filter change
+    setIsFilterDropdownOpen(false);
+  };
+
+  const selectSort = (sort: SortOption) => {
+    setSortBy(sort);
+    setIsSortDropdownOpen(false);
+  };
+
+  return {
+    filterCustomizable,
+    sortBy,
+    currentPage: safeCurrentPage,
+    totalPages,
+    paginatedProducts,
+    isFilterDropdownOpen,
+    setIsFilterDropdownOpen,
+    isSortDropdownOpen,
+    setIsSortDropdownOpen,
+    filterRef,
+    sortRef,
+    handleNextPage,
+    handlePrevPage,
+    setCurrentPage,
+    selectFilter,
+    selectSort,
+  };
+}
+export type UseShopReturn = ReturnType<typeof useShop>;

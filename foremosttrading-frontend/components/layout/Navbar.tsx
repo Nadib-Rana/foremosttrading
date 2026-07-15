@@ -6,68 +6,143 @@ import { MobileNav } from "@/components/layout/mobile-nav";
 import { ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
+
+// Styled athletic wing logo mark matching the FOREMOST logo
+export function LogoMark({ className = "w-10 h-5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 120 40"
+      className={className}
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M10 28C35 28 65 14 100 8C72 15 42 30 10 28Z" fill="#F97316" />
+      <path d="M22 20C45 20 72 10 105 4C78 11 50 22 22 20Z" fill="#F97316" fillOpacity="0.85" />
+      <path d="M5 34C28 34 55 20 90 14C65 22 38 38 5 34Z" fill="#F97316" fillOpacity="0.7" />
+    </svg>
+  );
+}
 
 export const navLinks = [
-  { label: "Shop", href: "#" },
-  { label: "Customize", href: "#" },
+  { label: "Shop", href: "/shop" },
+  { label: "Customize", href: "/customize" },
   { label: "Teams & Bulk", href: "#" },
   { label: "About", href: "#" },
   { label: "Contact", href: "#" },
 ];
 
-export function Navbar() {
+export interface NavbarProps {
+  theme?: "dynamic" | "light" | "dark";
+}
+
+export function Navbar({ theme = "dynamic" }: NavbarProps) {
   const scrolled = useScroll(10);
+  const pathname = usePathname();
+
+  const isLight = theme === "light";
 
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out",
-        {
-          "bg-black/60 backdrop-blur-xl border-b border-white/10 shadow-lg md:top-3 md:w-[90%] xl:w-[90%] 2xl:w-[85%] max-w-7xl md:mx-auto md:rounded-lg": scrolled,
-          "bg-gradient-to-b from-black/80 to-transparent": !scrolled,
-        }
+        "transition-all duration-300 ease-in-out z-50",
+        isLight
+          ? "sticky top-0 left-0 right-0 w-full bg-white border-b border-gray-100 shadow-xs"
+          : "fixed top-0 left-0 right-0"
       )}
     >
-      <nav
+      <div
         className={cn(
-          "container mx-auto flex w-full items-center transition-all duration-300 ease-in-out",
+          "w-full transition-all duration-300 ease-in-out",
           {
-            "h-14 px-4 sm:px-6": scrolled,
-            "h-16 md:h-20 px-4 sm:px-6": !scrolled,
+            "bg-black/60 backdrop-blur-xl border-b border-white/10 shadow-lg md:top-3 md:w-[90%] xl:w-[90%] 2xl:w-[85%] max-w-7xl md:mx-auto md:rounded-lg md:mt-3": !isLight && scrolled,
+            "bg-gradient-to-b from-black/80 to-transparent": !isLight && !scrolled,
           }
         )}
       >
-        <div className="flex-1 flex items-center justify-start">
-          <Link
-            href="/"
-            className="hover:opacity-80 transition"
-          >
-            <Image src="/logo/Logo.png" alt="FOREMOST Logo" width={240} height={60} className="object-contain h-10 lg:h-12 w-auto mix-blend-lighten" />
-          </Link>
-        </div>
-        
-        <div className="hidden lg:flex flex-1 items-center justify-center gap-0 lg:gap-2">
-          {navLinks.map((link) => (
-            <Button key={link.label} variant="ghost" className="text-white hover:text-primary hover:bg-white/10 text-xs lg:text-base px-2 lg:px-4 py-2" render={<Link href={link.href} />}>
-              {link.label}
-            </Button>
-          ))}
-        </div>
+        <nav
+          className={cn(
+            "container mx-auto flex w-full items-center transition-all duration-300 ease-in-out px-4 sm:px-6",
+            {
+              "h-14": isLight || scrolled,
+              "h-16 md:h-20": !isLight && !scrolled,
+            }
+          )}
+        >
+          <div className="flex-1 flex items-center justify-start">
+            <Link
+              href="/"
+              className="hover:opacity-80 transition flex flex-col items-center group"
+            >
+              {isLight ? (
+                <>
+                  <LogoMark className="w-12 h-6 transition-transform group-hover:scale-105" />
+                  <span className="text-[9px] font-heading font-black tracking-[0.3em] text-[#F97316] uppercase mt-0.5 -mr-[0.3em] italic">
+                    FOREMOST
+                  </span>
+                </>
+              ) : (
+                <Image src="/logo/Logo.png" alt="FOREMOST Logo" width={240} height={60} className="object-contain h-10 lg:h-12 w-auto mix-blend-lighten" />
+              )}
+            </Link>
+          </div>
+          
+          <div className="hidden lg:flex flex-1 items-center justify-center gap-0 lg:gap-2">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Button
+                  key={link.label}
+                  variant="ghost"
+                  className={cn(
+                    "text-xs lg:text-base px-2 lg:px-4 py-2 font-semibold transition-colors duration-200",
+                    isLight
+                      ? isActive
+                        ? "text-[#F97316] font-bold border-b-2 border-[#F97316] rounded-none pb-1"
+                        : "text-gray-600 hover:text-[#F97316] hover:bg-gray-50"
+                      : isActive
+                        ? "text-primary font-bold"
+                        : "text-white hover:text-primary hover:bg-white/10"
+                  )}
+                  render={<Link href={link.href} />}
+                  nativeButton={false}
+                >
+                  {link.label}
+                </Button>
+              );
+            })}
+          </div>
 
-        <div className="flex-1 flex items-center justify-end">
-          <div className="hidden lg:block">
-            <Button variant="outline" className="rounded bg-black/20 border-white/20 hover:bg-black/40 text-white ml-4 w-11 h-11 flex items-center justify-center p-0">
-              <ShoppingCart className="w-5 h-5" />
-            </Button>
+          <div className="flex-1 flex items-center justify-end">
+            <div className="hidden lg:block">
+              <Button
+                variant="outline"
+                className={cn(
+                  "rounded ml-4 w-11 h-11 flex items-center justify-center p-0 shadow-xs",
+                  isLight
+                    ? "border-gray-200 text-gray-700 bg-white hover:bg-gray-50"
+                    : "bg-black/20 border-white/20 hover:bg-black/40 text-white"
+                )}
+              >
+                <ShoppingCart className="w-5 h-5" />
+              </Button>
+            </div>
+            <div className="lg:hidden flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "rounded",
+                  isLight ? "text-gray-600 hover:bg-gray-50" : "text-white hover:bg-white/10"
+                )}
+              >
+                <ShoppingCart className="w-5 h-5" />
+              </Button>
+              <MobileNav isLight={isLight} />
+            </div>
           </div>
-          <div className="lg:hidden flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="rounded text-white hover:bg-white/10">
-              <ShoppingCart className="w-5 h-5" />
-            </Button>
-            <MobileNav />
-          </div>
-        </div>
-      </nav>
+        </nav>
+      </div>
     </header>
   );
 }

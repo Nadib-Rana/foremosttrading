@@ -2,10 +2,15 @@ import { cn } from "@/lib/utils";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Portal, PortalBackdrop } from "@/components/ui/portal";
-import { navLinks } from "@/components/layout/header";
+import { navLinks } from "@/components/layout/Navbar";
 import { XIcon, MenuIcon } from "lucide-react";
+import Link from "next/link";
 
-export function MobileNav() {
+export interface MobileNavProps {
+	isLight?: boolean;
+}
+
+export function MobileNav({ isLight }: MobileNavProps) {
 	const [open, setOpen] = React.useState(false);
 
 	return (
@@ -14,7 +19,12 @@ export function MobileNav() {
 				aria-controls="mobile-menu"
 				aria-expanded={open}
 				aria-label="Toggle menu"
-				className="md:hidden"
+				className={cn(
+					"md:hidden",
+					isLight
+						? "text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900"
+						: "text-white border-white/20 hover:bg-white/10 hover:text-white"
+				)}
 				onClick={() => setOpen(!open)}
 				size="icon"
 				variant="outline"
@@ -37,14 +47,23 @@ export function MobileNav() {
 					>
 						<div className="grid gap-y-2">
 							{navLinks.map((link) => (
-								<Button className="justify-start" key={link.label} variant="ghost" render={<a href={link.href} />} nativeButton={false}>{link.label}</Button>
+								<Button
+									className="justify-start text-white hover:text-primary hover:bg-white/10"
+									key={link.label}
+									variant="ghost"
+									render={<Link href={link.href} />}
+									onClick={() => setOpen(false)}
+									nativeButton={false}
+								>
+									{link.label}
+								</Button>
 							))}
 						</div>
 						<div className="mt-12 flex flex-col gap-2">
-							<Button className="w-full" variant="outline">
+							<Button className="w-full border-white/20 text-white hover:bg-white/10" variant="outline">
 								Sign In
 							</Button>
-							<Button className="w-full">Get Started</Button>
+							<Button className="w-full bg-primary text-white hover:bg-primary/80">Get Started</Button>
 						</div>
 					</div>
 				</Portal>
