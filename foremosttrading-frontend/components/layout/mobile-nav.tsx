@@ -60,10 +60,23 @@ export function MobileNav({ isLight }: MobileNavProps) {
 							))}
 						</div>
 						<div className="mt-12 flex flex-col gap-2">
-							<Button className="w-full border-white/20 text-white hover:bg-white/10" variant="outline">
+							<Button
+								className="w-full border-white/20 text-white hover:bg-white/10"
+								variant="outline"
+								render={<Link href="/login" />}
+								onClick={() => setOpen(false)}
+								nativeButton={false}
+							>
 								Sign In
 							</Button>
-							<Button className="w-full bg-primary text-white hover:bg-primary/80">Get Started</Button>
+							<Button
+								className="w-full bg-primary text-white hover:bg-primary/80"
+								render={<Link href="/signup" />}
+								onClick={() => setOpen(false)}
+								nativeButton={false}
+							>
+								Get Started
+							</Button>
 						</div>
 					</div>
 				</Portal>

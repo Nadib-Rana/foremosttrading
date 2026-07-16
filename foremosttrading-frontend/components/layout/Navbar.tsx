@@ -129,7 +129,7 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
               >
                 <ShoppingCart className="w-5 h-5" />
               </Button>
-              {isLight && (
+              {isLight ? (
                 <Link
                   href="/account"
                   className="flex items-center gap-1.5 p-1 bg-gray-50 border border-gray-200/80 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
@@ -142,6 +142,14 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
                   />
                   <ChevronDown className="w-4 h-4 text-gray-400 mr-1" />
                 </Link>
+              ) : (
+                <Button
+                  className="bg-[#F97316] hover:bg-[#EA580C] text-white py-2 px-4.5 rounded-xl font-bold text-xs flex items-center justify-center border-0 cursor-pointer shadow-sm ml-2 h-11"
+                  render={<Link href="/login" />}
+                  nativeButton={false}
+                >
+                  Log In
+                </Button>
               )}
             </div>
             <div className="lg:hidden flex items-center gap-2">
