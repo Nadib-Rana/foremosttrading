@@ -28,9 +28,9 @@ export const navLinks = [
   { label: "Home", href: "/" },
   { label: "Shop", href: "/shop" },
   { label: "Customize", href: "/customize" },
-  { label: "Teams & Bulk", href: "#" },
-  { label: "About", href: "#" },
-  { label: "Contact", href: "#" },
+  { label: "Teams & Bulk", href: "/teams-and-bulk" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export interface NavbarProps {
