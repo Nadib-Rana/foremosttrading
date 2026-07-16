@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { useScroll } from "@/hooks/use-scroll";
 import { Button } from "@/components/ui/button";
 import { MobileNav } from "@/components/layout/mobile-nav";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -25,6 +25,7 @@ export function LogoMark({ className = "w-10 h-5" }: { className?: string }) {
 }
 
 export const navLinks = [
+  { label: "Home", href: "/" },
   { label: "Shop", href: "/shop" },
   { label: "Customize", href: "/customize" },
   { label: "Teams & Bulk", href: "#" },
@@ -115,7 +116,7 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
           </div>
 
           <div className="flex-1 flex items-center justify-end">
-            <div className="hidden lg:block">
+            <div className="hidden lg:flex items-center gap-3">
               <Button
                 variant="outline"
                 onClick={onCartClick}
@@ -128,6 +129,20 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
               >
                 <ShoppingCart className="w-5 h-5" />
               </Button>
+              {isLight && (
+                <Link
+                  href="/account"
+                  className="flex items-center gap-1.5 p-1 bg-gray-50 border border-gray-200/80 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
+                  title="My Account"
+                >
+                  <img
+                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop"
+                    alt="User Profile"
+                    className="w-8 h-8 rounded-lg object-cover"
+                  />
+                  <ChevronDown className="w-4 h-4 text-gray-400 mr-1" />
+                </Link>
+              )}
             </div>
             <div className="lg:hidden flex items-center gap-2">
               <Button
