@@ -3,12 +3,24 @@
 import { Filter } from "lucide-react";
 import { Product } from "../types";
 import { ProductCard } from "./ProductCard";
+import { ProductSkeleton } from "./ProductSkeleton";
 
 interface ProductGridProps {
   products: Product[];
+  isLoading?: boolean;
 }
 
-export function ProductGrid({ products }: ProductGridProps) {
+export function ProductGrid({ products, isLoading }: ProductGridProps) {
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        {[...Array(6)].map((_, i) => (
+          <ProductSkeleton key={i} />
+        ))}
+      </div>
+    );
+  }
+
   if (products.length === 0) {
     return (
       <div className="h-64 flex flex-col items-center justify-center border border-dashed border-gray-200 rounded-2xl bg-white p-6">

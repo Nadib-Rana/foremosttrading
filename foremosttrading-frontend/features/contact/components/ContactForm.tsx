@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CheckCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function ContactForm() {
@@ -8,15 +9,30 @@ export function ContactForm() {
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isError, setIsError] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Thank you ${name}! Your inquiry has been sent successfully.`);
-    // Reset form
-    setName("");
-    setEmail("");
-    setSubject("");
-    setMessage("");
+    setIsSubmitting(true);
+    setIsSuccess(false);
+    setIsError(false);
+
+    try {
+      // Simulate API submit latency of 1500ms
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      setIsSuccess(true);
+      // Reset form
+      setName("");
+      setEmail("");
+      setSubject("");
+      setMessage("");
+    } catch (err) {
+      setIsError(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -84,11 +100,43 @@ export function ContactForm() {
         </div>
       </div>
 
+      {isSuccess && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 flex gap-3 items-start text-xs select-none">
+          <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-bold">Message Sent Successfully</h4>
+            <p className="mt-1 font-semibold leading-relaxed text-gray-600">
+              Thank you! Your message has been sent successfully. Our support desk will respond to your inquiry as soon as possible.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {isError && (
+        <div className="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 flex gap-3 items-start text-xs select-none">
+          <CheckCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-bold">Message Delivery Failed</h4>
+            <p className="mt-1 font-semibold leading-relaxed text-gray-600">
+              Something went wrong while sending your message. Please check your network connection and try again.
+            </p>
+          </div>
+        </div>
+      )}
+
       <Button
         type="submit"
-        className="w-full mt-2 bg-[#F97316] hover:bg-[#EA580C] text-white py-6 rounded-xl font-bold transition-colors shadow-sm text-xs flex items-center justify-center cursor-pointer border-0"
+        disabled={isSubmitting}
+        className="w-full mt-2 bg-[#F97316] hover:bg-[#EA580C] text-white py-6 rounded-xl font-bold transition-all shadow-sm text-xs flex items-center justify-center cursor-pointer border-0 active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none"
       >
-        Send Message
+        {isSubmitting ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            Sending...
+          </>
+        ) : (
+          "Send Message"
+        )}
       </Button>
     </form>
   );

@@ -8,6 +8,7 @@ export function useShop() {
   const [filterCustomizable, setFilterCustomizable] = useState<FilterCustomizable>("all");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [currentPage, setCurrentPage] = useState<number>(2); // Start on page 2 to match Figma active bar indicator default state
+  const [isLoading, setIsLoading] = useState(false);
 
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
@@ -52,25 +53,39 @@ export function useShop() {
 
   const handleNextPage = () => {
     if (safeCurrentPage < totalPages) {
+      setIsLoading(true);
       setCurrentPage(safeCurrentPage + 1);
+      setTimeout(() => setIsLoading(false), 600);
     }
   };
 
   const handlePrevPage = () => {
     if (safeCurrentPage > 1) {
+      setIsLoading(true);
       setCurrentPage(safeCurrentPage - 1);
+      setTimeout(() => setIsLoading(false), 600);
     }
   };
 
   const selectFilter = (filter: FilterCustomizable) => {
+    setIsLoading(true);
     setFilterCustomizable(filter);
     setCurrentPage(1); // Reset to page 1 on filter change
     setIsFilterDropdownOpen(false);
+    setTimeout(() => setIsLoading(false), 600);
   };
 
   const selectSort = (sort: SortOption) => {
+    setIsLoading(true);
     setSortBy(sort);
     setIsSortDropdownOpen(false);
+    setTimeout(() => setIsLoading(false), 600);
+  };
+
+  const selectPage = (page: number) => {
+    setIsLoading(true);
+    setCurrentPage(page);
+    setTimeout(() => setIsLoading(false), 600);
   };
 
   return {
@@ -87,9 +102,10 @@ export function useShop() {
     sortRef,
     handleNextPage,
     handlePrevPage,
-    setCurrentPage,
+    setCurrentPage: selectPage,
     selectFilter,
     selectSort,
+    isLoading,
   };
 }
 export type UseShopReturn = ReturnType<typeof useShop>;

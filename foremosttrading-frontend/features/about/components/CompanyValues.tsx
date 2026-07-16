@@ -26,7 +26,7 @@ export function CompanyValues() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section title */}
         <div className="text-center mb-12">
-          <span className="text-[10px] font-heading font-black tracking-[0.25em] text-[#F97316] uppercase italic">
+          <span className="text-[10px] font-heading font-black tracking-[0.25em] text-[#F97316] uppercase mt-0.5 italic">
             OUR CORE PILLARS
           </span>
           <h2 className="font-heading text-3xl font-black text-gray-900 tracking-tight mt-3">

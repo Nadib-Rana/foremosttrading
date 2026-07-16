@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { UploadCloud, CheckCircle } from "lucide-react";
+import { UploadCloud, CheckCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function BulkInquiryForm() {
@@ -12,6 +12,9 @@ export function BulkInquiryForm() {
   const [category, setCategory] = useState("Jerseys");
   const [requirements, setRequirements] = useState("");
   const [fileName, setFileName] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isError, setIsError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleUploadClick = () => {
@@ -25,16 +28,28 @@ export function BulkInquiryForm() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Thank you ${name}! Inquiry submitted successfully. Our designer will reach out shortly.`);
-    // Reset form
-    setName("");
-    setEmail("");
-    setTeamName("");
-    setPhone("");
-    setRequirements("");
-    setFileName(null);
+    setIsSubmitting(true);
+    setIsSuccess(false);
+    setIsError(false);
+
+    try {
+      // Simulate API submit latency of 1500ms
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      setIsSuccess(true);
+      // Reset form fields
+      setName("");
+      setEmail("");
+      setTeamName("");
+      setPhone("");
+      setRequirements("");
+      setFileName(null);
+    } catch (err) {
+      setIsError(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -145,11 +160,43 @@ export function BulkInquiryForm() {
         </div>
       </div>
 
+      {isSuccess && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 flex gap-3 items-start text-xs select-none">
+          <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-bold">Inquiry Sent Successfully</h4>
+            <p className="mt-1 font-semibold leading-relaxed text-gray-600">
+              Thank you! Our dedicated account manager will review your specs and reach out with design mockups and pricing options within 24 hours.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {isError && (
+        <div className="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 flex gap-3 items-start text-xs select-none">
+          <CheckCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-bold">Submission Failed</h4>
+            <p className="mt-1 font-semibold leading-relaxed text-gray-600">
+              Something went wrong while sending your inquiry. Please check your network connection and try again.
+            </p>
+          </div>
+        </div>
+      )}
+
       <Button
         type="submit"
-        className="w-full mt-4 bg-[#F97316] hover:bg-[#EA580C] text-white py-6 rounded-xl font-bold transition-colors shadow-sm text-xs flex items-center justify-center cursor-pointer border-0"
+        disabled={isSubmitting}
+        className="w-full mt-4 bg-[#F97316] hover:bg-[#EA580C] text-white py-6 rounded-xl font-bold transition-all shadow-sm text-xs flex items-center justify-center cursor-pointer border-0 active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none"
       >
-        Submit Inquiry
+        {isSubmitting ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            Sending...
+          </>
+        ) : (
+          "Submit Inquiry"
+        )}
       </Button>
     </form>
   );

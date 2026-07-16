@@ -56,7 +56,7 @@ export function PricingCalculator() {
               key={type}
               type="button"
               onClick={() => setProductType(type)}
-              className={`py-3 px-4 rounded-xl text-xs font-bold transition-all border cursor-pointer text-center ${
+              className={`py-3 px-4 rounded-xl text-xs font-bold transition-all border cursor-pointer text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316]/50 active:scale-98 ${
                 productType === type
                   ? "bg-[#F97316] text-white border-[#F97316] shadow-xs"
                   : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
