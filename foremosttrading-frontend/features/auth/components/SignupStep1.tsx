@@ -147,7 +147,7 @@ export function SignupStep1({ onNext }: SignupStep1Props) {
       {/* Forgot Password Link */}
       <div className="w-full flex justify-end mt-2">
         <Link
-          href="#"
+          href="/forgot-password"
           className="text-[10px] font-bold text-[#F97316] hover:underline"
         >
           Forgot password?

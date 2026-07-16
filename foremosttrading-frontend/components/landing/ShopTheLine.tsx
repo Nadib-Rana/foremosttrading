@@ -5,52 +5,52 @@ const categories = [
   {
     title: "Letterman\nJackets",
     image: "https://images.unsplash.com/photo-1559551409-dadc959f76b8?q=80&w=600&auto=format&fit=crop",
-    href: "#",
+    href: "/shop",
   },
   {
     title: "Sweatsuits",
     image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=600&auto=format&fit=crop",
-    href: "#",
+    href: "/shop",
   },
   {
     title: "Shirt & Shorts\nSets",
     image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=600&auto=format&fit=crop",
-    href: "#",
+    href: "/shop",
   },
   {
     title: "American\nFootball",
     image: "https://images.unsplash.com/photo-1566933293069-b55c7f326dd4?q=80&w=600&auto=format&fit=crop",
-    href: "#",
+    href: "/shop",
   },
   {
     title: "Basketball",
     image: "https://images.unsplash.com/photo-1542652694-40abf526446e?q=80&w=600&auto=format&fit=crop",
-    href: "#",
+    href: "/shop",
   },
   {
     title: "Baseball",
     image: "https://images.unsplash.com/photo-1508344928928-7137b29de216?q=80&w=600&auto=format&fit=crop",
-    href: "#",
+    href: "/shop",
   },
   {
     title: "Cargo Pants",
     image: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=600&auto=format&fit=crop",
-    href: "#",
+    href: "/shop",
   },
   {
     title: "Dancing/Cheer",
     image: "https://images.unsplash.com/photo-1524594152303-9fd13543fe6e?q=80&w=600&auto=format&fit=crop",
-    href: "#",
+    href: "/shop",
   },
   {
     title: "Jumpsuits",
     image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop",
-    href: "#",
+    href: "/shop",
   },
   {
     title: "Accessories",
     image: "https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=600&auto=format&fit=crop",
-    href: "#",
+    href: "/shop",
   },
 ];
 

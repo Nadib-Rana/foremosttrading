@@ -51,7 +51,13 @@ export function Hero() {
                 Start Designing &rarr;
               </Button>
             </Link>
-            <Button variant="outline" className="text-white border-white/30 hover:bg-white/10 rounded-sm px-8 h-12 text-base font-heading" size="lg">
+            <Button
+              variant="outline"
+              className="text-white border-white/30 hover:bg-white/10 rounded-sm px-8 h-12 text-base font-heading cursor-pointer flex items-center justify-center"
+              size="lg"
+              render={<Link href="/teams-and-bulk" />}
+              nativeButton={false}
+            >
               Request a Quote
             </Button>
           </div>

@@ -14,11 +14,11 @@ export function Footer() {
         <div>
           <h4 className="text-white font-bold mb-4 font-heading tracking-wide">Quick Links</h4>
           <ul className="space-y-2 text-sm">
-            <li><a href="#" className="hover:text-primary transition">Shop</a></li>
-            <li><a href="#" className="hover:text-primary transition">Customize</a></li>
-            <li><a href="#" className="hover:text-primary transition">Teams & Bulk</a></li>
-            <li><a href="#" className="hover:text-primary transition">About</a></li>
-            <li><a href="#" className="hover:text-primary transition">Contact</a></li>
+            <li><a href="/shop" className="hover:text-primary transition">Shop</a></li>
+            <li><a href="/customize" className="hover:text-primary transition">Customize</a></li>
+            <li><a href="/teams-and-bulk" className="hover:text-primary transition">Teams & Bulk</a></li>
+            <li><a href="/about" className="hover:text-primary transition">About</a></li>
+            <li><a href="/contact" className="hover:text-primary transition">Contact</a></li>
           </ul>
         </div>
         

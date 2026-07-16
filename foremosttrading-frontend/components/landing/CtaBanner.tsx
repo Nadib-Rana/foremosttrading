@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export function CtaBanner() {
   return (
@@ -16,7 +17,11 @@ export function CtaBanner() {
             Volume pricing, dedicated production manager, name & number sheets.
             Submit a bulk inquiry and we'll quote within 24 hours.
           </p>
-          <Button className="bg-[#F97316] hover:bg-[#EA580C] text-white font-bold px-8 h-12 text-base rounded-md">
+          <Button
+            className="bg-[#F97316] hover:bg-[#EA580C] text-white font-bold px-8 h-12 text-base rounded-md border-0 cursor-pointer flex items-center justify-center"
+            render={<Link href="/teams-and-bulk" />}
+            nativeButton={false}
+          >
             Request bulk quote &gt;
           </Button>
         </div>

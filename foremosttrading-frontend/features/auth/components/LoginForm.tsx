@@ -83,7 +83,7 @@ export function LoginForm() {
       {/* Forgot Password Link */}
       <div className="w-full flex justify-end mt-2">
         <Link
-          href="#"
+          href="/forgot-password"
           className="text-[10px] font-bold text-[#F97316] hover:underline"
         >
           Forgot password?
@@ -102,7 +102,7 @@ export function LoginForm() {
       <p className="text-[10px] font-medium text-gray-500 mt-6">
         Don’t have an account?
         <Link
-          href="#"
+          href="/signup"
           className="text-[#F97316] font-bold hover:underline ml-1"
         >
           Sign up
