@@ -10,11 +10,22 @@ import { TabDesigns } from "@/features/customize/components/TabDesigns";
 import { TabColors } from "@/features/customize/components/TabColors";
 import { TabElements } from "@/features/customize/components/TabElements";
 import { TabText } from "@/features/customize/components/TabText";
+import { TabPlayers } from "@/features/customize/components/TabPlayers";
 import { Accordions } from "@/features/customize/components/Accordions";
 import { SizeGuide } from "@/features/customize/components/SizeGuide";
 
 export default function CustomizePage() {
   const custom = useCustomize();
+
+  const handleNextFromPlayers = () => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("foremost_customizer_colors", JSON.stringify(custom.colors));
+      localStorage.setItem("foremost_customizer_pattern", custom.pattern);
+      localStorage.setItem("foremost_customizer_playerText", JSON.stringify(custom.playerText));
+      localStorage.setItem("foremost_customizer_visibleParts", JSON.stringify(custom.visibleParts));
+      window.location.href = "/customize/materials";
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#F9F9F9] text-gray-900 flex flex-col">
@@ -80,6 +91,8 @@ export default function CustomizePage() {
                   onSave={custom.saveConfiguration}
                   onNext={custom.goToNextTab}
                   isSaved={custom.isSaved}
+                  versionName={custom.versionName}
+                  onVersionNameChange={custom.setVersionName}
                 />
               )}
               {custom.activeTab === "elements" && (
@@ -97,6 +110,21 @@ export default function CustomizePage() {
                   onUpdateText={custom.updatePlayerText}
                   onSave={custom.saveConfiguration}
                   onNext={custom.goToNextTab}
+                  isSaved={custom.isSaved}
+                />
+              )}
+              {custom.activeTab === "players" && (
+                <TabPlayers
+                  players={custom.players}
+                  activePlayerId={custom.activePlayerId}
+                  onSelectActivePlayer={custom.selectActivePlayer}
+                  onAddPlayer={custom.addPlayer}
+                  onUpdatePlayer={custom.updatePlayer}
+                  onRemovePlayer={custom.removePlayer}
+                  versionName={custom.versionName}
+                  onVersionNameChange={custom.setVersionName}
+                  onSave={custom.saveConfiguration}
+                  onNext={handleNextFromPlayers}
                   isSaved={custom.isSaved}
                 />
               )}

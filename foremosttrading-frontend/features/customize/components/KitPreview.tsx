@@ -7,9 +7,10 @@ interface KitPreviewProps {
   pattern: DesignPattern;
   playerText: PlayerText;
   visibleParts: Record<keyof KitColors, boolean>;
+  className?: string;
 }
 
-export function KitPreview({ colors, pattern, playerText, visibleParts }: KitPreviewProps) {
+export function KitPreview({ colors, pattern, playerText, visibleParts, className }: KitPreviewProps) {
   const getStyle = (part: keyof KitColors) => {
     return visibleParts[part] ? {} : { display: "none" };
   };
@@ -61,7 +62,7 @@ export function KitPreview({ colors, pattern, playerText, visibleParts }: KitPre
   };
 
   return (
-    <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-4 bg-gray-50 border border-gray-100 rounded-xl p-4 sm:p-6 shadow-xs">
+    <div className={className || "w-full grid grid-cols-2 lg:grid-cols-4 gap-4 bg-gray-50 border border-gray-100 rounded-xl p-4 sm:p-6 shadow-xs"}>
       <defs>
         <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.4" />

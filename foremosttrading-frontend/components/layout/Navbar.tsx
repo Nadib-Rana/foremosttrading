@@ -34,9 +34,10 @@ export const navLinks = [
 
 export interface NavbarProps {
   theme?: "dynamic" | "light" | "dark";
+  onCartClick?: () => void;
 }
 
-export function Navbar({ theme = "dynamic" }: NavbarProps) {
+export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
   const scrolled = useScroll(10);
   const pathname = usePathname();
 
@@ -117,6 +118,7 @@ export function Navbar({ theme = "dynamic" }: NavbarProps) {
             <div className="hidden lg:block">
               <Button
                 variant="outline"
+                onClick={onCartClick}
                 className={cn(
                   "rounded ml-4 w-11 h-11 flex items-center justify-center p-0 shadow-xs",
                   isLight
@@ -131,6 +133,7 @@ export function Navbar({ theme = "dynamic" }: NavbarProps) {
               <Button
                 variant="ghost"
                 size="icon"
+                onClick={onCartClick}
                 className={cn(
                   "rounded",
                   isLight ? "text-gray-600 hover:bg-gray-50" : "text-white hover:bg-white/10"
