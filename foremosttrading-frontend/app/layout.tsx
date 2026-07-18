@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
-import { Inter, Oswald } from "next/font/google";
+import { Poppins, Geist } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const poppins = Poppins({
   variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
-const oswald = Oswald({
+const geist = Geist({
   variable: "--font-heading",
   subsets: ["latin"],
 });
@@ -25,7 +26,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${oswald.variable} h-full antialiased dark`}
+      className={`${poppins.variable} ${geist.variable} h-full antialiased dark`}
     >
       <body className="min-h-full flex flex-col font-sans bg-background text-foreground">
         {children}

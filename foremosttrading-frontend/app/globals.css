@@ -9,7 +9,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-heading);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -46,6 +46,53 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Spacing Tokens from Figma */
+  --spacing-v1: 4px;
+  --spacing-v2: 8px;
+  --spacing-v3: 12px;
+  --spacing-v4: 16px;
+  --spacing-v5: 20px;
+  --spacing-v6: 24px;
+  --spacing-v7: 28px;
+  --spacing-v8: 32px;
+  --spacing-v9: 36px;
+  --spacing-v10: 40px;
+  --spacing-v11: 44px;
+  --spacing-v12: 48px;
+
+  --spacing-value-1: 4px;
+  --spacing-value-2: 8px;
+  --spacing-value-3: 12px;
+  --spacing-value-4: 16px;
+  --spacing-value-5: 20px;
+  --spacing-value-6: 24px;
+  --spacing-value-7: 28px;
+  --spacing-value-8: 32px;
+  --spacing-value-9: 36px;
+  --spacing-value-10: 40px;
+  --spacing-value-11: 44px;
+  --spacing-value-12: 48px;
+
+  /* Brand / Color Scale Tokens from Figma */
+  --color-brand-50: #FFFDFC;
+  --color-brand-100: #FEF8F2;
+  --color-brand-200: #FDEEE1;
+  --color-brand-300: #FBE1CA;
+  --color-brand-400: #F9D1AC;
+  --color-brand-500: #F6BD87;
+  --color-brand-600: #F3A55C;
+  --color-brand-primary: #EF892A;
+
+  /* Custom Orange Scale Mapping */
+  --color-orange-50: #FFFDFC;
+  --color-orange-100: #FEF8F2;
+  --color-orange-200: #FDEEE1;
+  --color-orange-300: #FBE1CA;
+  --color-orange-400: #F9D1AC;
+  --color-orange-500: #F6BD87;
+  --color-orange-600: #F3A55C;
+  --color-orange-700: #EF892A;
 }
 
 :root, .dark {
@@ -55,8 +102,8 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.18 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.70 0.17 55); /* Golden Orange matching logo */
-  --primary-foreground: oklch(0.985 0 0);
+  --primary: #EF892A; /* Primary brand color from Figma */
+  --primary-foreground: #FFFDFC; /* Contrasting primary foreground color (Figma 50) */
   --secondary: oklch(0.25 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.25 0 0);
@@ -66,20 +113,20 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.70 0.17 55);
-  --chart-1: oklch(0.70 0.17 55);
+  --ring: #EF892A;
+  --chart-1: #EF892A;
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --sidebar: oklch(0.18 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.70 0.17 55);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary: #EF892A;
+  --sidebar-primary-foreground: #FFFDFC;
   --sidebar-accent: oklch(0.25 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.70 0.17 55);
+  --sidebar-ring: #EF892A;
 }
 
 @layer base {
@@ -87,9 +134,12 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
   }
   html {
     @apply font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
   }
 }

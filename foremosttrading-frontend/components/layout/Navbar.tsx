@@ -64,7 +64,7 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
       >
         <nav
           className={cn(
-            "container mx-auto flex w-full items-center transition-all duration-300 ease-in-out px-4 sm:px-6",
+            "container mx-auto flex w-full items-center transition-all duration-300 ease-in-out px-4 sm:px-6 font-sans",
             {
               "h-14": isLight || scrolled,
               "h-16 md:h-20": !isLight && !scrolled,
