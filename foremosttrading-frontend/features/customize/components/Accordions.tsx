@@ -15,7 +15,7 @@ export function Accordions() {
       title: "Important Information",
       icon: <Info className="w-4 h-4 text-[#F97316]" />,
       content: (
-        <ul className="list-disc pl-4 text-[11px] text-gray-500 font-medium leading-relaxed uppercase flex flex-col gap-2.5">
+        <ul className="list-disc pl-4 text-[11px] text-gray-500 font-medium leading-relaxed  flex flex-col gap-2.5">
           <li>
             Do not upload, copy/paste or write any logos that are protected by copyright and related laws or penalties or charges and fines or any custom customizations. Read our guidelines.
           </li>
@@ -37,7 +37,7 @@ export function Accordions() {
     {
       title: "Minimum Order",
       content: (
-        <p className="text-[11px] text-gray-500 font-semibold uppercase">
+        <p className="text-[11px] text-gray-500 font-semibold">
           Our minimum order quantity is 10 kits per design style. For team-wide distributions or bulk custom pricing, please request a quote.
         </p>
       ),
@@ -45,7 +45,7 @@ export function Accordions() {
     {
       title: "Color Variants",
       content: (
-        <p className="text-[11px] text-gray-500 font-semibold uppercase">
+        <p className="text-[11px] text-gray-500 font-semibold">
           Jersey bodies, collars, borders, shorts, and socks colors can be matched exactly to your club's Pantone values or hex specifications.
         </p>
       ),
@@ -53,7 +53,7 @@ export function Accordions() {
     {
       title: "Size Guide",
       content: (
-        <p className="text-[11px] text-gray-500 font-semibold uppercase">
+        <p className="text-[11px] text-gray-500 font-semibold">
           Refer to the measurements table below. Sizing measures width (chest), length (shirt height), and waist height in centimeters.
         </p>
       ),
@@ -61,7 +61,7 @@ export function Accordions() {
     {
       title: "Delivery Timing",
       content: (
-        <p className="text-[11px] text-gray-500 font-semibold uppercase">
+        <p className="text-[11px] text-gray-500 font-semibold">
           Production takes 7-10 business days after digital layout approval. Fast shipping options are coordinated dynamically during checkout.
         </p>
       ),
@@ -69,7 +69,7 @@ export function Accordions() {
     {
       title: "Print On Demand",
       content: (
-        <p className="text-[11px] text-gray-500 font-semibold uppercase">
+        <p className="text-[11px] text-gray-500 font-semibold">
           All custom kit orders are printed on-demand with premium dye-sublimation to guarantee colors will never wash out or peel.
         </p>
       ),
@@ -96,12 +96,11 @@ export function Accordions() {
                 </span>
               </div>
               <ChevronDown
-                className={`w-4 h-4 text-gray-400 transition-transform duration-300 ${
-                  isOpen ? "rotate-180 text-[#F97316]" : ""
-                }`}
+                className={`w-4 h-4 text-gray-400 transition-transform duration-300 ${isOpen ? "rotate-180 text-[#F97316]" : ""
+                  }`}
               />
             </button>
-            
+
             {isOpen && (
               <div className="px-4 pb-4 pt-1 border-t border-gray-50 bg-white animate-in fade-in slide-in-from-top-1 duration-200">
                 {item.content}

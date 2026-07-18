@@ -16,7 +16,7 @@ export function SizeGuide() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Side: Measurement Graphic illustration */}
-        <div className="lg:col-span-5 flex flex-col items-center justify-center p-6 bg-[#F9F9F9] rounded-2xl border border-gray-100 max-w-[340px] mx-auto w-full">
+        <div className="lg:col-span-5 flex flex-col items-center justify-center max-w-[340px] mx-auto w-full">
           <svg viewBox="0 0 200 240" className="w-full h-auto text-gray-700 fill-none" xmlns="http://www.w3.org/2000/svg">
             {/* T-Shirt Drawing with double sleeve line and detailed collar */}
             {/* Outer body */}
@@ -60,6 +60,13 @@ export function SizeGuide() {
           <span className="text-xs font-bold uppercase text-gray-800 tracking-wider mt-4">
             Tolerance: 2cm
           </span>
+          {/* Instructions */}
+          <div className="border-t pt-4 mt-8">
+            <h4 className="text-xs font-black uppercase text-gray-900 tracking-wider mb-2">Instructions:</h4>
+            <p className="text-[10px] text-gray-400 font-semibold leading-relaxed ">
+              Compare the measurements you see in the table with a garment of your size that you already own. Spread it out on a flat surface, take the measurements as indicated by the arrows and choose the size that's right for you.
+            </p>
+          </div>
         </div>
 
         {/* Right Side: Size Chart Table */}
@@ -106,13 +113,7 @@ export function SizeGuide() {
         </div>
       </div>
 
-      {/* Instructions */}
-      <div className="border-t border-gray-100 pt-6 mt-8">
-        <h4 className="text-xs font-black uppercase text-gray-900 tracking-wider mb-2">Instructions:</h4>
-        <p className="text-[10px] text-gray-500 font-semibold leading-relaxed uppercase">
-          Compare the measurements you see in the table with a garment of your size that you already own. Spread it out on a flat surface, take the measurements as indicated by the arrows and choose the size that's right for you.
-        </p>
-      </div>
+
     </section>
   );
 }
