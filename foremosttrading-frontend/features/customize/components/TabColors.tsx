@@ -141,24 +141,24 @@ export function TabColors({
 
       {/* Action Footer */}
       <div className="pt-4 border-t border-gray-100 flex flex-col gap-3 mt-auto">
-        <div className="flex gap-2 items-center bg-gray-50 rounded-xl p-2 border border-gray-100">
+        <div className="flex gap-2 items-center">
           <input
             type="text"
             value={versionName}
             onChange={(e) => onVersionNameChange(e.target.value)}
-            className="flex-1 px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white font-semibold text-gray-800 focus:outline-none focus:border-blue-500"
+            className="flex-1 px-4 py-2.5 bg-[#E2E8F0] border-0 rounded-lg text-xs font-bold text-gray-700 focus:outline-none placeholder-gray-500"
             placeholder="Version Name"
           />
           <Button
             onClick={onSave}
-            className="bg-black hover:bg-neutral-800 text-white font-bold text-[10px] uppercase h-8 px-4 rounded-lg cursor-pointer"
+            className="bg-black hover:bg-neutral-800 text-white font-bold text-xs uppercase h-10 px-5 rounded-lg border-0 cursor-pointer flex-shrink-0"
           >
             {isSaved ? "Saved!" : "Save Design"}
           </Button>
         </div>
         <Button
           onClick={onNext}
-          className="w-full bg-[#F97316] hover:bg-[#EA580C] text-white py-6 text-sm font-bold uppercase tracking-wider cursor-pointer shadow-sm rounded-lg"
+          className="w-full bg-[#EF892A] hover:bg-[#EA580C] text-white py-3 text-sm font-bold uppercase tracking-wider cursor-pointer shadow-sm rounded-lg border-0"
         >
           Next
         </Button>

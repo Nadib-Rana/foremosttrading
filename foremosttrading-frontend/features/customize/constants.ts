@@ -20,7 +20,7 @@ export const DESIGN_PATTERNS: { id: DesignPattern; label: string; image: string 
   { id: "classic", label: "Classic Solid", image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=150&auto=format&fit=crop" },
   { id: "striped", label: "Vertical Stripes", image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=150&auto=format&fit=crop" },
   { id: "sash", label: "Diagonal Sash", image: "https://images.unsplash.com/photo-1559551409-dadc959f76b8?q=80&w=150&auto=format&fit=crop" },
-  { id: "gradients", label: "Modern Gradient", image: "https://images.unsplash.com/photo-1508344928928-7137b29de216?q=80&w=150&auto=format&fit=crop" },
+  { id: "gradients", label: "Modern Gradient", image: "https://images.unsplash.com/photo-1516738901171-8eb4fc13bd20?q=80&w=150&auto=format&fit=crop" },
   { id: "modern", label: "Split Geometric", image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=150&auto=format&fit=crop" },
   { id: "classic", label: "Fusion Splash", image: "https://images.unsplash.com/photo-1542652694-40abf526446e?q=80&w=150&auto=format&fit=crop" },
   { id: "striped", label: "Evolution Tech", image: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=150&auto=format&fit=crop" },

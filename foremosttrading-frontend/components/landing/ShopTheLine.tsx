@@ -29,7 +29,7 @@ const categories = [
   },
   {
     title: "Baseball",
-    image: "https://images.unsplash.com/photo-1508344928928-7137b29de216?q=80&w=600&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1516738901171-8eb4fc13bd20?q=80&w=600&auto=format&fit=crop",
     href: "/shop",
   },
   {
@@ -78,6 +78,7 @@ export function ShopTheLine() {
                 src={category.image}
                 alt={category.title}
                 fill
+                sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 20vw"
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-90 transition-opacity group-hover:opacity-100" />

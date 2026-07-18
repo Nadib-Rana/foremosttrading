@@ -1,6 +1,7 @@
 "use client";
 
 import { KitColors, DesignPattern, PlayerText } from "../types";
+import { cn } from "@/lib/utils";
 
 interface KitPreviewProps {
   colors: KitColors;
@@ -62,7 +63,7 @@ export function KitPreview({ colors, pattern, playerText, visibleParts, classNam
   };
 
   return (
-    <div className={className || "w-full grid grid-cols-2 lg:grid-cols-4 gap-4 bg-gray-50 border border-gray-100 rounded-xl p-4 sm:p-6 shadow-xs"}>
+    <div className={cn("w-full bg-white border border-gray-100 rounded-2xl p-4 md:p-6 shadow-xs flex flex-col justify-between h-full", className)}>
       {/* Wrapped SVG defs in a hidden SVG element so they are valid SVG nodes inside HTML */}
       <svg className="hidden" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -73,10 +74,23 @@ export function KitPreview({ colors, pattern, playerText, visibleParts, classNam
         </defs>
       </svg>
 
-      {/* 1. FRONT VIEW */}
-      <div className="flex flex-col items-center p-2 border border-gray-100 rounded-lg bg-white shadow-xs">
-        <span className="text-[10px] font-black uppercase text-gray-400 tracking-wider mb-2">Front View</span>
-        <svg viewBox="0 0 300 400" className="w-full max-h-[220px]" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <div className="w-full flex-1 bg-[#F4F5F7] rounded-xl p-4 md:p-8 flex flex-row items-center justify-center gap-2 md:gap-4 overflow-x-auto scrollbar-none">
+        {/* 1. LEFT SIDE VIEW */}
+        <svg viewBox="0 0 300 400" className="w-[22%] min-w-[70px] max-h-[300px] h-auto flex-shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Side Jersey */}
+          <path d="M 120 70 L 160 70 L 170 210 L 110 210 Z" fill={colors.jerseyBody} style={getStyle("jerseyBody")} />
+          {/* Sleeve side */}
+          <path d="M 105 85 L 135 70 L 125 140 Z" fill={colors.borders} style={getStyle("borders")} />
+          {/* Shorts side */}
+          <path d="M 115 210 L 165 210 L 170 280 L 110 280 Z" fill={colors.pantBody} style={getStyle("pantBody")} />
+          <rect x="135" y="210" width="8" height="70" fill={colors.borders} style={getStyle("borders")} />
+          {/* Sock side */}
+          <rect x="130" y="290" width="18" height="80" fill={colors.socks} rx="3" style={getStyle("socks")} />
+          <rect x="130" y="290" width="18" height="8" fill={colors.borders} style={getStyle("borders")} />
+        </svg>
+
+        {/* 2. FRONT VIEW */}
+        <svg viewBox="0 0 300 400" className="w-[22%] min-w-[70px] max-h-[300px] h-auto flex-shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Jersey Sleeves */}
           <path d="M 60 90 L 90 70 L 110 110 L 80 130 Z" fill={colors.borders} style={getStyle("borders")} />
           <path d="M 240 90 L 210 70 L 190 110 L 220 130 Z" fill={colors.borders} style={getStyle("borders")} />
@@ -85,7 +99,7 @@ export function KitPreview({ colors, pattern, playerText, visibleParts, classNam
           {renderPattern("front")}
           {/* Collar */}
           <path d="M 130 70 C 140 85, 160 85, 170 70 Z" fill={colors.collar} style={getStyle("collar")} />
-
+          
           {/* Text/Number Overlay */}
           {visibleParts.jerseyBody && (
             <text x="150" y="160" fill={playerText.textColor} fontFamily={playerText.fontFamily} fontSize="28" fontWeight="bold" textAnchor="middle" className="italic">
@@ -104,12 +118,9 @@ export function KitPreview({ colors, pattern, playerText, visibleParts, classNam
           <rect x="100" y="290" width="16" height="8" fill={colors.borders} style={getStyle("borders")} />
           <rect x="184" y="290" width="16" height="8" fill={colors.borders} style={getStyle("borders")} />
         </svg>
-      </div>
 
-      {/* 2. BACK VIEW */}
-      <div className="flex flex-col items-center p-2 border border-gray-100 rounded-lg bg-white shadow-xs">
-        <span className="text-[10px] font-black uppercase text-gray-400 tracking-wider mb-2">Back View</span>
-        <svg viewBox="0 0 300 400" className="w-full max-h-[220px]" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* 3. BACK VIEW */}
+        <svg viewBox="0 0 300 400" className="w-[22%] min-w-[70px] max-h-[300px] h-auto flex-shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Jersey Sleeves */}
           <path d="M 60 90 L 90 70 L 110 110 L 80 130 Z" fill={colors.borders} style={getStyle("borders")} />
           <path d="M 240 90 L 210 70 L 190 110 L 220 130 Z" fill={colors.borders} style={getStyle("borders")} />
@@ -118,7 +129,7 @@ export function KitPreview({ colors, pattern, playerText, visibleParts, classNam
           {renderPattern("back")}
           {/* Collar Back */}
           <path d="M 130 70 C 140 73, 160 73, 170 70 Z" fill={colors.collar} style={getStyle("collar")} />
-
+          
           {visibleParts.jerseyBody && (
             <>
               <text x="150" y="110" fill={playerText.textColor} fontFamily={playerText.fontFamily} fontSize="12" fontWeight="black" textAnchor="middle" className="uppercase italic tracking-widest">
@@ -138,29 +149,9 @@ export function KitPreview({ colors, pattern, playerText, visibleParts, classNam
           <rect x="100" y="290" width="16" height="8" fill={colors.borders} style={getStyle("borders")} />
           <rect x="184" y="290" width="16" height="8" fill={colors.borders} style={getStyle("borders")} />
         </svg>
-      </div>
 
-      {/* 3. LEFT SIDE VIEW */}
-      <div className="flex flex-col items-center p-2 border border-gray-100 rounded-lg bg-white shadow-xs">
-        <span className="text-[10px] font-black uppercase text-gray-400 tracking-wider mb-2">Left Side View</span>
-        <svg viewBox="0 0 300 400" className="w-full max-h-[220px]" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Side Jersey */}
-          <path d="M 120 70 L 160 70 L 170 210 L 110 210 Z" fill={colors.jerseyBody} style={getStyle("jerseyBody")} />
-          {/* Sleeve side */}
-          <path d="M 105 85 L 135 70 L 125 140 Z" fill={colors.borders} style={getStyle("borders")} />
-          {/* Shorts side */}
-          <path d="M 115 210 L 165 210 L 170 280 L 110 280 Z" fill={colors.pantBody} style={getStyle("pantBody")} />
-          <rect x="135" y="210" width="8" height="70" fill={colors.borders} style={getStyle("borders")} />
-          {/* Sock side */}
-          <rect x="130" y="290" width="18" height="80" fill={colors.socks} rx="3" style={getStyle("socks")} />
-          <rect x="130" y="290" width="18" height="8" fill={colors.borders} style={getStyle("borders")} />
-        </svg>
-      </div>
-
-      {/* 4. RIGHT SIDE VIEW */}
-      <div className="flex flex-col items-center p-2 border border-gray-100 rounded-lg bg-white shadow-xs">
-        <span className="text-[10px] font-black uppercase text-gray-400 tracking-wider mb-2">Right Side View</span>
-        <svg viewBox="0 0 300 400" className="w-full max-h-[220px]" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* 4. RIGHT SIDE VIEW */}
+        <svg viewBox="0 0 300 400" className="w-[22%] min-w-[70px] max-h-[300px] h-auto flex-shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Side Jersey */}
           <path d="M 120 70 L 160 70 L 170 210 L 110 210 Z" fill={colors.jerseyBody} style={getStyle("jerseyBody")} />
           {/* Sleeve side */}

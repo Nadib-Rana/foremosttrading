@@ -53,21 +53,20 @@ export function TabDesigns({
 
       {/* Action Footer */}
       <div className="pt-4 border-t border-gray-100 flex flex-col gap-3 mt-auto">
-        <div className="flex justify-between items-center bg-gray-50 rounded-lg p-3 border border-gray-100">
-          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-            {isSaved ? "Saved Design Successfully!" : "Player version 1"}
-          </span>
+        <div className="flex gap-2 items-center">
+          <div className="flex-1 px-4 py-2.5 bg-[#E2E8F0] rounded-lg text-xs font-bold text-gray-700 select-none">
+            {isSaved ? "Saved Successfully!" : "Player version 1"}
+          </div>
           <Button
-            variant="outline"
             onClick={onSave}
-            className="border-gray-200 hover:bg-gray-100 font-bold text-xs uppercase"
+            className="bg-black hover:bg-neutral-800 text-white font-bold text-xs uppercase h-10 px-5 rounded-lg border-0 cursor-pointer flex-shrink-0"
           >
             {isSaved ? "Saved!" : "Save Design"}
           </Button>
         </div>
         <Button
           onClick={onNext}
-          className="w-full bg-[#F97316] hover:bg-[#EA580C] text-white py-6 text-sm font-bold uppercase tracking-wider cursor-pointer shadow-sm rounded-lg"
+          className="w-full bg-[#EF892A] hover:bg-[#EA580C] text-white py-3 text-sm font-bold uppercase tracking-wider cursor-pointer shadow-sm rounded-lg border-0"
         >
           Next
         </Button>

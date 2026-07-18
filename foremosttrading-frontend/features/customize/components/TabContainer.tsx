@@ -39,8 +39,8 @@ export function TabContainer({ activeTab, setActiveTab, tabs }: TabContainerProp
   };
 
   return (
-    <div className="w-full overflow-x-auto lg:overflow-x-visible scrollbar-none border-b border-gray-100 pb-4 mb-6 scroll-smooth scroll-px-4">
-      <div className="flex min-w-max lg:min-w-0 lg:w-full gap-2 p-1">
+    <div className="w-full bg-[#F4F5F7] rounded-xl p-1.5 mb-6 overflow-x-auto lg:overflow-x-visible scrollbar-none scroll-smooth scroll-px-4">
+      <div className="flex min-w-max lg:min-w-0 lg:w-full gap-1.5">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -48,9 +48,9 @@ export function TabContainer({ activeTab, setActiveTab, tabs }: TabContainerProp
               key={tab.id}
               ref={isActive ? activeTabRef : null}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex-shrink-0 lg:flex-shrink min-w-[70px] py-2 px-3 rounded-lg flex flex-col items-center gap-1 transition-all select-none cursor-pointer ${isActive
-                ? "bg-blue-600 text-white shadow-sm"
-                : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              className={`flex-1 flex-shrink-0 lg:flex-shrink min-w-[70px] py-2 px-3 rounded-lg flex flex-col items-center gap-1 transition-all select-none cursor-pointer border-0 ${isActive
+                ? "bg-blue-600 text-white shadow-xs"
+                : "bg-white text-gray-500 hover:text-gray-800"
                 }`}
             >
               {getIcon(tab.id)}

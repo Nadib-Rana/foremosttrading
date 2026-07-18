@@ -43,7 +43,7 @@ export function Footer() {
       </div>
       
       <div className="container mx-auto mt-12 pt-8 border-t border-white/10 text-xs text-center">
-        &copy; {new Date().getFullYear()} FOREMOST. All rights reserved.
+        &copy; 2026 FOREMOST. All rights reserved.
       </div>
     </footer>
   );

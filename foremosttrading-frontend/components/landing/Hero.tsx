@@ -26,9 +26,10 @@ export function Hero() {
       {/* Background Image (Stadium) */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/hero-bg.jpg"
+          src="/image/hero-bg.jpg"
           alt="Stadium Background"
           fill
+          sizes="100vw"
           className="object-cover opacity-60"
           priority
         />
@@ -89,6 +90,7 @@ export function Hero() {
               src={src}
               alt={`Athlete wearing custom jersey ${index + 1}`}
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               className={`object-contain object-bottom mix-blend-lighten transition-opacity duration-1000 ease-in-out ${
                 index === currentSlide ? "opacity-100" : "opacity-0"
               }`}
