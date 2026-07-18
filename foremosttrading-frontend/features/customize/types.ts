@@ -1,14 +1,12 @@
 export type CustomizerTab = "designs" | "colors" | "elements" | "text" | "players";
 
-export interface KitColors {
-  jerseyBody: string;
-  pantBody: string;
-  collar: string;
-  socks: string;
-  borders: string;
-}
+// Dynamic ProductColors mapping to make it product-agnostic
+export type ProductColors = Record<string, string>;
 
-export type DesignPattern = "classic" | "striped" | "sash" | "gradients" | "modern";
+// Backwards-compatible alias for existing kit color types
+export type KitColors = ProductColors;
+
+export type DesignPattern = string;
 
 export interface KitDesign {
   pattern: DesignPattern;
@@ -38,4 +36,28 @@ export interface TeamPlayer {
   number: string;
   name: string;
   size: string;
+}
+
+// Product Schema Definition for Backend Integration
+export interface ProductPartSchema {
+  id: string;
+  label: string;
+  defaultColor: string;
+}
+
+export interface ProductPatternSchema {
+  id: string;
+  label: string;
+  image: string;
+}
+
+export interface ProductSchema {
+  id: string;
+  name: string;
+  category: string;
+  customizableParts: ProductPartSchema[];
+  patterns: ProductPatternSchema[];
+  supportedTabs: CustomizerTab[];
+  defaultColors: ProductColors;
+  defaultPattern: string;
 }

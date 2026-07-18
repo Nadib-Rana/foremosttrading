@@ -11,6 +11,7 @@ interface TabDesignsProps {
   onSave: () => void;
   onNext: () => void;
   isSaved: boolean;
+  patterns: { id: string; label: string; image: string }[];
 }
 
 export function TabDesigns({
@@ -19,14 +20,15 @@ export function TabDesigns({
   onSave,
   onNext,
   isSaved,
+  patterns,
 }: TabDesignsProps) {
   return (
     <div className="flex flex-col h-full min-h-0 justify-between">
       {/* Design Presets Grid (3 columns matching the 3x3 grid in screenshot) */}
       <div className="flex-1 overflow-y-auto min-h-0 mb-4 pr-1">
         <div className="grid grid-cols-3 gap-2.5">
-          {DESIGN_PATTERNS.map((design, index) => {
-            const isSelected = currentPattern === design.id && index === 0; // Simple highlight for demo
+          {patterns.map((design, index) => {
+            const isSelected = currentPattern === design.id; // Correct selection binding
             return (
               <div
                 key={index}

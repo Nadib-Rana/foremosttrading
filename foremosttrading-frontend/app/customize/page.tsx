@@ -75,6 +75,7 @@ export default function CustomizePage() {
                   onSave={custom.saveConfiguration}
                   onNext={custom.goToNextTab}
                   isSaved={custom.isSaved}
+                  patterns={custom.schema.patterns}
                 />
               )}
               {custom.activeTab === "colors" && (
@@ -92,6 +93,7 @@ export default function CustomizePage() {
                   isSaved={custom.isSaved}
                   versionName={custom.versionName}
                   onVersionNameChange={custom.setVersionName}
+                  parts={custom.schema.customizableParts}
                 />
               )}
               {custom.activeTab === "elements" && (

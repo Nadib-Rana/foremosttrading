@@ -7,18 +7,19 @@ import { COLOR_SWATCHES } from "../constants";
 
 interface TabColorsProps {
   colors: KitColors;
-  onChangeColor: (part: keyof KitColors, color: string) => void;
-  lockedParts: Record<keyof KitColors, boolean>;
-  toggleLock: (part: keyof KitColors) => void;
-  visibleParts: Record<keyof KitColors, boolean>;
-  toggleVisibility: (part: keyof KitColors) => void;
-  activePartToEdit: keyof KitColors | null;
-  setActivePartToEdit: (part: keyof KitColors | null) => void;
+  onChangeColor: (part: string, color: string) => void;
+  lockedParts: Record<string, boolean>;
+  toggleLock: (part: string) => void;
+  visibleParts: Record<string, boolean>;
+  toggleVisibility: (part: string) => void;
+  activePartToEdit: string | null;
+  setActivePartToEdit: (part: string | null) => void;
   onSave: () => void;
   onNext: () => void;
   isSaved: boolean;
   versionName: string;
   onVersionNameChange: (name: string) => void;
+  parts: { id: string; label: string }[];
 }
 
 export function TabColors({
@@ -35,14 +36,8 @@ export function TabColors({
   isSaved,
   versionName,
   onVersionNameChange,
+  parts,
 }: TabColorsProps) {
-  const parts: { id: keyof KitColors; label: string }[] = [
-    { id: "jerseyBody", label: "Jersey Body" },
-    { id: "pantBody", label: "Pant Body" },
-    { id: "collar", label: "Collar" },
-    { id: "socks", label: "Socks" },
-    { id: "borders", label: "Borders" },
-  ];
 
   return (
     <div className="flex flex-col h-full min-h-0 justify-between">
