@@ -49,7 +49,7 @@ export default function CustomizePage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch mb-8">
           
           {/* Left Side: Preview Card */}
-          <div className="lg:col-span-7 flex flex-col h-full">
+          <div className="lg:col-span-7 flex flex-col h-full lg:h-[650px] min-h-0">
             <KitPreview
               colors={custom.colors}
               pattern={custom.pattern}
@@ -59,7 +59,7 @@ export default function CustomizePage() {
           </div>
 
           {/* Right Side: Tab Controls Panel */}
-          <div className="lg:col-span-5 bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col justify-between h-full">
+          <div className="lg:col-span-5 bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col justify-between h-full lg:h-[650px] overflow-hidden">
             <TabContainer
               activeTab={custom.activeTab}
               setActiveTab={custom.setActiveTab}
@@ -67,7 +67,7 @@ export default function CustomizePage() {
             />
 
             {/* Render Tab Views */}
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col min-h-0">
               {custom.activeTab === "designs" && (
                 <TabDesigns
                   currentPattern={custom.pattern}

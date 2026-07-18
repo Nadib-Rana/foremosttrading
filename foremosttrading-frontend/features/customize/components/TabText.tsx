@@ -20,8 +20,8 @@ export function TabText({
   isSaved,
 }: TabTextProps) {
   return (
-    <div className="flex flex-col h-full justify-between">
-      <div className="flex flex-col gap-5 overflow-y-auto mb-6">
+    <div className="flex flex-col h-full min-h-0 justify-between">
+      <div className="flex-1 overflow-y-auto min-h-0 mb-4 pr-1 flex flex-col gap-5">
         {/* Name Input */}
         <div className="flex flex-col gap-1.5">
           <label className="text-[10px] font-black uppercase text-gray-500 tracking-wider">

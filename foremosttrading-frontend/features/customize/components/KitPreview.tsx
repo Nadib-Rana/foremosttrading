@@ -63,7 +63,7 @@ export function KitPreview({ colors, pattern, playerText, visibleParts, classNam
   };
 
   return (
-    <div className={cn("w-full bg-white border border-gray-100 rounded-2xl p-4 md:p-6 shadow-xs flex flex-col justify-between h-full", className)}>
+    <div className={cn("w-full bg-white border border-gray-100 rounded-2xl p-4 md:p-6 shadow-xs flex flex-col justify-between h-full lg:h-[650px] overflow-hidden", className)}>
       {/* Wrapped SVG defs in a hidden SVG element so they are valid SVG nodes inside HTML */}
       <svg className="hidden" xmlns="http://www.w3.org/2000/svg">
         <defs>
