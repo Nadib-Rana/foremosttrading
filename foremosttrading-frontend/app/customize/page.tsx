@@ -59,7 +59,7 @@ export default function CustomizePage() {
           </div>
 
           {/* Right Side: Tab Controls Panel */}
-          <div className="lg:col-span-5 bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col justify-between h-full lg:h-[650px] overflow-hidden">
+          <div className="lg:col-span-5 bg-white border border-gray-100 rounded-2xl p-4 sm:p-6 shadow-xs flex flex-col justify-between h-full lg:h-[650px] overflow-hidden">
             <TabContainer
               activeTab={custom.activeTab}
               setActiveTab={custom.setActiveTab}

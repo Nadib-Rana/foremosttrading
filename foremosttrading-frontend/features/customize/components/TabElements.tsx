@@ -84,21 +84,21 @@ export function TabElements({
       </div>
 
       {/* Action Footer */}
-      <div className="pt-4 border-t border-gray-100 flex flex-col gap-3 mt-auto">
-        <div className="flex gap-2 items-center">
-          <div className="flex-1 px-4 py-2.5 bg-[#E2E8F0] rounded-lg text-xs font-bold text-gray-700 select-none">
+      <div className="pt-4 border-t border-gray-100 flex flex-col gap-3 mt-auto bg-white sticky bottom-0 z-20 flex-shrink-0">
+        <div className="flex gap-3 items-stretch">
+          <div className="flex-1 h-11 flex items-center px-4 bg-[#E2E8F0] rounded-lg text-xs font-bold text-gray-700 select-none">
             {isSaved ? "Saved Successfully!" : "Player version 1"}
           </div>
           <Button
             onClick={onSave}
-            className="bg-black hover:bg-neutral-800 text-white font-bold text-xs uppercase h-10 px-5 rounded-lg border-0 cursor-pointer flex-shrink-0"
+            className="bg-black hover:bg-neutral-800 text-white font-bold text-xs uppercase h-11 px-5 rounded-lg border-0 cursor-pointer flex-shrink-0"
           >
             {isSaved ? "Saved!" : "Save Design"}
           </Button>
         </div>
         <Button
           onClick={onNext}
-          className="w-full bg-[#EF892A] hover:bg-[#EA580C] text-white py-3 text-sm font-bold uppercase tracking-wider cursor-pointer shadow-sm rounded-lg border-0"
+          className="w-full bg-[#EF892A] hover:bg-[#EA580C] text-white h-11 text-sm font-bold uppercase tracking-wider cursor-pointer shadow-sm rounded-lg border-0 flex items-center justify-center"
         >
           Next
         </Button>

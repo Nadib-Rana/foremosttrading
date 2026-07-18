@@ -12,13 +12,19 @@ interface TabContainerProps {
 
 export function TabContainer({ activeTab, setActiveTab, tabs }: TabContainerProps) {
   const activeTabRef = useRef<HTMLButtonElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (activeTabRef.current) {
-      activeTabRef.current.scrollIntoView({
+    const container = containerRef.current;
+    const activeBtn = activeTabRef.current;
+    if (container && activeBtn) {
+      const containerWidth = container.offsetWidth;
+      const btnOffsetLeft = activeBtn.offsetLeft;
+      const btnWidth = activeBtn.offsetWidth;
+      const scrollPosition = btnOffsetLeft - (containerWidth / 2) + (btnWidth / 2);
+      container.scrollTo({
+        left: scrollPosition,
         behavior: "smooth",
-        inline: "center",
-        block: "nearest",
       });
     }
   }, [activeTab]);
@@ -39,7 +45,7 @@ export function TabContainer({ activeTab, setActiveTab, tabs }: TabContainerProp
   };
 
   return (
-    <div className="w-full bg-[#F4F5F7] rounded-xl p-1.5 mb-6 overflow-x-auto lg:overflow-x-visible scrollbar-none scroll-smooth scroll-px-4">
+    <div ref={containerRef} className="w-full bg-[#F4F5F7] rounded-xl p-1.5 mb-6 overflow-x-auto lg:overflow-x-visible scrollbar-none scroll-smooth scroll-px-4">
       <div className="flex min-w-max lg:min-w-0 lg:w-full gap-1.5">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
