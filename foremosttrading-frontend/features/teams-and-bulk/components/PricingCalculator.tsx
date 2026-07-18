@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { Info } from "lucide-react";
+import { useState, useRef } from "react";
+import { Info, ChevronLeft, ChevronRight } from "lucide-react";
 
 export function PricingCalculator() {
   const [productType, setProductType] = useState<"Jerseys" | "Jackets" | "Hoodies">("Jerseys");
   const [quantity, setQuantity] = useState(50);
+  const productContainerRef = useRef<HTMLDivElement>(null);
 
   // Core base prices
   const basePrices = {
@@ -39,6 +40,16 @@ export function PricingCalculator() {
     }).format(val);
   };
 
+  const handleProductScroll = (direction: "left" | "right") => {
+    if (productContainerRef.current) {
+      const scrollAmount = 100;
+      productContainerRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
+
   return (
     <div className="w-full bg-white border border-gray-100 rounded-[2rem] p-6 sm:p-8 shadow-xs flex flex-col gap-6 select-none">
       <div className="flex items-center gap-2 pb-3 border-b border-gray-50">
@@ -50,21 +61,47 @@ export function PricingCalculator() {
       {/* Product Select Buttons */}
       <div className="flex flex-col gap-2">
         <label className="text-[10px] font-bold text-gray-700 block">Select Product</label>
-        <div className="grid grid-cols-3 gap-2 w-full">
-          {(["Jerseys", "Jackets", "Hoodies"] as const).map((type) => (
-            <button
-              key={type}
-              type="button"
-              onClick={() => setProductType(type)}
-              className={`py-3 px-4 rounded-xl text-xs font-bold transition-all border cursor-pointer text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316]/50 active:scale-98 ${
-                productType === type
-                  ? "bg-[#F97316] text-white border-[#F97316] shadow-xs"
-                  : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
-              }`}
-            >
-              {type}
-            </button>
-          ))}
+        <div className="relative flex items-center gap-1.5 w-full">
+          {/* Left scroll button */}
+          <button
+            type="button"
+            onClick={() => handleProductScroll("left")}
+            className="flex sm:hidden items-center justify-center w-8 h-8 rounded-lg bg-[#F4F5F7] hover:bg-gray-200 active:scale-95 transition-all cursor-pointer flex-shrink-0 border-0"
+          >
+            <ChevronLeft className="w-4 h-4 text-gray-600" />
+          </button>
+
+          {/* Scrollable Container */}
+          <div
+            ref={productContainerRef}
+            className="flex-1 overflow-x-auto sm:overflow-x-visible scrollbar-none scroll-smooth flex gap-2"
+          >
+            <div className="flex min-w-max sm:min-w-0 sm:grid sm:grid-cols-3 gap-2 w-full">
+              {(["Jerseys", "Jackets", "Hoodies"] as const).map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => setProductType(type)}
+                  className={`py-3 px-4 min-w-[90px] sm:min-w-0 rounded-xl text-xs font-bold transition-all border cursor-pointer text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316]/50 active:scale-98 flex-shrink-0 sm:flex-shrink ${
+                    productType === type
+                      ? "bg-[#F97316] text-white border-[#F97316] shadow-xs"
+                      : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Right scroll button */}
+          <button
+            type="button"
+            onClick={() => handleProductScroll("right")}
+            className="flex sm:hidden items-center justify-center w-8 h-8 rounded-lg bg-[#F4F5F7] hover:bg-gray-200 active:scale-95 transition-all cursor-pointer flex-shrink-0 border-0"
+          >
+            <ChevronRight className="w-4 h-4 text-gray-600" />
+          </button>
         </div>
       </div>
 

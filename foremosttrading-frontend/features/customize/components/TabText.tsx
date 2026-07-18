@@ -64,11 +64,10 @@ export function TabText({
                 <button
                   key={font.id}
                   onClick={() => onUpdateText({ fontFamily: font.id })}
-                  className={`py-2 px-3 border rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
-                    isSelected
+                  className={`py-2 px-3 border rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${isSelected
                       ? "border-blue-600 bg-blue-50 text-blue-600 shadow-2xs"
                       : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
-                  }`}
+                    }`}
                 >
                   {font.name}
                 </button>
@@ -90,11 +89,10 @@ export function TabText({
                   key={swatch.name}
                   onClick={() => onUpdateText({ textColor: swatch.hex })}
                   style={{ backgroundColor: swatch.hex }}
-                  className={`w-6 h-6 rounded-full border cursor-pointer transition-all hover:scale-110 shadow-xs ${
-                    isSelected
+                  className={`w-6 h-6 rounded-full border cursor-pointer transition-all hover:scale-110 shadow-xs ${isSelected
                       ? "border-[#F97316] ring-2 ring-[#F97316]/30 scale-105"
                       : "border-gray-200 hover:border-gray-400"
-                  }`}
+                    }`}
                   title={swatch.name}
                   aria-label={`Select ${swatch.name} text color`}
                 />
@@ -105,7 +103,7 @@ export function TabText({
       </div>
 
       {/* Action Footer */}
-      <div className="pt-4 border-t border-gray-100 flex flex-col gap-3 mt-auto bg-white sticky bottom-0 z-20 flex-shrink-0">
+      <div className="pt-4 flex flex-col gap-3 mt-auto bg-gray-50 sticky bottom-0 z-20 flex-shrink-0">
         <div className="flex gap-3 items-stretch">
           <div className="flex-1 h-11 flex items-center px-4 bg-[#E2E8F0] rounded-lg text-xs font-bold text-gray-700 select-none">
             {isSaved ? "Saved Successfully!" : "Player version 1"}

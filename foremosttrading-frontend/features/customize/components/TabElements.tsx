@@ -35,9 +35,8 @@ export function TabElements({
         {/* Upload Zone matching screenshot */}
         <div
           onClick={simulateUpload}
-          className={`h-48 border-2 border-dashed border-gray-200 hover:border-blue-500 rounded-2xl bg-white flex flex-col items-center justify-center p-6 cursor-pointer transition-all ${
-            isUploading ? "opacity-70 pointer-events-none" : ""
-          }`}
+          className={`h-48 border-2 border-dashed border-gray-200 hover:border-blue-500 rounded-2xl bg-white flex flex-col items-center justify-center p-6 cursor-pointer transition-all ${isUploading ? "opacity-70 pointer-events-none" : ""
+            }`}
         >
           {isUploading ? (
             <div className="flex flex-col items-center gap-2">
@@ -84,7 +83,7 @@ export function TabElements({
       </div>
 
       {/* Action Footer */}
-      <div className="pt-4 border-t border-gray-100 flex flex-col gap-3 mt-auto bg-white sticky bottom-0 z-20 flex-shrink-0">
+      <div className="pt-4 flex flex-col gap-3 mt-auto bg-gray-50 sticky bottom-0 z-20 flex-shrink-0">
         <div className="flex gap-3 items-stretch">
           <div className="flex-1 h-11 flex items-center px-4 bg-[#E2E8F0] rounded-lg text-xs font-bold text-gray-700 select-none">
             {isSaved ? "Saved Successfully!" : "Player version 1"}

@@ -76,11 +76,10 @@ export function TabColors({
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => toggleLock(part.id)}
-                    className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
-                      isLocked
+                    className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${isLocked
                         ? "bg-red-50 border-red-200 text-red-500"
                         : "bg-white border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50"
-                    }`}
+                      }`}
                     title={isLocked ? "Unlock edits" : "Lock edits"}
                   >
                     {isLocked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
@@ -88,11 +87,10 @@ export function TabColors({
 
                   <button
                     onClick={() => toggleVisibility(part.id)}
-                    className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
-                      !isVisible
+                    className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${!isVisible
                         ? "bg-amber-50 border-amber-200 text-amber-500"
                         : "bg-white border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50"
-                    }`}
+                      }`}
                     title={isVisible ? "Hide part" : "Show part"}
                   >
                     {isVisible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
@@ -110,11 +108,10 @@ export function TabColors({
                         key={swatch.name}
                         onClick={() => onChangeColor(part.id, swatch.hex)}
                         style={{ backgroundColor: swatch.hex }}
-                        className={`w-6 h-6 rounded-full border cursor-pointer transition-all hover:scale-110 shadow-xs ${
-                          isActive
+                        className={`w-6 h-6 rounded-full border cursor-pointer transition-all hover:scale-110 shadow-xs ${isActive
                             ? "border-[#F97316] ring-2 ring-[#F97316]/30 scale-105"
                             : "border-gray-200 hover:border-gray-400"
-                        }`}
+                          }`}
                         title={swatch.name}
                         aria-label={`Select ${swatch.name}`}
                       />
@@ -140,7 +137,7 @@ export function TabColors({
       </div>
 
       {/* Action Footer */}
-      <div className="pt-4 border-t border-gray-100 flex flex-col gap-3 mt-auto bg-white sticky bottom-0 z-20 flex-shrink-0">
+      <div className="pt-4 flex flex-col gap-3 mt-auto bg-gray-50 sticky bottom-0 z-20 flex-shrink-0">
         <div className="flex gap-3 items-stretch">
           <input
             type="text"

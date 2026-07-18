@@ -47,8 +47,8 @@ export function TabPlayers({
               key={player.id}
               onClick={() => onSelectActivePlayer(player.id)}
               className={`flex items-center gap-1 sm:gap-2 bg-white p-1 sm:p-2 border rounded-xl shadow-2xs transition-all cursor-pointer ${isActive
-                  ? "border-blue-500 ring-2 ring-blue-500/10"
-                  : "border-gray-150 hover:border-gray-300"
+                ? "border-blue-500 ring-2 ring-blue-500/10"
+                : "border-gray-150 hover:border-gray-300"
                 }`}
             >
               {/* Number Input with Prefix */}
@@ -117,7 +117,7 @@ export function TabPlayers({
       </div>
 
       {/* Action Footer */}
-      <div className="pt-4 border-t border-gray-100 flex flex-col gap-3 mt-auto bg-white sticky bottom-0 z-20 flex-shrink-0">
+      <div className="pt-4 flex flex-col gap-3 mt-auto bg-gray-50 sticky bottom-0 z-20 flex-shrink-0">
         <div className="flex gap-3 items-stretch">
           <input
             type="text"

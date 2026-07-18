@@ -34,7 +34,7 @@ export default function CustomizePage() {
 
       {/* Main Builder Grid */}
       <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        
+
         {/* Title Block */}
         <div className="mb-8 text-center sm:text-left">
           <h1 className="font-heading text-3xl md:text-4xl font-black uppercase tracking-tight text-gray-900">
@@ -47,9 +47,9 @@ export default function CustomizePage() {
 
         {/* 2-Column Responsive Workspace */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch mb-8">
-          
+
           {/* Left Side: Preview Card */}
-          <div className="lg:col-span-7 flex flex-col h-full lg:h-[650px] min-h-0">
+          <div className="lg:col-span-7 flex flex-col h-full lg:h-[650px] min-h-0 bg-white border border-gray-100 rounded-2xl">
             <KitPreview
               colors={custom.colors}
               pattern={custom.pattern}
@@ -59,7 +59,7 @@ export default function CustomizePage() {
           </div>
 
           {/* Right Side: Tab Controls Panel */}
-          <div className="lg:col-span-5 bg-white border border-gray-100 rounded-2xl p-4 sm:p-6 shadow-xs flex flex-col justify-between h-full lg:h-[650px] overflow-hidden">
+          <div className="lg:col-span-5 bg-white border border-gray-100 rounded-3xl p-4 sm:p-5 shadow-sm flex flex-col justify-between h-full lg:h-[650px] overflow-hidden">
             <TabContainer
               activeTab={custom.activeTab}
               setActiveTab={custom.setActiveTab}
@@ -67,7 +67,7 @@ export default function CustomizePage() {
             />
 
             {/* Render Tab Views */}
-            <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 flex flex-col min-h-0 bg-gray-50 rounded-2xl p-4 overflow-hidden">
               {custom.activeTab === "designs" && (
                 <TabDesigns
                   currentPattern={custom.pattern}
