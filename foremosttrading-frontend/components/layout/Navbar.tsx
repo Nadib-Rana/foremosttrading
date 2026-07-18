@@ -49,17 +49,20 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
       className={cn(
         "transition-all duration-300 ease-in-out z-50",
         isLight
-          ? "sticky top-0 left-0 right-0 w-full bg-white border-b border-gray-100 shadow-xs"
+          ? "sticky top-0 left-0 right-0 w-full bg-transparent"
           : "fixed top-0 left-0 right-0"
       )}
     >
       <div
         className={cn(
           "w-full transition-all duration-300 ease-in-out",
-          {
-            "bg-black/60 backdrop-blur-xl border-b border-white/10 shadow-lg md:top-3 md:w-[90%] xl:w-[90%] 2xl:w-[85%] max-w-7xl md:mx-auto md:rounded-lg md:mt-3": !isLight && scrolled,
-            "bg-gradient-to-b from-black/80 to-transparent": !isLight && !scrolled,
-          }
+          isLight
+            ? scrolled
+              ? "bg-white/90 backdrop-blur-xl border border-gray-200/80 shadow-md md:top-3 md:w-[90%] xl:w-[90%] 2xl:w-[85%] max-w-7xl md:mx-auto md:rounded-lg md:mt-3"
+              : "bg-white border-b border-gray-100"
+            : scrolled
+              ? "bg-black/60 backdrop-blur-xl border border-white/10 shadow-lg md:top-3 md:w-[90%] xl:w-[90%] 2xl:w-[85%] max-w-7xl md:mx-auto md:rounded-lg md:mt-3"
+              : "bg-gradient-to-b from-black/80 to-transparent"
         )}
       >
         <nav
@@ -76,16 +79,16 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
               href="/"
               className="hover:opacity-80 transition flex flex-col items-center group"
             >
-              {isLight ? (
-                <>
-                  <LogoMark className="w-12 h-6 transition-transform group-hover:scale-105" />
-                  <span className="text-[9px] font-heading font-black tracking-[0.3em] text-[#F97316] uppercase mt-0.5 -mr-[0.3em] italic">
-                    FOREMOST
-                  </span>
-                </>
-              ) : (
-                <Image src="/logo/Logo.png" alt="FOREMOST Logo" width={240} height={60} className="object-contain h-10 lg:h-12 w-auto mix-blend-lighten" />
-              )}
+              <Image
+                src="/logo/Logo.png"
+                alt="FOREMOST Logo"
+                width={240}
+                height={60}
+                className={cn(
+                  "object-contain h-10 lg:h-12 w-auto",
+                  !isLight && "mix-blend-lighten"
+                )}
+              />
             </Link>
           </div>
           
@@ -97,14 +100,14 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
                   key={link.label}
                   variant="ghost"
                   className={cn(
-                    "text-xs lg:text-base px-2 lg:px-4 py-2 font-semibold transition-colors duration-200",
+                    "text-xs lg:text-base px-2 lg:px-4 py-2 font-semibold transition-colors duration-200 hover:bg-transparent",
                     isLight
                       ? isActive
-                        ? "text-[#F97316] font-bold border-b-2 border-[#F97316] rounded-none pb-1"
-                        : "text-gray-600 hover:text-[#F97316] hover:bg-gray-50"
+                        ? "text-[#F97316] font-bold"
+                        : "text-gray-600 hover:text-[#F97316]"
                       : isActive
                         ? "text-primary font-bold"
-                        : "text-white hover:text-primary hover:bg-white/10"
+                        : "text-white hover:text-primary"
                   )}
                   render={<Link href={link.href} />}
                   nativeButton={false}

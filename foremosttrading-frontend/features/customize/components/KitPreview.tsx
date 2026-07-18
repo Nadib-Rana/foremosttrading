@@ -63,12 +63,15 @@ export function KitPreview({ colors, pattern, playerText, visibleParts, classNam
 
   return (
     <div className={className || "w-full grid grid-cols-2 lg:grid-cols-4 gap-4 bg-gray-50 border border-gray-100 rounded-xl p-4 sm:p-6 shadow-xs"}>
-      <defs>
-        <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.4" />
-          <stop offset="100%" stopColor="#000000" stopOpacity="0.4" />
-        </linearGradient>
-      </defs>
+      {/* Wrapped SVG defs in a hidden SVG element so they are valid SVG nodes inside HTML */}
+      <svg className="hidden" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#000000" stopOpacity="0.4" />
+          </linearGradient>
+        </defs>
+      </svg>
 
       {/* 1. FRONT VIEW */}
       <div className="flex flex-col items-center p-2 border border-gray-100 rounded-lg bg-white shadow-xs">
@@ -82,7 +85,7 @@ export function KitPreview({ colors, pattern, playerText, visibleParts, classNam
           {renderPattern("front")}
           {/* Collar */}
           <path d="M 130 70 C 140 85, 160 85, 170 70 Z" fill={colors.collar} style={getStyle("collar")} />
-          
+
           {/* Text/Number Overlay */}
           {visibleParts.jerseyBody && (
             <text x="150" y="160" fill={playerText.textColor} fontFamily={playerText.fontFamily} fontSize="28" fontWeight="bold" textAnchor="middle" className="italic">
@@ -115,10 +118,10 @@ export function KitPreview({ colors, pattern, playerText, visibleParts, classNam
           {renderPattern("back")}
           {/* Collar Back */}
           <path d="M 130 70 C 140 73, 160 73, 170 70 Z" fill={colors.collar} style={getStyle("collar")} />
-          
+
           {visibleParts.jerseyBody && (
             <>
-              <text x="150" y="110" fill={playerText.textColor} fontFamily={playerText.fontFamily} fontSize="12" fontWeight="black" tracking-widest textAnchor="middle" className="uppercase italic">
+              <text x="150" y="110" fill={playerText.textColor} fontFamily={playerText.fontFamily} fontSize="12" fontWeight="black" textAnchor="middle" className="uppercase italic tracking-widest">
                 {playerText.name}
               </text>
               <text x="150" y="165" fill={playerText.textColor} fontFamily={playerText.fontFamily} fontSize="46" fontWeight="black" textAnchor="middle" className="italic">
