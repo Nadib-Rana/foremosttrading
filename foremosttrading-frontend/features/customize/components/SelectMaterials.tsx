@@ -81,14 +81,13 @@ export function SelectMaterials({ isCartOpen, setIsCartOpen }: SelectMaterialsPr
       {/* 2-Column Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        {/* Left Side View: Dynamic 4-View Visualizer in White Card */}
-        <div className="lg:col-span-7 bg-white border border-gray-100 rounded-[2rem] p-6 sm:p-8 shadow-xs flex items-center justify-center min-h-[500px]">
+        {/* Left Side View: Dynamic 4-View Visualizer */}
+        <div className="lg:col-span-7 flex flex-col h-full lg:h-[650px] min-h-0">
           <KitPreview
             colors={colors}
             pattern={pattern}
             playerText={playerText}
             visibleParts={visibleParts}
-            className="w-full grid grid-cols-2 lg:grid-cols-4 gap-4 bg-transparent border-0 shadow-none p-0"
           />
         </div>
 
