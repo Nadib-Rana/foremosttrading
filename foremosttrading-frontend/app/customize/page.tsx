@@ -141,7 +141,7 @@ export default function CustomizePage() {
         </div>
 
         {/* Specs Accordions below the workspace row */}
-        <div className="max-w-4xl mb-8">
+        <div className="w-full mb-8">
           <Accordions />
         </div>
 
