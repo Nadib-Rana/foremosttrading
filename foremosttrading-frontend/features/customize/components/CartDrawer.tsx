@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CartItemCard } from "./CartItemCard";
 import { KitColors, DesignPattern, PlayerText } from "../types";
+import { SignatureModal } from "./SignatureModal";
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -32,6 +34,7 @@ export function CartDrawer({
 }: CartDrawerProps) {
   const pricePerKit = 250;
   const subtotal = quantity * pricePerKit;
+  const [isSignatureOpen, setIsSignatureOpen] = useState(false);
 
   // Formatting currency helper
   const formatCurrency = (val: number) => {
@@ -44,7 +47,7 @@ export function CartDrawer({
   };
 
   const handleCheckout = () => {
-    alert("Proceeding to checkout...");
+    setIsSignatureOpen(true);
   };
 
   return (
@@ -113,6 +116,17 @@ export function CartDrawer({
           </Button>
         </div>
       </div>
+
+      <SignatureModal
+        isOpen={isSignatureOpen}
+        onClose={() => setIsSignatureOpen(false)}
+        onSuccessClose={() => {
+          setIsSignatureOpen(false);
+          onClose();
+        }}
+        quantity={quantity}
+        subtotal={subtotal}
+      />
     </>
   );
 }

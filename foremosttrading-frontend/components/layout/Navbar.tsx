@@ -97,7 +97,7 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
                   key={link.label}
                   variant="ghost"
                   className={cn(
-                    "text-xs lg:text-base px-2 lg:px-4 py-2 font-semibold transition-colors duration-200",
+                    "text-xs lg:text-base px-2 lg:px-4 py-2 font-semibold transition-colors duration-200 rounded-lg",
                     isLight
                       ? isActive
                         ? "text-[#EF892A] font-bold"
@@ -121,10 +121,10 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
                 variant="outline"
                 onClick={onCartClick}
                 className={cn(
-                  "ml-4 w-11 h-11 flex items-center justify-center p-0 shadow-xs",
+                  "ml-4 w-11 h-11 flex items-center justify-center p-0 shadow-xs rounded-lg transition-colors duration-200",
                   isLight
-                    ? "border-gray-200 text-gray-700 bg-white hover:bg-gray-50"
-                    : "bg-black/20 border-white/20 hover:bg-black/40 text-white"
+                    ? "border-gray-200 text-gray-700 bg-white hover:border-primary/50 hover:text-primary hover:bg-primary/5"
+                    : "bg-black/20 border-white/20 text-white hover:border-primary/50 hover:text-primary hover:bg-primary/5"
                 )}
               >
                 <ShoppingCart className="w-5 h-5" />
@@ -144,7 +144,7 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
                 </Link>
               ) : (
                 <Button
-                  className="bg-[#EF892A] hover:bg-[#D97310] text-white py-2 px-4.5 font-bold text-xs flex items-center justify-center border-0 cursor-pointer shadow-sm ml-2 h-11"
+                  className="bg-[#EF892A] hover:bg-[#D97310] text-white py-2 px-4.5 rounded-lg font-bold text-xs flex items-center justify-center border-0 cursor-pointer shadow-sm ml-2 h-11"
                   render={<Link href="/login" />}
                   nativeButton={false}
                 >
@@ -158,7 +158,10 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
                 size="icon"
                 onClick={onCartClick}
                 className={cn(
-                  isLight ? "text-gray-600 hover:bg-gray-50" : "text-white hover:bg-white/10"
+                  "rounded-lg transition-colors duration-200",
+                  isLight
+                    ? "text-gray-600 hover:text-primary hover:bg-primary/5"
+                    : "text-white hover:text-primary hover:bg-primary/5"
                 )}
               >
                 <ShoppingCart className="w-5 h-5" />
