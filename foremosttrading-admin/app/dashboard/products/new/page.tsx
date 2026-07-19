@@ -1,4 +1,4 @@
-import { ProductForm } from "@/components/products/ProductForm";
+import { WizardForm } from "@/components/products/WizardForm";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,12 +15,13 @@ export default function NewProductPage() {
       </div>
       
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Add New Product</h2>
+        <h2 className="text-3xl font-bold tracking-tight">Create Product Wizard</h2>
       </div>
 
-      <div className="rounded-md border bg-card p-6 shadow-sm max-w-3xl">
-        <ProductForm />
+      <div className="rounded-md border bg-card p-6 shadow-sm max-w-4xl">
+        <WizardForm />
       </div>
     </div>
   );
 }
+

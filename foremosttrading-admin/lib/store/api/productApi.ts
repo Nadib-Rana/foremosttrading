@@ -19,7 +19,7 @@ export const productApi = baseApi.injectEndpoints({
       invalidatesTags: ['ProductShape'],
     }),
     getProductShapes: builder.query({
-      query: (productId) => `/admin/products/${productId}/shapes`,
+      query: (productId) => ({ url: `/admin/products/${productId}/shapes` }),
       providesTags: ['ProductShape'],
     }),
   }),

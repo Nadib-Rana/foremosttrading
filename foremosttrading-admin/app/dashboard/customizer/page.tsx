@@ -1,54 +1,67 @@
-import Link from "next/link";
-import { Layers } from "lucide-react";
-import { Button } from "@/components/ui/button";
+"use client";
 
-export default async function CustomizerPage() {
-  let products = [];
-  try {
-    const res = await fetch("http://localhost:3030/admin/products", { cache: 'no-store' });
-    if(res.ok) {
-      const json = await res.json();
-      products = (json.data?.products || []).filter((p: any) => p.isCustomizable);
-    }
-  } catch (err) {
-    console.error("Failed to fetch products for customizer:", err);
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Layers, Palette } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { mockDb, MockProduct } from "@/services/mockDb";
+
+export default function CustomizerPage() {
+  const [mounted, setMounted] = useState(false);
+  const [products, setProducts] = useState<MockProduct[]>([]);
+
+  useEffect(() => {
+    mockDb.initialize();
+    // Filter only customizable products
+    const customList = mockDb.getProducts().filter(p => p.isCustomizable);
+    setProducts(customList);
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="flex h-[50vh] w-full items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-primary"></div>
+      </div>
+    );
   }
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Customizer Management</h2>
+    <div className="flex-1 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight text-foreground font-sans">Customizer Management</h2>
+          <p className="text-sm text-muted-foreground">Select a product model to edit customization layers or test rendering canvases.</p>
+        </div>
       </div>
       
-      <div className="rounded-md border bg-card text-card-foreground shadow-sm">
+      <div className="rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden">
         {products.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">
-            No customizable products found. Create one from the Products tab.
+          <div className="p-12 text-center text-muted-foreground text-xs font-semibold flex flex-col items-center gap-2">
+            <Palette className="h-8 w-8 text-muted-foreground/60" />
+            <span>No customizable models found. Navigate to Products to flag models as Customizable.</span>
           </div>
         ) : (
           <div className="relative w-full overflow-auto">
-            <table className="w-full caption-bottom text-sm">
-              <thead className="[&_tr]:border-b">
-                <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Name</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Category</th>
-                  <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Action</th>
+            <table className="w-full text-xs">
+              <thead className="border-b bg-secondary/30">
+                <tr className="text-muted-foreground font-semibold">
+                  <th className="h-10 px-4 text-left align-middle">Product Model</th>
+                  <th className="h-10 px-4 text-left align-middle">Category</th>
+                  <th className="h-10 px-4 text-left align-middle">Base Price</th>
+                  <th className="h-10 px-4 text-right align-middle">Actions</th>
                 </tr>
               </thead>
-              <tbody className="[&_tr:last-child]:border-0">
-                {products.map((p: any) => (
-                  <tr key={p.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                    <td className="p-4 align-middle font-medium">{p.name}</td>
-                    <td className="p-4 align-middle">{p.category}</td>
+              <tbody className="divide-y divide-border">
+                {products.map((p) => (
+                  <tr key={p.id} className="hover:bg-muted/40 transition-colors">
+                    <td className="p-4 align-middle font-bold text-foreground">{p.name}</td>
+                    <td className="p-4 align-middle capitalize text-muted-foreground">{p.category.toLowerCase()}</td>
+                    <td className="p-4 align-middle font-semibold text-foreground">${p.basePrice.toFixed(2)}</td>
                     <td className="p-4 align-middle text-right space-x-2">
-                      <Link href={`/dashboard/customizer/${p.id}`}>
-                        <Button variant="outline" size="sm">
-                          <Layers className="mr-2 h-4 w-4" /> Manage Shapes
-                        </Button>
-                      </Link>
                       <Link href={`/dashboard/customizer/${p.id}/editor`}>
-                        <Button variant="default" size="sm">
-                          Start Customization
+                        <Button variant="default" size="sm" className="h-8 text-[10px] font-bold">
+                          Launch Canvas Editor
                         </Button>
                       </Link>
                     </td>
