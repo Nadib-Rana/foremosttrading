@@ -100,7 +100,7 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
                     "text-xs lg:text-base px-2 lg:px-4 py-2 font-semibold transition-colors duration-200",
                     isLight
                       ? isActive
-                        ? "text-[#EF892A] font-bold border-b-2 border-[#EF892A] rounded-none pb-1"
+                        ? "text-[#EF892A] font-bold"
                         : "text-gray-600 hover:text-[#EF892A] hover:bg-gray-50"
                       : isActive
                         ? "text-primary font-bold"
