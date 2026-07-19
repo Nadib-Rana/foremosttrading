@@ -76,16 +76,16 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
               href="/"
               className="hover:opacity-80 transition flex flex-col items-center group"
             >
-              {isLight ? (
-                <>
-                  <LogoMark className="w-12 h-6 transition-transform group-hover:scale-105" />
-                  <span className="text-[9px] font-heading font-black tracking-[0.3em] text-[#EF892A] uppercase mt-0.5 -mr-[0.3em] italic">
-                    FOREMOST
-                  </span>
-                </>
-              ) : (
-                <Image src="/logo/Logo.png" alt="FOREMOST Logo" width={240} height={60} className="object-contain h-10 lg:h-12 w-auto mix-blend-lighten" />
-              )}
+              <Image
+                src="/logo/Logo.png"
+                alt="FOREMOST Logo"
+                width={240}
+                height={60}
+                className={cn(
+                  "object-contain h-10 lg:h-12 w-auto",
+                  !isLight && "mix-blend-lighten"
+                )}
+              />
             </Link>
           </div>
 

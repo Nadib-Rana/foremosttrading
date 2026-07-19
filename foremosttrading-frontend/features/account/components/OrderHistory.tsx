@@ -47,6 +47,7 @@ export function OrderHistory() {
               pattern={mockOrder.pattern}
               playerText={mockOrder.playerText}
               visibleParts={mockOrder.visibleParts}
+              isThumbnail={true}
               className="w-full h-full grid grid-cols-4 gap-1.5 bg-transparent border-0 shadow-none p-0 scale-90"
             />
           </div>

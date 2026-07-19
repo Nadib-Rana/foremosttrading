@@ -11,6 +11,7 @@ interface KitPreviewProps {
   visibleParts: Record<string, boolean>;
   className?: string;
   productId?: string;
+  isThumbnail?: boolean;
 }
 
 export function KitPreview({
@@ -20,11 +21,12 @@ export function KitPreview({
   visibleParts,
   className,
   productId = "soccer-jersey",
+  isThumbnail = false,
 }: KitPreviewProps) {
   const Renderer = getProductRenderer(productId);
 
   return (
-    <div className={cn("w-full bg-white border border-gray-100 rounded-3xl p-4 sm:p-5 shadow-sm flex flex-col justify-between h-[350px] sm:h-[450px] lg:h-[650px] overflow-hidden", className)}>
+    <>
       {/* Wrapped SVG defs in a hidden SVG element so they are valid SVG nodes inside HTML */}
       <svg className="hidden" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -35,14 +37,27 @@ export function KitPreview({
         </defs>
       </svg>
 
-      <div className="w-full flex-1 bg-gray-50 rounded-2xl p-4 md:p-8 flex flex-row items-center justify-center gap-2 md:gap-4 overflow-x-auto scrollbar-none overflow-hidden">
-        <Renderer
-          colors={colors}
-          pattern={pattern}
-          playerText={playerText}
-          visibleParts={visibleParts}
-        />
-      </div>
-    </div>
+      {isThumbnail ? (
+        <div className={cn("w-full h-full bg-transparent flex flex-row items-center justify-center overflow-hidden", className)}>
+          <Renderer
+            colors={colors}
+            pattern={pattern}
+            playerText={playerText}
+            visibleParts={visibleParts}
+          />
+        </div>
+      ) : (
+        <div className={cn("w-full bg-white border border-gray-100 rounded-3xl p-4 sm:p-5 shadow-sm flex flex-col justify-between h-[350px] sm:h-[450px] lg:h-[650px] overflow-hidden", className)}>
+          <div className="w-full flex-1 bg-gray-50 rounded-2xl p-4 md:p-8 flex flex-row items-center justify-center gap-2 md:gap-4 overflow-x-auto scrollbar-none overflow-hidden">
+            <Renderer
+              colors={colors}
+              pattern={pattern}
+              playerText={playerText}
+              visibleParts={visibleParts}
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 }

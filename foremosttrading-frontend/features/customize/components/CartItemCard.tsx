@@ -55,6 +55,7 @@ export function CartItemCard({
           pattern={pattern}
           playerText={playerText}
           visibleParts={visibleParts}
+          isThumbnail={true}
           className="w-full grid grid-cols-2 gap-0.5 bg-transparent border-0 shadow-none p-0 scale-105 pointer-events-none select-none [&_text]:text-[10px] [&_span]:hidden"
         />
       </div>
@@ -69,19 +70,19 @@ export function CartItemCard({
         <div className="flex flex-col gap-0.5 text-[10px]">
           <div className="flex items-center gap-1 text-gray-500 font-bold truncate">
             <span className="text-[9px] font-black text-gray-600">Front Clossure:</span>
-            <span className="text-[#3b82f6] font-semibold">{frontClosure}</span>
+            <span className="text-[#EF892A] font-semibold">{frontClosure}</span>
           </div>
           <div className="flex items-center gap-1 text-gray-500 font-bold truncate">
             <span className="text-[9px] font-black text-gray-600">Body Material:</span>
-            <span className="text-[#3b82f6] font-semibold">{bodyMaterial}</span>
+            <span className="text-[#EF892A] font-semibold">{bodyMaterial}</span>
           </div>
           <div className="flex items-center gap-1 text-gray-500 font-bold truncate">
             <span className="text-[9px] font-black text-gray-600">Sleeves Material:</span>
-            <span className="text-[#3b82f6] font-semibold">{sleevesMaterial}</span>
+            <span className="text-[#EF892A] font-semibold">{sleevesMaterial}</span>
           </div>
           <div className="flex items-start gap-1 mt-0.5">
             <span className="text-[9px] font-black text-gray-600 shrink-0">Sizes:</span>
-            <span className="text-[#3b82f6] font-semibold leading-normal break-words max-w-[180px]">
+            <span className="text-[#EF892A] font-semibold leading-normal break-words max-w-[180px]">
               M, L, XL, 2XL, M, S, M, S, XL, 2XL
             </span>
           </div>

@@ -63,6 +63,7 @@ export function SavedDesignsList() {
                 pattern={design.pattern}
                 playerText={design.playerText}
                 visibleParts={design.visibleParts}
+                isThumbnail={true}
                 className="w-full h-full grid grid-cols-4 gap-1.5 bg-transparent border-0 shadow-none p-0 scale-90"
               />
             </div>
