@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { DesignPattern } from "../types";
-import { DESIGN_PATTERNS } from "../constants";
 
 interface TabDesignsProps {
   currentPattern: DesignPattern;

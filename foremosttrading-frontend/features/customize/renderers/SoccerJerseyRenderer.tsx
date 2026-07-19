@@ -20,7 +20,7 @@ export function SoccerJerseyRenderer({
     return visibleParts[part] ? {} : { display: "none" };
   };
 
-  const renderPattern = (view: "front" | "back") => {
+  const renderPattern = () => {
     if (!visibleParts.borders) return null;
     if (pattern === "striped") {
       return (
@@ -89,7 +89,7 @@ export function SoccerJerseyRenderer({
         <path d="M 240 90 L 210 70 L 190 110 L 220 130 Z" fill={colors.borders} style={getStyle("borders")} />
         {/* Jersey Body */}
         <path d="M 90 70 C 120 70, 180 70, 210 70 L 220 210 L 80 210 Z" fill={colors.jerseyBody} style={getStyle("jerseyBody")} />
-        {renderPattern("front")}
+        {renderPattern()}
         {/* Collar */}
         <path d="M 130 70 C 140 85, 160 85, 170 70 Z" fill={colors.collar} style={getStyle("collar")} />
         
@@ -119,7 +119,7 @@ export function SoccerJerseyRenderer({
         <path d="M 240 90 L 210 70 L 190 110 L 220 130 Z" fill={colors.borders} style={getStyle("borders")} />
         {/* Jersey Body */}
         <path d="M 90 70 C 120 70, 180 70, 210 70 L 220 210 L 80 210 Z" fill={colors.jerseyBody} style={getStyle("jerseyBody")} />
-        {renderPattern("back")}
+        {renderPattern()}
         {/* Collar Back */}
         <path d="M 130 70 C 140 73, 160 73, 170 70 Z" fill={colors.collar} style={getStyle("collar")} />
         

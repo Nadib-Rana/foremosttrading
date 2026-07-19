@@ -9,7 +9,6 @@ export function BulkInquiryForm() {
   const [email, setEmail] = useState("");
   const [teamName, setTeamName] = useState("");
   const [phone, setPhone] = useState("");
-  const [category, setCategory] = useState("Jerseys");
   const [requirements, setRequirements] = useState("");
   const [fileName, setFileName] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,7 +44,7 @@ export function BulkInquiryForm() {
       setPhone("");
       setRequirements("");
       setFileName(null);
-    } catch (err) {
+    } catch {
       setIsError(true);
     } finally {
       setIsSubmitting(false);

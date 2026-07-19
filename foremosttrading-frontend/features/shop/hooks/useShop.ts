@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { FilterCustomizable, SortOption, Product } from "../types";
+import { FilterCustomizable, SortOption } from "../types";
 import { MOCK_PRODUCTS, ITEMS_PER_PAGE } from "../constants";
 
 export function useShop() {

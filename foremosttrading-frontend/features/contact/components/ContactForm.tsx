@@ -28,7 +28,7 @@ export function ContactForm() {
       setEmail("");
       setSubject("");
       setMessage("");
-    } catch (err) {
+    } catch {
       setIsError(true);
     } finally {
       setIsSubmitting(false);
