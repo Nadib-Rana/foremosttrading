@@ -34,7 +34,7 @@ export function BrandStats() {
               className="bg-white border border-gray-100 rounded-3xl p-5 sm:p-6 text-center shadow-3xs flex flex-col items-center justify-center min-h-[160px]"
             >
               {/* Stat number with brand accent color */}
-              <span className="font-heading text-3xl sm:text-4xl font-black text-[#F97316]">
+              <span className="font-heading text-3xl sm:text-4xl font-black text-[#EF892A]">
                 {stat.value}
               </span>
               

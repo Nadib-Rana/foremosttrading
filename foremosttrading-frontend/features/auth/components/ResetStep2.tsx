@@ -45,8 +45,8 @@ export function ResetStep2({ onSubmit }: ResetStep2Props) {
     >
       {/* Brand Logo */}
       <div className="flex flex-col items-center mb-6">
-        <LogoMark className="w-16 h-8 text-[#F97316]" />
-        <span className="text-[10px] font-heading font-black tracking-[0.3em] text-[#F97316] uppercase mt-1 italic -mr-[0.3em]">
+        <LogoMark className="w-16 h-8 text-[#EF892A]" />
+        <span className="text-[10px] font-heading font-black tracking-[0.3em] text-[#EF892A] uppercase mt-1 italic -mr-[0.3em]">
           FOREMOST
         </span>
       </div>
@@ -81,7 +81,7 @@ export function ResetStep2({ onSubmit }: ResetStep2Props) {
       {/* Submit Button */}
       <Button
         type="submit"
-        className="w-full bg-[#F97316] hover:bg-[#EA580C] text-white py-6 rounded-xl font-bold transition-colors shadow-sm text-xs flex items-center justify-center cursor-pointer border-0"
+        className="w-full bg-[#EF892A] hover:bg-[#D97310] text-white py-6 rounded-xl font-bold transition-colors shadow-sm text-xs flex items-center justify-center cursor-pointer border-0"
       >
         Submit
       </Button>
@@ -90,7 +90,7 @@ export function ResetStep2({ onSubmit }: ResetStep2Props) {
       <button
         type="button"
         onClick={() => alert("Resending verification code...")}
-        className="text-xs font-bold text-[#F97316] hover:underline mt-4 cursor-pointer"
+        className="text-xs font-bold text-[#EF892A] hover:underline mt-4 cursor-pointer"
       >
         Resend it
       </button>

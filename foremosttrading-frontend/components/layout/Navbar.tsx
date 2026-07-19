@@ -17,9 +17,9 @@ export function LogoMark({ className = "w-10 h-5" }: { className?: string }) {
       fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path d="M10 28C35 28 65 14 100 8C72 15 42 30 10 28Z" fill="#F97316" />
-      <path d="M22 20C45 20 72 10 105 4C78 11 50 22 22 20Z" fill="#F97316" fillOpacity="0.85" />
-      <path d="M5 34C28 34 55 20 90 14C65 22 38 38 5 34Z" fill="#F97316" fillOpacity="0.7" />
+      <path d="M10 28C35 28 65 14 100 8C72 15 42 30 10 28Z" fill="#EF892A" />
+      <path d="M22 20C45 20 72 10 105 4C78 11 50 22 22 20Z" fill="#EF892A" fillOpacity="0.85" />
+      <path d="M5 34C28 34 55 20 90 14C65 22 38 38 5 34Z" fill="#EF892A" fillOpacity="0.7" />
     </svg>
   );
 }
@@ -79,7 +79,7 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
               {isLight ? (
                 <>
                   <LogoMark className="w-12 h-6 transition-transform group-hover:scale-105" />
-                  <span className="text-[9px] font-heading font-black tracking-[0.3em] text-[#F97316] uppercase mt-0.5 -mr-[0.3em] italic">
+                  <span className="text-[9px] font-heading font-black tracking-[0.3em] text-[#EF892A] uppercase mt-0.5 -mr-[0.3em] italic">
                     FOREMOST
                   </span>
                 </>
@@ -100,8 +100,8 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
                     "text-xs lg:text-base px-2 lg:px-4 py-2 font-semibold transition-colors duration-200",
                     isLight
                       ? isActive
-                        ? "text-[#F97316] font-bold border-b-2 border-[#F97316] rounded-none pb-1"
-                        : "text-gray-600 hover:text-[#F97316] hover:bg-gray-50"
+                        ? "text-[#EF892A] font-bold border-b-2 border-[#EF892A] rounded-none pb-1"
+                        : "text-gray-600 hover:text-[#EF892A] hover:bg-gray-50"
                       : isActive
                         ? "text-primary font-bold"
                         : "text-white hover:text-primary hover:bg-white/10"
@@ -121,7 +121,7 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
                 variant="outline"
                 onClick={onCartClick}
                 className={cn(
-                  "rounded ml-4 w-11 h-11 flex items-center justify-center p-0 shadow-xs",
+                  "ml-4 w-11 h-11 flex items-center justify-center p-0 shadow-xs",
                   isLight
                     ? "border-gray-200 text-gray-700 bg-white hover:bg-gray-50"
                     : "bg-black/20 border-white/20 hover:bg-black/40 text-white"
@@ -144,7 +144,7 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
                 </Link>
               ) : (
                 <Button
-                  className="bg-[#F97316] hover:bg-[#EA580C] text-white py-2 px-4.5 rounded-xl font-bold text-xs flex items-center justify-center border-0 cursor-pointer shadow-sm ml-2 h-11"
+                  className="bg-[#EF892A] hover:bg-[#D97310] text-white py-2 px-4.5 font-bold text-xs flex items-center justify-center border-0 cursor-pointer shadow-sm ml-2 h-11"
                   render={<Link href="/login" />}
                   nativeButton={false}
                 >
@@ -158,7 +158,6 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
                 size="icon"
                 onClick={onCartClick}
                 className={cn(
-                  "rounded",
                   isLight ? "text-gray-600 hover:bg-gray-50" : "text-white hover:bg-white/10"
                 )}
               >

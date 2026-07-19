@@ -9,16 +9,16 @@ export default function Loading() {
         {/* Animated Brand Logo Glow Wrapper */}
         <div className="relative flex items-center justify-center">
           {/* Subtle pulsating outer glow */}
-          <div className="absolute w-20 h-20 rounded-full bg-[#F97316] opacity-20 blur-xl animate-pulse" />
+          <div className="absolute w-20 h-20 rounded-full bg-[#EF892A] opacity-20 blur-xl animate-pulse" />
           
           {/* Main loader ring */}
-          <div className="w-16 h-16 rounded-full border-4 border-gray-200 border-t-[#F97316] animate-spin" />
+          <div className="w-16 h-16 rounded-full border-4 border-gray-200 border-t-[#EF892A] animate-spin" />
         </div>
 
         {/* Brand Text */}
         <div className="flex flex-col items-center gap-1.5 text-center">
           <span className="font-heading text-lg font-black tracking-[0.25em] text-gray-900 uppercase italic">
-            FOREMOST<span className="text-[#F97316]">TRADING</span>
+            FOREMOST<span className="text-[#EF892A]">TRADING</span>
           </span>
           <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest animate-pulse">
             Loading...

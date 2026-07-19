@@ -69,7 +69,7 @@ export function ContactInfo() {
       <div className="flex flex-col gap-5">
         {infoItems.map((item, i) => (
           <div key={i} className="flex gap-4 items-start">
-            <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-[#F97316] flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-[#EF892A] flex-shrink-0">
               {item.icon}
             </div>
             <div>

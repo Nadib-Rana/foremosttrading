@@ -14,7 +14,7 @@ export default function TeamsAndBulkPage() {
         {/* Hero Section */}
         <section className="bg-white border-b border-gray-100 py-16 md:py-20 select-none">
           <div className="max-w-4xl mx-auto text-center px-4 sm:px-6">
-            <span className="text-[10px] font-heading font-black tracking-[0.25em] text-[#F97316] uppercase mt-0.5 italic">
+            <span className="text-[10px] font-heading font-black tracking-[0.25em] text-[#EF892A] uppercase mt-0.5 italic">
               VOLUME ORDERS
             </span>
             <h1 className="font-heading text-4xl md:text-5xl font-black text-gray-900 tracking-tight mt-3">
@@ -30,7 +30,7 @@ export default function TeamsAndBulkPage() {
         <section className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-xs flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-[#F97316] flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-[#EF892A] flex-shrink-0">
                 <Sparkles className="w-5 h-5" />
               </div>
               <div>
@@ -42,7 +42,7 @@ export default function TeamsAndBulkPage() {
             </div>
 
             <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-xs flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-[#F97316] flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-[#EF892A] flex-shrink-0">
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
@@ -54,7 +54,7 @@ export default function TeamsAndBulkPage() {
             </div>
 
             <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-xs flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-[#F97316] flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-[#EF892A] flex-shrink-0">
                 <Truck className="w-5 h-5" />
               </div>
               <div>

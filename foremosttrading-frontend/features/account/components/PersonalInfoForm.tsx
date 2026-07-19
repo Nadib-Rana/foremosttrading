@@ -141,7 +141,7 @@ export function PersonalInfoForm() {
       <div className="mt-8 flex justify-end">
         <Button
           type="submit"
-          className="bg-[#F97316] hover:bg-[#EA580C] text-white py-6 px-8 rounded-xl font-bold transition-colors shadow-sm text-xs flex items-center gap-2 cursor-pointer border-0 w-full sm:w-auto"
+          className="bg-[#EF892A] hover:bg-[#D97310] text-white py-6 px-8 rounded-xl font-bold transition-colors shadow-sm text-xs flex items-center gap-2 cursor-pointer border-0 w-full sm:w-auto"
         >
           <Save className="w-4 h-4" />
           Save Changes

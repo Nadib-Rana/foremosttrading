@@ -82,9 +82,9 @@ export function PricingCalculator() {
                   key={type}
                   type="button"
                   onClick={() => setProductType(type)}
-                  className={`py-3 px-4 min-w-[90px] sm:min-w-0 rounded-xl text-xs font-bold transition-all border cursor-pointer text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316]/50 active:scale-98 flex-shrink-0 sm:flex-shrink ${
+                  className={`py-3 px-4 min-w-[90px] sm:min-w-0 rounded-xl text-xs font-bold transition-all border cursor-pointer text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EF892A]/50 active:scale-98 flex-shrink-0 sm:flex-shrink ${
                     productType === type
-                      ? "bg-[#F97316] text-white border-[#F97316] shadow-xs"
+                      ? "bg-[#EF892A] text-white border-[#EF892A] shadow-xs"
                       : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
                   }`}
                 >
@@ -109,7 +109,7 @@ export function PricingCalculator() {
       <div className="flex flex-col gap-3">
         <div className="flex justify-between items-baseline">
           <label className="text-[10px] font-bold text-gray-700">Estimated Quantity</label>
-          <span className="text-sm font-black text-[#F97316]">{quantity} units</span>
+          <span className="text-sm font-black text-[#EF892A]">{quantity} units</span>
         </div>
         <input
           type="range"
@@ -118,7 +118,7 @@ export function PricingCalculator() {
           step="5"
           value={quantity}
           onChange={(e) => setQuantity(parseInt(e.target.value))}
-          className="w-full accent-[#F97316] h-1.5 bg-gray-100 rounded-lg cursor-pointer appearance-none"
+          className="w-full accent-[#EF892A] h-1.5 bg-gray-100 rounded-lg cursor-pointer appearance-none"
         />
         <div className="flex justify-between text-[9px] text-gray-400 font-bold">
           <span>Min: 10</span>
@@ -130,7 +130,7 @@ export function PricingCalculator() {
       <div className="bg-orange-50/50 border border-orange-100/50 rounded-xl p-3 flex gap-2.5 items-start text-xs text-orange-800 leading-normal">
         <Info className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
         <p className="text-[10px] font-semibold">
-          Current discount tier: <span className="font-bold text-[#F97316]">{discountPercent}% off</span>. Base price of {productType.toLowerCase()} is {formatCurrency(basePrice)}/unit.
+          Current discount tier: <span className="font-bold text-[#EF892A]">{discountPercent}% off</span>. Base price of {productType.toLowerCase()} is {formatCurrency(basePrice)}/unit.
         </p>
       </div>
 
@@ -148,7 +148,7 @@ export function PricingCalculator() {
 
       <div className="bg-gray-950 border border-gray-900 rounded-xl p-4.5 text-center shadow-xs">
         <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Estimated Package Total</span>
-        <p className="text-2xl font-black text-[#F97316] mt-0.5">{formatCurrency(total)}</p>
+        <p className="text-2xl font-black text-[#EF892A] mt-0.5">{formatCurrency(total)}</p>
       </div>
     </div>
   );

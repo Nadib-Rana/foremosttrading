@@ -94,7 +94,7 @@ export function TabText({
                   onClick={() => onUpdateText({ textColor: swatch.hex })}
                   style={{ backgroundColor: swatch.hex }}
                   className={`w-6 h-6 rounded-full border cursor-pointer transition-all hover:scale-110 shadow-xs ${isSelected
-                    ? "border-[#F97316] ring-2 ring-[#F97316]/30 scale-105"
+                    ? "border-[#EF892A] ring-2 ring-[#EF892A]/30 scale-105"
                     : "border-gray-200 hover:border-gray-400"
                     }`}
                   title={swatch.name}
@@ -174,7 +174,7 @@ export function TabText({
       uppercase
       tracking-wide
       shadow-sm
-      hover:bg-[#EA580C]
+      hover:bg-[#D97310]
     "
         >
           Next

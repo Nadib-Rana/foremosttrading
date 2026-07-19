@@ -39,7 +39,7 @@ export default function Error({ error, reset }: ErrorProps) {
         <div className="flex flex-col sm:flex-row gap-3 mt-8 items-stretch justify-center w-full px-4">
           <Button
             onClick={reset}
-            className="flex-1 bg-[#F97316] hover:bg-[#EA580C] text-white py-5 px-6 rounded-xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer border-0 shadow-sm"
+            className="flex-1 bg-[#EF892A] hover:bg-[#D97310] text-white py-5 px-6 rounded-xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer border-0 shadow-sm"
           >
             <RotateCcw className="w-4 h-4" />
             Try again

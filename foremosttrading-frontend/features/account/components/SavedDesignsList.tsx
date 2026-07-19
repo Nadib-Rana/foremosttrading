@@ -89,7 +89,7 @@ export function SavedDesignsList() {
               <Button
                 variant="default"
                 onClick={() => handleCheckout(design.id)}
-                className="flex-1 sm:flex-none bg-[#F97316] hover:bg-[#EA580C] text-white font-bold py-4 px-6 rounded-lg text-[10px] tracking-wide cursor-pointer transition-colors border-0 h-auto text-center"
+                className="flex-1 sm:flex-none bg-[#EF892A] hover:bg-[#D97310] text-white font-bold py-4 px-6 rounded-lg text-[10px] tracking-wide cursor-pointer transition-colors border-0 h-auto text-center"
               >
                 Checkout
               </Button>

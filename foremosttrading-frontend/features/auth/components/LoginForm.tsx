@@ -23,8 +23,8 @@ export function LoginForm() {
     >
       {/* Centralized Logo */}
       <div className="flex flex-col items-center mb-6">
-        <LogoMark className="w-16 h-8 text-[#F97316]" />
-        <span className="text-[10px] font-heading font-black tracking-[0.3em] text-[#F97316] uppercase mt-1 italic -mr-[0.3em]">
+        <LogoMark className="w-16 h-8 text-[#EF892A]" />
+        <span className="text-[10px] font-heading font-black tracking-[0.3em] text-[#EF892A] uppercase mt-1 italic -mr-[0.3em]">
           FOREMOST
         </span>
       </div>
@@ -84,7 +84,7 @@ export function LoginForm() {
       <div className="w-full flex justify-end mt-2">
         <Link
           href="/forgot-password"
-          className="text-[10px] font-bold text-[#F97316] hover:underline"
+          className="text-[10px] font-bold text-[#EF892A] hover:underline"
         >
           Forgot password?
         </Link>
@@ -93,7 +93,7 @@ export function LoginForm() {
       {/* Log In Button */}
       <Button
         type="submit"
-        className="w-full mt-6 bg-[#F97316] hover:bg-[#EA580C] text-white py-6 rounded-xl font-bold transition-colors shadow-sm text-xs flex items-center justify-center cursor-pointer border-0"
+        className="w-full mt-6 bg-[#EF892A] hover:bg-[#D97310] text-white py-6 rounded-xl font-bold transition-colors shadow-sm text-xs flex items-center justify-center cursor-pointer border-0"
       >
         Log In
       </Button>
@@ -103,7 +103,7 @@ export function LoginForm() {
         Don’t have an account?
         <Link
           href="/signup"
-          className="text-[#F97316] font-bold hover:underline ml-1"
+          className="text-[#EF892A] font-bold hover:underline ml-1"
         >
           Sign up
         </Link>

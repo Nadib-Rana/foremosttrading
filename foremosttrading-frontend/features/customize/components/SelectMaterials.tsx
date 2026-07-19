@@ -126,7 +126,7 @@ export function SelectMaterials({ isCartOpen, setIsCartOpen }: SelectMaterialsPr
           <div className="mt-6">
             <Button
               onClick={handleAddToCart}
-              className="w-full md:w-auto bg-[#F97316] hover:bg-[#EA580C] text-white py-6 px-8 rounded-xl font-bold tracking-wider transition-colors shadow-sm flex items-center justify-center gap-2.5 cursor-pointer text-xs"
+              className="w-full md:w-auto bg-[#EF892A] hover:bg-[#D97310] text-white py-6 px-8 rounded-xl font-bold tracking-wider transition-colors shadow-sm flex items-center justify-center gap-2.5 cursor-pointer text-xs"
             >
               <ShoppingCart className="w-4 h-4" />
               Add To Cart

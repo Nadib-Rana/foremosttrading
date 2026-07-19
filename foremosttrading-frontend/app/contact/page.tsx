@@ -13,7 +13,7 @@ export default function ContactPage() {
         {/* Hero Section */}
         <section className="bg-white border-b border-gray-100 py-16 md:py-20 select-none">
           <div className="max-w-4xl mx-auto text-center px-4 sm:px-6">
-            <span className="text-[10px] font-heading font-black tracking-[0.25em] text-[#F97316] uppercase mt-0.5 italic">
+            <span className="text-[10px] font-heading font-black tracking-[0.25em] text-[#EF892A] uppercase mt-0.5 italic">
               GET IN TOUCH
             </span>
             <h1 className="font-heading text-4xl md:text-5xl font-black text-gray-900 tracking-tight mt-3">

@@ -140,7 +140,7 @@ export function BulkInquiryForm() {
           />
           <div
             onClick={handleUploadClick}
-            className="w-full rounded-xl border border-dashed border-gray-250 bg-white py-4 px-6 flex flex-col items-center justify-center cursor-pointer hover:border-[#F97316] transition-colors gap-2"
+            className="w-full rounded-xl border border-dashed border-gray-250 bg-white py-4 px-6 flex flex-col items-center justify-center cursor-pointer hover:border-[#EF892A] transition-colors gap-2"
           >
             {fileName ? (
               <div className="flex items-center gap-2 text-xs font-bold text-green-600">
@@ -186,7 +186,7 @@ export function BulkInquiryForm() {
       <Button
         type="submit"
         disabled={isSubmitting}
-        className="w-full mt-4 bg-[#F97316] hover:bg-[#EA580C] text-white py-6 rounded-xl font-bold transition-all shadow-sm text-xs flex items-center justify-center cursor-pointer border-0 active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none"
+        className="w-full mt-4 bg-[#EF892A] hover:bg-[#D97310] text-white py-6 rounded-xl font-bold transition-all shadow-sm text-xs flex items-center justify-center cursor-pointer border-0 active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none"
       >
         {isSubmitting ? (
           <>

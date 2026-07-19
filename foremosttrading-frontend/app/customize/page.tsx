@@ -40,7 +40,7 @@ export default function CustomizePage() {
           <h1 className="font-heading text-3xl md:text-4xl font-black uppercase tracking-tight text-gray-900">
             Evolution Football Kit
           </h1>
-          <p className="text-sm font-black text-[#F97316] uppercase mt-1 tracking-wider">
+          <p className="text-sm font-black text-[#EF892A] uppercase mt-1 tracking-wider">
             $199 - $699
           </p>
         </div>

@@ -3,23 +3,23 @@ import { Zap, Shield, Layers, Sparkles } from "lucide-react";
 
 const features = [
   {
-    icon: <Zap className="w-6 h-6 text-[#F97316]" />,
+    icon: <Zap className="w-6 h-6 text-[#EF892A]" />,
     title: "REAL-TIME PREVIEW",
     description: "Every color, every panel, every text instant feedback.",
   },
   {
-    icon: <Shield className="w-6 h-6 text-[#F97316]" />,
+    icon: <Shield className="w-6 h-6 text-[#EF892A]" />,
     title: "TOURNAMENT-GRADE",
     description:
       "Materials engineered for impact, sweat and stadium lights.",
   },
   {
-    icon: <Layers className="w-6 h-6 text-[#F97316]" />,
+    icon: <Layers className="w-6 h-6 text-[#EF892A]" />,
     title: "FULL CUSTOMIZATION",
     description: "Body, sleeves, pockets, cuffs, stripes, buttons - yours.",
   },
   {
-    icon: <Sparkles className="w-6 h-6 text-[#F97316]" />,
+    icon: <Sparkles className="w-6 h-6 text-[#EF892A]" />,
     title: "MADE ON DEMAND",
     description:
       "Zero inventory. Zero waste. Every piece is yours alone.",

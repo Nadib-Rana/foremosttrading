@@ -12,7 +12,7 @@ export const COLOR_SWATCHES = [
   { name: "Teal Green", hex: "#0F766E" },
   { name: "Neon Yellow", hex: "#D9F99D" },
   { name: "Gold Yellow", hex: "#EAB308" },
-  { name: "Sunset Orange", hex: "#F97316" },
+  { name: "Sunset Orange", hex: "#EF892A" },
   { name: "Vibrant Purple", hex: "#6D28D9" },
 ];
 

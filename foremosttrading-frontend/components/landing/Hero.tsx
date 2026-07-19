@@ -48,13 +48,13 @@ export function Hero() {
           
           <div className="mt-10 flex flex-col sm:flex-row gap-4">
             <Link href="/customize">
-              <Button className="font-bold tracking-wide rounded-sm px-8 h-12 text-base font-heading w-full sm:w-auto" size="lg">
+              <Button className="font-bold tracking-wide px-8 h-12 text-base font-heading w-full sm:w-auto" size="lg">
                 Start Designing &rarr;
               </Button>
             </Link>
             <Button
               variant="outline"
-              className="text-white border-white/30 hover:bg-white/10 rounded-sm px-8 h-12 text-base font-heading cursor-pointer flex items-center justify-center"
+              className="text-white border-white/30 hover:bg-white/10 px-8 h-12 text-base font-heading cursor-pointer flex items-center justify-center"
               size="lg"
               render={<Link href="/teams-and-bulk" />}
               nativeButton={false}
@@ -104,7 +104,7 @@ export function Hero() {
               <button
                 key={index}
                 className={`h-2 w-8 rounded-full transition-colors duration-300 ${
-                  index === currentSlide ? "bg-[#F97316]" : "bg-white/30 hover:bg-white/50"
+                  index === currentSlide ? "bg-[#EF892A]" : "bg-white/30 hover:bg-white/50"
                 }`}
                 onClick={() => setCurrentSlide(index)}
               />

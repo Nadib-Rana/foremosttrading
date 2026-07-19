@@ -16,7 +16,7 @@ export default function AboutPage() {
         {/* Hero Section */}
         <section className="bg-white py-16 md:py-20 select-none border-b border-gray-100">
           <div className="max-w-4xl mx-auto text-center px-4 sm:px-6">
-            <span className="text-[10px] font-heading font-black tracking-[0.25em] text-[#F97316] uppercase mt-0.5 italic">
+            <span className="text-[10px] font-heading font-black tracking-[0.25em] text-[#EF892A] uppercase mt-0.5 italic">
               OUR MISSION
             </span>
             <h1 className="font-heading text-4xl md:text-5xl font-black text-gray-900 tracking-tight mt-3">
@@ -58,7 +58,7 @@ export default function AboutPage() {
             </p>
             <div className="mt-6">
               <Button
-                className="bg-[#F97316] hover:bg-[#EA580C] text-white py-6 px-8 rounded-xl font-bold tracking-wider transition-colors shadow-sm flex items-center justify-center gap-2 cursor-pointer border-0 text-xs w-full sm:w-auto mx-auto"
+                className="bg-[#EF892A] hover:bg-[#D97310] text-white py-6 px-8 rounded-xl font-bold tracking-wider transition-colors shadow-sm flex items-center justify-center gap-2 cursor-pointer border-0 text-xs w-full sm:w-auto mx-auto"
                 render={<Link href="/customize" />}
                 nativeButton={false}
               >

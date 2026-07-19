@@ -107,7 +107,7 @@ export function CartDrawer({
           <Button
             variant="default"
             onClick={handleCheckout}
-            className="flex-1 bg-[#F97316] hover:bg-[#EA580C] text-white font-bold py-5 rounded-xl text-[10px] tracking-wider text-center cursor-pointer shadow-sm transition-colors border-0"
+            className="flex-1 bg-[#EF892A] hover:bg-[#D97310] text-white font-bold py-5 rounded-xl text-[10px] tracking-wider text-center cursor-pointer shadow-sm transition-colors border-0"
           >
             Checkout
           </Button>

@@ -29,7 +29,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Customizable Badge */}
         {product.isCustomizable && (
-          <span className="absolute bottom-3 left-3 bg-[#F97316]/90 backdrop-blur-xs text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md">
+          <span className="absolute bottom-3 left-3 bg-[#EF892A]/90 backdrop-blur-xs text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md">
             Customizable
           </span>
         )}
@@ -37,7 +37,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
       {/* Product Info */}
       <div className="mt-4 px-1 pb-2">
-        <h3 className="font-heading text-sm font-black uppercase tracking-wider text-gray-900 leading-snug group-hover:text-[#F97316] transition-colors">
+        <h3 className="font-heading text-sm font-black uppercase tracking-wider text-gray-900 leading-snug group-hover:text-[#EF892A] transition-colors">
           {product.title}
         </h3>
         
@@ -50,7 +50,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <span className="text-xs font-bold line-through text-gray-400">
             ${product.originalPrice}
           </span>
-          <span className="text-sm font-black text-[#F97316]">
+          <span className="text-sm font-black text-[#EF892A]">
             ${product.salePrice}
           </span>
         </div>

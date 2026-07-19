@@ -125,7 +125,7 @@ export function TabDesigns({
       uppercase
       tracking-wide
       shadow-sm
-      hover:bg-[#EA580C]
+      hover:bg-[#D97310]
     "
         >
           Next

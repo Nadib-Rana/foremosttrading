@@ -89,8 +89,8 @@ export function OrderHistory() {
         {/* Timeline Status Track */}
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4 mt-2">
           {/* Step 1: Active In Transit */}
-          <div className="flex-1 w-full lg:w-auto flex items-center gap-3.5 bg-[#FFF7ED] border border-[#F97316] rounded-2xl p-4 shadow-3xs">
-            <div className="w-10 h-10 rounded-xl bg-[#F97316] flex items-center justify-center text-white flex-shrink-0">
+          <div className="flex-1 w-full lg:w-auto flex items-center gap-3.5 bg-[#FFF7ED] border border-[#EF892A] rounded-2xl p-4 shadow-3xs">
+            <div className="w-10 h-10 rounded-xl bg-[#EF892A] flex items-center justify-center text-white flex-shrink-0">
               <Package className="w-5 h-5" />
             </div>
             <div>
@@ -101,9 +101,9 @@ export function OrderHistory() {
 
           {/* Connector Line 1 */}
           <div className="flex lg:flex-col items-center justify-center w-full lg:w-16 h-8 lg:h-auto relative">
-            <div className="w-0.5 lg:w-full h-8 lg:h-0.5 bg-[#F97316] absolute" />
-            <div className="w-3.5 h-3.5 rounded-full border-2 border-[#F97316] bg-white relative z-10 flex items-center justify-center">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#F97316]" />
+            <div className="w-0.5 lg:w-full h-8 lg:h-0.5 bg-[#EF892A] absolute" />
+            <div className="w-3.5 h-3.5 rounded-full border-2 border-[#EF892A] bg-white relative z-10 flex items-center justify-center">
+              <div className="w-1.5 h-1.5 rounded-full bg-[#EF892A]" />
             </div>
           </div>
 

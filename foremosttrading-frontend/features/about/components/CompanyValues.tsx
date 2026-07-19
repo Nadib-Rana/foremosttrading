@@ -26,7 +26,7 @@ export function CompanyValues() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section title */}
         <div className="text-center mb-12">
-          <span className="text-[10px] font-heading font-black tracking-[0.25em] text-[#F97316] uppercase mt-0.5 italic">
+          <span className="text-[10px] font-heading font-black tracking-[0.25em] text-[#EF892A] uppercase mt-0.5 italic">
             OUR CORE PILLARS
           </span>
           <h2 className="font-heading text-3xl font-black text-gray-900 tracking-tight mt-3">
@@ -42,7 +42,7 @@ export function CompanyValues() {
               className="bg-[#F9F9F9] border border-gray-50 rounded-3xl p-6 sm:p-8 flex flex-col items-center text-center shadow-3xs"
             >
               {/* Icon round backdrop */}
-              <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center text-[#F97316] mb-5 flex-shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center text-[#EF892A] mb-5 flex-shrink-0">
                 {val.icon}
               </div>
               

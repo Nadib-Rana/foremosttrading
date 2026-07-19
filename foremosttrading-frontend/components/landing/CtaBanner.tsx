@@ -18,7 +18,7 @@ export function CtaBanner() {
             Submit a bulk inquiry and we'll quote within 24 hours.
           </p>
           <Button
-            className="bg-[#F97316] hover:bg-[#EA580C] text-white font-bold px-8 h-12 text-base rounded-md border-0 cursor-pointer flex items-center justify-center"
+            className="bg-[#EF892A] hover:bg-[#D97310] text-white font-bold px-8 h-12 text-base rounded-md border-0 cursor-pointer flex items-center justify-center"
             render={<Link href="/teams-and-bulk" />}
             nativeButton={false}
           >

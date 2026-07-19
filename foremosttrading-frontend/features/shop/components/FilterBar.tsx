@@ -51,7 +51,7 @@ export function FilterBar({
               <button
                 onClick={() => selectFilter("all")}
                 className={`w-full text-left px-4 py-2 text-xs font-semibold uppercase transition-colors hover:bg-gray-50 ${
-                  filterCustomizable === "all" ? "text-[#F97316]" : "text-gray-600"
+                  filterCustomizable === "all" ? "text-[#EF892A]" : "text-gray-600"
                 }`}
               >
                 All Products
@@ -59,7 +59,7 @@ export function FilterBar({
               <button
                 onClick={() => selectFilter("customizable")}
                 className={`w-full text-left px-4 py-2 text-xs font-semibold uppercase transition-colors hover:bg-gray-50 ${
-                  filterCustomizable === "customizable" ? "text-[#F97316]" : "text-gray-600"
+                  filterCustomizable === "customizable" ? "text-[#EF892A]" : "text-gray-600"
                 }`}
               >
                 Customizable Only
@@ -89,7 +89,7 @@ export function FilterBar({
               <button
                 onClick={() => selectSort("newest")}
                 className={`w-full text-left px-4 py-2 text-xs font-semibold uppercase transition-colors hover:bg-gray-50 ${
-                  sortBy === "newest" ? "text-[#F97316]" : "text-gray-600"
+                  sortBy === "newest" ? "text-[#EF892A]" : "text-gray-600"
                 }`}
               >
                 Newest
@@ -97,7 +97,7 @@ export function FilterBar({
               <button
                 onClick={() => selectSort("price-asc")}
                 className={`w-full text-left px-4 py-2 text-xs font-semibold uppercase transition-colors hover:bg-gray-50 ${
-                  sortBy === "price-asc" ? "text-[#F97316]" : "text-gray-600"
+                  sortBy === "price-asc" ? "text-[#EF892A]" : "text-gray-600"
                 }`}
               >
                 Price: Low to High
@@ -105,7 +105,7 @@ export function FilterBar({
               <button
                 onClick={() => selectSort("price-desc")}
                 className={`w-full text-left px-4 py-2 text-xs font-semibold uppercase transition-colors hover:bg-gray-50 ${
-                  sortBy === "price-desc" ? "text-[#F97316]" : "text-gray-600"
+                  sortBy === "price-desc" ? "text-[#EF892A]" : "text-gray-600"
                 }`}
               >
                 Price: High to Low

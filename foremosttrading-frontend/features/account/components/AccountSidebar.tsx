@@ -32,7 +32,7 @@ export function AccountSidebar({ activeTab }: AccountSidebarProps) {
           href="/account"
           className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs transition-all ${
             activeTab === "account"
-              ? "bg-[#F97316] text-white shadow-xs"
+              ? "bg-[#EF892A] text-white shadow-xs"
               : "hover:bg-gray-50 text-gray-500 hover:text-gray-700"
           }`}
         >
@@ -45,7 +45,7 @@ export function AccountSidebar({ activeTab }: AccountSidebarProps) {
           href="/account/saved-designs"
           className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs transition-all ${
             activeTab === "designs"
-              ? "bg-[#F97316] text-white shadow-xs"
+              ? "bg-[#EF892A] text-white shadow-xs"
               : "hover:bg-gray-50 text-gray-500 hover:text-gray-700"
           }`}
         >
@@ -58,7 +58,7 @@ export function AccountSidebar({ activeTab }: AccountSidebarProps) {
           href="/account/orders"
           className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs transition-all ${
             activeTab === "orders"
-              ? "bg-[#F97316] text-white shadow-xs"
+              ? "bg-[#EF892A] text-white shadow-xs"
               : "hover:bg-gray-50 text-gray-500 hover:text-gray-700"
           }`}
         >

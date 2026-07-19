@@ -13,7 +13,7 @@ export function Accordions() {
   const accordionItems = [
     {
       title: "Important Information",
-      icon: <Info className="w-4 h-4 text-[#F97316]" />,
+      icon: <Info className="w-4 h-4 text-[#EF892A]" />,
       content: (
         <ul className="list-disc pl-4 text-[11px] text-gray-500 font-medium leading-relaxed  flex flex-col gap-2.5">
           <li>
@@ -96,7 +96,7 @@ export function Accordions() {
                 </span>
               </div>
               <ChevronDown
-                className={`w-4 h-4 text-gray-400 transition-transform duration-300 ${isOpen ? "rotate-180 text-[#F97316]" : ""
+                className={`w-4 h-4 text-gray-400 transition-transform duration-300 ${isOpen ? "rotate-180 text-[#EF892A]" : ""
                   }`}
               />
             </button>

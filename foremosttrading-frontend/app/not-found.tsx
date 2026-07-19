@@ -7,7 +7,7 @@ export default function NotFound() {
     <main className="min-h-screen bg-[#F4F5F7] flex flex-col items-center justify-center px-6 py-24 select-none">
       <div className="text-center max-w-md w-full">
         {/* Giant visual header */}
-        <h1 className="font-heading text-8xl md:text-9xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-[#F97316] to-[#EA580C] drop-shadow-xs">
+        <h1 className="font-heading text-8xl md:text-9xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-[#EF892A] to-[#D97310] drop-shadow-xs">
           404
         </h1>
 
@@ -23,7 +23,7 @@ export default function NotFound() {
         {/* Buttons Action Group */}
         <div className="flex flex-col sm:flex-row gap-3 mt-8 items-stretch justify-center px-4">
           <Button
-            className="bg-[#F97316] hover:bg-[#EA580C] text-white py-5 px-6 rounded-xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer border-0 shadow-sm"
+            className="bg-[#EF892A] hover:bg-[#D97310] text-white py-5 px-6 rounded-xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer border-0 shadow-sm"
             render={<Link href="/" />}
             nativeButton={false}
           >

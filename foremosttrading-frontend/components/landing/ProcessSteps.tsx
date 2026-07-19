@@ -32,7 +32,7 @@ export function ProcessSteps() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {steps.map((step, i) => (
             <div key={i} className="flex flex-col bg-white rounded-xl p-6 md:p-8 shadow-sm">
-              <span className="text-2xl md:text-3xl font-bold text-[#F97316] mb-4">
+              <span className="text-2xl md:text-3xl font-bold text-[#EF892A] mb-4">
                 {step.number}
               </span>
               <h3 className="text-sm md:text-base font-bold text-black uppercase mb-3">

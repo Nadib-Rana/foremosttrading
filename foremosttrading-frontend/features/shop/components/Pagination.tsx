@@ -33,7 +33,7 @@ export function Pagination({
               onClick={() => onPageChange(pageNum)}
               className={`transition-all duration-300 cursor-pointer ${
                 isActive
-                  ? "h-2 w-8 bg-[#F97316] rounded-full"
+                  ? "h-2 w-8 bg-[#EF892A] rounded-full"
                   : "h-2 w-2 bg-gray-300 hover:bg-gray-400 rounded-full"
               }`}
               aria-label={`Go to page ${pageNum}`}
@@ -57,7 +57,7 @@ export function Pagination({
         <Button
           onClick={onNextPage}
           disabled={currentPage === totalPages}
-          className="bg-[#F97316] hover:bg-[#EA580C] text-white disabled:opacity-50 disabled:pointer-events-none rounded-lg px-4 py-2 flex items-center gap-1.5 text-xs font-semibold cursor-pointer shadow-sm select-none"
+          className="bg-[#EF892A] hover:bg-[#D97310] text-white disabled:opacity-50 disabled:pointer-events-none rounded-lg px-4 py-2 flex items-center gap-1.5 text-xs font-semibold cursor-pointer shadow-sm select-none"
         >
           Next
           <ArrowRight className="w-4 h-4" />
