@@ -70,7 +70,7 @@ export function SizeGuide() {
         </div>
 
         {/* Right Side: Size Chart Table */}
-        <div className="lg:col-span-7 w-full overflow-hidden border border-black rounded-[24px]">
+        <div className="lg:col-span-7 w-full overflow-x-auto border border-black rounded-[24px]">
           <table className="min-w-full text-center text-sm font-semibold uppercase tracking-wider text-gray-900 border-collapse">
             <thead>
               <tr className="bg-[#222222] text-white">

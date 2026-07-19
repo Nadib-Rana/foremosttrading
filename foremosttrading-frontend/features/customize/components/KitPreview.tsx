@@ -24,7 +24,7 @@ export function KitPreview({
   const Renderer = getProductRenderer(productId);
 
   return (
-    <div className={cn("w-full bg-white border border-gray-100 rounded-3xl p-4 sm:p-5 shadow-sm flex flex-col justify-between h-full lg:h-[650px] overflow-hidden", className)}>
+    <div className={cn("w-full bg-white border border-gray-100 rounded-3xl p-4 sm:p-5 shadow-sm flex flex-col justify-between h-[350px] sm:h-[450px] lg:h-[650px] overflow-hidden", className)}>
       {/* Wrapped SVG defs in a hidden SVG element so they are valid SVG nodes inside HTML */}
       <svg className="hidden" xmlns="http://www.w3.org/2000/svg">
         <defs>

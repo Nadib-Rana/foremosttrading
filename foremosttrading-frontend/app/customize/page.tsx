@@ -17,7 +17,7 @@ import { SizeGuide } from "@/features/customize/components/SizeGuide";
 export default function CustomizePage() {
   const custom = useCustomize();
 
-  const handleNextFromPlayers = () => {
+  const handleNextFromText = () => {
     if (typeof window !== "undefined") {
       localStorage.setItem("foremost_customizer_colors", JSON.stringify(custom.colors));
       localStorage.setItem("foremost_customizer_pattern", custom.pattern);
@@ -49,7 +49,7 @@ export default function CustomizePage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch mb-8">
 
           {/* Left Side: Preview Card */}
-          <div className="lg:col-span-7 flex flex-col h-full lg:h-[650px] min-h-0 bg-white border border-gray-100 rounded-2xl">
+          <div className="lg:col-span-7 flex flex-col h-[350px] sm:h-[450px] lg:h-[650px] min-h-0 bg-white border border-gray-100 rounded-2xl">
             <KitPreview
               colors={custom.colors}
               pattern={custom.pattern}
@@ -76,6 +76,8 @@ export default function CustomizePage() {
                   onNext={custom.goToNextTab}
                   isSaved={custom.isSaved}
                   patterns={custom.schema.patterns}
+                  versionName={custom.versionName}
+                  onVersionNameChange={custom.setVersionName}
                 />
               )}
               {custom.activeTab === "colors" && (
@@ -103,6 +105,8 @@ export default function CustomizePage() {
                   isSaved={custom.isSaved}
                   uploadedFiles={custom.uploadedFiles}
                   onUploadFile={custom.addUploadedFile}
+                  versionName={custom.versionName}
+                  onVersionNameChange={custom.setVersionName}
                 />
               )}
               {custom.activeTab === "text" && (
@@ -110,8 +114,10 @@ export default function CustomizePage() {
                   playerText={custom.playerText}
                   onUpdateText={custom.updatePlayerText}
                   onSave={custom.saveConfiguration}
-                  onNext={custom.goToNextTab}
+                  onNext={handleNextFromText}
                   isSaved={custom.isSaved}
+                  versionName={custom.versionName}
+                  onVersionNameChange={custom.setVersionName}
                 />
               )}
               {custom.activeTab === "players" && (
@@ -125,7 +131,7 @@ export default function CustomizePage() {
                   versionName={custom.versionName}
                   onVersionNameChange={custom.setVersionName}
                   onSave={custom.saveConfiguration}
-                  onNext={handleNextFromPlayers}
+                  onNext={custom.goToNextTab}
                   isSaved={custom.isSaved}
                 />
               )}

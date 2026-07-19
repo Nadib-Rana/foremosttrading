@@ -72,8 +72,8 @@ export function TabColors({
                   <button
                     onClick={() => toggleLock(part.id)}
                     className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${isLocked
-                        ? "bg-red-50 border-red-200 text-red-500"
-                        : "bg-white border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+                      ? "bg-red-50 border-red-200 text-red-500"
+                      : "bg-white border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50"
                       }`}
                     title={isLocked ? "Unlock edits" : "Lock edits"}
                   >
@@ -83,8 +83,8 @@ export function TabColors({
                   <button
                     onClick={() => toggleVisibility(part.id)}
                     className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${!isVisible
-                        ? "bg-amber-50 border-amber-200 text-amber-500"
-                        : "bg-white border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+                      ? "bg-amber-50 border-amber-200 text-amber-500"
+                      : "bg-white border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50"
                       }`}
                     title={isVisible ? "Hide part" : "Show part"}
                   >
@@ -104,8 +104,8 @@ export function TabColors({
                         onClick={() => onChangeColor(part.id, swatch.hex)}
                         style={{ backgroundColor: swatch.hex }}
                         className={`w-6 h-6 rounded-full border cursor-pointer transition-all hover:scale-110 shadow-xs ${isActive
-                            ? "border-[#F97316] ring-2 ring-[#F97316]/30 scale-105"
-                            : "border-gray-200 hover:border-gray-400"
+                          ? "border-[#F97316] ring-2 ring-[#F97316]/30 scale-105"
+                          : "border-gray-200 hover:border-gray-400"
                           }`}
                         title={swatch.name}
                         aria-label={`Select ${swatch.name}`}
@@ -132,25 +132,75 @@ export function TabColors({
       </div>
 
       {/* Action Footer */}
-      <div className="pt-4 flex flex-col gap-3 mt-auto bg-gray-50 sticky bottom-0 z-20 flex-shrink-0">
-        <div className="flex gap-3 items-stretch">
+      <div className="sticky bottom-0 z-20 mt-auto bg-gray-50 pt-4 flex-shrink-0">
+        <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
             value={versionName}
             onChange={(e) => onVersionNameChange(e.target.value)}
-            className="flex-1 h-11 px-4 bg-[#E2E8F0] border-0 rounded-lg text-xs font-bold text-gray-700 focus:outline-none placeholder-gray-500"
             placeholder="Version Name"
+            className="
+        min-w-0
+        flex-1
+        h-11
+        sm:h-12
+        w-full
+        rounded-lg
+        border-0
+        bg-[#E2E8F0]
+        px-4
+        text-sm
+        sm:text-sm
+        font-semibold
+        text-gray-700
+        placeholder:text-gray-500
+        focus:outline-none
+        focus:ring-2
+        focus:ring-orange-400
+      "
           />
+
           <Button
             onClick={onSave}
-            className="bg-black hover:bg-neutral-800 text-white font-bold text-xs uppercase h-11 px-5 rounded-lg border-0 cursor-pointer flex-shrink-0"
+            className="
+        h-11
+        sm:h-12
+        w-full
+        sm:w-auto
+        sm:min-w-[140px]
+        px-5
+        rounded-lg
+        bg-black
+        text-white
+        text-sm
+        font-bold
+        uppercase
+        hover:bg-neutral-800
+        flex-shrink-0
+      "
           >
             {isSaved ? "Saved!" : "Save Design"}
           </Button>
         </div>
+
         <Button
           onClick={onNext}
-          className="w-full bg-[#EF892A] hover:bg-[#EA580C] text-white h-11 text-sm font-bold uppercase tracking-wider cursor-pointer shadow-sm rounded-lg border-0 flex items-center justify-center"
+          className="
+      mt-3
+      h-11
+      sm:h-12
+      w-full
+      rounded-lg
+      bg-[#EF892A]
+      text-white
+      text-sm
+      sm:text-base
+      font-bold
+      uppercase
+      tracking-wide
+      shadow-sm
+      hover:bg-[#EA580C]
+    "
         >
           Next
         </Button>

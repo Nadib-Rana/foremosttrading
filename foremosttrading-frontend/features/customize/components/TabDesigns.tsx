@@ -12,6 +12,8 @@ interface TabDesignsProps {
   onNext: () => void;
   isSaved: boolean;
   patterns: { id: string; label: string; image: string }[];
+  versionName: string;
+  onVersionNameChange: (name: string) => void;
 }
 
 export function TabDesigns({
@@ -21,6 +23,8 @@ export function TabDesigns({
   onNext,
   isSaved,
   patterns,
+  versionName,
+  onVersionNameChange,
 }: TabDesignsProps) {
   return (
     <div className="flex flex-col h-full min-h-0 justify-between">
@@ -55,21 +59,75 @@ export function TabDesigns({
       </div>
 
       {/* Action Footer */}
-      <div className="pt-4 flex flex-col gap-3 mt-auto bg-gray-50 sticky bottom-0 z-20 flex-shrink-0">
-        <div className="flex gap-3 items-stretch">
-          <div className="flex-1 h-11 flex items-center px-4 bg-[#E2E8F0] rounded-lg text-xs font-bold text-gray-700 select-none">
-            {isSaved ? "Saved Successfully!" : "Player version 1"}
-          </div>
+      <div className="sticky bottom-0 z-20 mt-auto bg-gray-50 pt-4 flex-shrink-0">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            value={versionName}
+            onChange={(e) => onVersionNameChange(e.target.value)}
+            placeholder="Version Name"
+            className="
+        min-w-0
+        flex-1
+        h-11
+        sm:h-12
+        w-full
+        rounded-lg
+        border-0
+        bg-[#E2E8F0]
+        px-4
+        text-sm
+        sm:text-sm
+        font-semibold
+        text-gray-700
+        placeholder:text-gray-500
+        focus:outline-none
+        focus:ring-2
+        focus:ring-orange-400
+      "
+          />
+
           <Button
             onClick={onSave}
-            className="bg-black hover:bg-neutral-800 text-white font-bold text-xs uppercase h-11 px-5 rounded-lg border-0 cursor-pointer flex-shrink-0"
+            className="
+        h-11
+        sm:h-12
+        w-full
+        sm:w-auto
+        sm:min-w-[140px]
+        px-5
+        rounded-lg
+        bg-black
+        text-white
+        text-sm
+        font-bold
+        uppercase
+        hover:bg-neutral-800
+        flex-shrink-0
+      "
           >
             {isSaved ? "Saved!" : "Save Design"}
           </Button>
         </div>
+
         <Button
           onClick={onNext}
-          className="w-full bg-[#EF892A] hover:bg-[#EA580C] text-white h-11 text-sm font-bold uppercase tracking-wider cursor-pointer shadow-sm rounded-lg border-0 flex items-center justify-center"
+          className="
+      mt-3
+      h-11
+      sm:h-12
+      w-full
+      rounded-lg
+      bg-[#EF892A]
+      text-white
+      text-sm
+      sm:text-base
+      font-bold
+      uppercase
+      tracking-wide
+      shadow-sm
+      hover:bg-[#EA580C]
+    "
         >
           Next
         </Button>

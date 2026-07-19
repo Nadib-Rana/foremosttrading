@@ -13,7 +13,7 @@ export const SOCCER_JERSEY_SCHEMA: ProductSchema = {
     { id: "borders", label: "Borders & Accents", defaultColor: "#D81920" },
   ],
   patterns: DESIGN_PATTERNS,
-  supportedTabs: ["elements", "colors", "designs", "text", "players"],
+  supportedTabs: ["colors", "designs", "elements", "players", "text"],
   defaultColors: {
     jerseyBody: "#D81920",
     pantBody: "#111111",
