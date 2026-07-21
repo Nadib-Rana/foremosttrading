@@ -48,8 +48,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   if (!isMounted || isFetching || (token && !data && !error)) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>
+      <div suppressHydrationWarning className="flex h-screen w-full items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div suppressHydrationWarning className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>
       </div>
     );
   }

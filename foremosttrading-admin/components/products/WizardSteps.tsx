@@ -285,11 +285,18 @@ export function SvgUploadStep({ formData, onChange }: Omit<StepProps, 'templates
           type: l.layerType.charAt(0) + l.layerType.slice(1).toLowerCase(), // FILL→Fill
           defaultColor: l.defaultColor ?? "#FFFFFF",
           parentGroupId: l.parentGroupId ?? null,
+          fill: l.fill ?? null,
+          stroke: l.stroke ?? null,
+          strokeWidth: l.strokeWidth ?? null,
+          opacity: l.opacity ?? null,
+          transform: l.transform ?? null,
           visible: true,
           locked: false,
           editable: true,
           required: l.layerType !== "GROUP",
         })),
+        debugFrontendReceived: payload.layers?.length ?? 0,
+        debugBackendDetected: payload.debugBackendDetected ?? 0,
       });
     } catch (err: any) {
       setError(err?.message || "SVG upload failed. Please try again.");
@@ -384,7 +391,11 @@ export function LayerMappingStep({ formData, onChange }: Omit<StepProps, 'templa
             <thead>
               <tr className="border-b bg-secondary/35 text-muted-foreground font-semibold">
                 <th className="p-2.5">Layer Name</th>
+                <th className="p-2.5">Element ID</th>
                 <th className="p-2.5">Type</th>
+                <th className="p-2.5">Fill</th>
+                <th className="p-2.5">Stroke</th>
+                <th className="p-2.5">Opacity</th>
                 <th className="p-2.5">Default Color</th>
                 <th className="p-2.5 text-center">Editable</th>
                 <th className="p-2.5 text-center">Required</th>
@@ -394,8 +405,38 @@ export function LayerMappingStep({ formData, onChange }: Omit<StepProps, 'templa
             <tbody className="divide-y divide-border">
               {(formData.layers || []).map((layer: any, idx: number) => (
                 <tr key={idx} className="hover:bg-muted/30">
-                  <td className="p-2 font-bold text-foreground">{layer.name}</td>
-                  <td className="p-2 text-muted-foreground">{layer.type}</td>
+                  <td className="p-2 font-bold text-foreground max-w-[100px] truncate" title={layer.name}>{layer.name}</td>
+                  <td className="p-2 font-mono text-[9px] text-muted-foreground max-w-[80px] truncate" title={layer.elementId}>{layer.elementId}</td>
+                  <td className="p-2">
+                    <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
+                      layer.type === 'Fill' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                      layer.type === 'Stroke' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' :
+                      layer.type === 'Group' ? 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' :
+                      layer.type === 'Text' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                      'bg-orange-100 text-orange-700'
+                    }`}>{layer.type}</span>
+                  </td>
+                  <td className="p-2">
+                    {layer.fill && layer.fill !== 'none' ? (
+                      <div className="flex items-center gap-1.5">
+                        {layer.fill.startsWith('#') && (
+                          <div className="w-3 h-3 rounded-sm border border-border" style={{ background: layer.fill }} />
+                        )}
+                        <span className="font-mono text-[9px] truncate max-w-[50px]">{layer.fill}</span>
+                      </div>
+                    ) : <span className="text-muted-foreground/50 text-[9px]">—</span>}
+                  </td>
+                  <td className="p-2">
+                    {layer.stroke && layer.stroke !== 'none' ? (
+                      <div className="flex items-center gap-1.5">
+                        {layer.stroke.startsWith('#') && (
+                          <div className="w-3 h-3 rounded-sm border-2 border-current" style={{ borderColor: layer.stroke, background: 'transparent' }} />
+                        )}
+                        <span className="font-mono text-[9px] truncate max-w-[50px]">{layer.stroke}</span>
+                      </div>
+                    ) : <span className="text-muted-foreground/50 text-[9px]">—</span>}
+                  </td>
+                  <td className="p-2 font-mono text-[9px]">{layer.opacity ?? '1'}</td>
                   <td className="p-2">
                     <div className="flex items-center gap-2">
                       <input 
@@ -437,6 +478,14 @@ export function LayerMappingStep({ formData, onChange }: Omit<StepProps, 'templa
           </table>
         </div>
       )}
+
+      {/* DEBUG UI */}
+      <div className="p-4 mt-4 bg-muted/50 rounded-lg border border-border font-mono text-xs space-y-1">
+        <p><strong>Backend detected:</strong> {formData.debugBackendDetected ?? 0} layers</p>
+        <p><strong>Frontend received:</strong> {formData.debugFrontendReceived ?? 0} layers</p>
+        <p><strong>Frontend state:</strong> {formData.layers?.length ?? 0} layers</p>
+        <p><strong>Rendered:</strong> {formData.layers?.length ?? 0} layers</p>
+      </div>
     </div>
   );
 }

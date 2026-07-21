@@ -388,7 +388,7 @@ export const mockDb = {
         category: p.category?.name?.toUpperCase() || 'FOOTBALL',
         basePrice: Number(p.basePrice),
         description: p.description || '',
-        images: p.images?.map((img: any) => img.url) || ['https://images.unsplash.com/photo-1580087443864-44bfa286377e?w=500'],
+        images: p.images?.map((img: any) => img.imageUrl) || ['https://images.unsplash.com/photo-1580087443864-44bfa286377e?w=500'],
         isCustomizable: p.isCustomizable,
         isActive: p.isActive,
         createdAt: p.createdAt,
@@ -409,11 +409,6 @@ export const mockDb = {
   },
 
   saveProductAsync: async (product: Omit<MockProduct, "id" | "createdAt">): Promise<MockProduct> => {
-    const catsRes = await mockDb.fetchApi('/categories');
-    const dbCats = catsRes.data || [];
-    const cat = dbCats.find((c: any) => c.name.toUpperCase() === product.category.toUpperCase()) || dbCats[0];
-    const categoryId = cat ? cat.id : undefined;
-
     const payload: Record<string, any> = {
       name: product.name,
       slug: product.slug || product.name.toLowerCase().replace(/ /g, '-'),
@@ -421,10 +416,14 @@ export const mockDb = {
       basePrice: Number(product.basePrice),
       isCustomizable: product.isCustomizable !== false,
       isActive: product.isActive !== false,
-      categoryId,
-      templateId: (product as any).templateId,
-      images: product.images?.map((url: string) => ({ url })) || [],
+      category: product.category,
+      images: product.images || [],
     };
+
+    const templateId = (product as any).templateId;
+    if (templateId && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(templateId)) {
+      payload.templateId = templateId;
+    }
 
     // Include uploadId so the backend links the staged SVG layers to the product
     const uploadId = (product as any).uploadId;
@@ -447,7 +446,8 @@ export const mockDb = {
       basePrice: updates.basePrice ? Number(updates.basePrice) : undefined,
       isCustomizable: updates.isCustomizable,
       isActive: updates.isActive,
-      images: updates.images?.map((url: string) => ({ url })) || undefined,
+      images: updates.images || undefined,
+      category: updates.category || undefined,
     };
     const res = await mockDb.fetchApi(`/admin/products/${id}`, {
       method: 'PUT',
