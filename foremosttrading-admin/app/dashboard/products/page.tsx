@@ -36,8 +36,15 @@ export default function ProductsPage() {
 
   useEffect(() => {
     mockDb.initialize();
-    setProducts(mockDb.getProducts());
-    setMounted(true);
+    mockDb.getProductsAsync()
+      .then(fetched => {
+        setProducts(fetched);
+        setMounted(true);
+      })
+      .catch(err => {
+        console.error(err);
+        setMounted(true);
+      });
   }, []);
 
   if (!mounted) {
@@ -48,14 +55,15 @@ export default function ProductsPage() {
     );
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this product?")) {
-      mockDb.deleteProduct(id);
-      setProducts(mockDb.getProducts());
+      await mockDb.deleteProductAsync(id);
+      const updated = await mockDb.getProductsAsync();
+      setProducts(updated);
     }
   };
 
-  const handleDuplicate = (product: MockProduct) => {
+  const handleDuplicate = async (product: MockProduct) => {
     const duplicateProduct = {
       name: `${product.name} (Copy)`,
       slug: `${product.slug}-copy`,
@@ -67,13 +75,15 @@ export default function ProductsPage() {
       isActive: product.isActive,
       shapes: product.shapes
     };
-    mockDb.saveProduct(duplicateProduct);
-    setProducts(mockDb.getProducts());
+    await mockDb.saveProductAsync(duplicateProduct);
+    const updated = await mockDb.getProductsAsync();
+    setProducts(updated);
   };
 
-  const handleToggleActive = (id: string, currentStatus: boolean) => {
-    mockDb.updateProduct(id, { isActive: !currentStatus });
-    setProducts(mockDb.getProducts());
+  const handleToggleActive = async (id: string, currentStatus: boolean) => {
+    await mockDb.updateProductAsync(id, { isActive: !currentStatus });
+    const updated = await mockDb.getProductsAsync();
+    setProducts(updated);
   };
 
   // Filter products

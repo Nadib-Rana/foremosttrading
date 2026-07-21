@@ -20,6 +20,8 @@ interface CartDrawerProps {
   quantity: number;
 }
 
+import { api } from "@/services/apiService";
+
 export function CartDrawer({
   isOpen,
   onClose,
@@ -46,7 +48,67 @@ export function CartDrawer({
     }).format(val);
   };
 
+  const handleConfirmCheckout = async (): Promise<string> => {
+    const product = await api.getProductBySlug("soccer-jersey");
+    
+    // Add item to cart
+    await api.addToCart({
+      productId: product.id,
+      quantity,
+      specifications: {
+        colors,
+        pattern,
+        playerText,
+        materials: {
+          bodyMaterial,
+          sleevesMaterial,
+          frontClosure,
+        },
+        roster: [
+          { name: playerText.name, number: playerText.number, size: "M" }
+        ]
+      }
+    });
+
+    // Get or create shipping address
+    let addresses = [];
+    try {
+      addresses = await api.getAddresses();
+    } catch (err) {}
+
+    let addressId;
+    if (addresses && addresses.length > 0) {
+      addressId = addresses[0].id;
+    } else {
+      const newAddress = await api.createAddress({
+        street: "221B Baker Street",
+        city: "Marylebone",
+        state: "London",
+        postalCode: "NW1 6XE",
+        country: "United Kingdom",
+      });
+      addressId = newAddress.id;
+    }
+
+    // Place order
+    const order = await api.placeOrder({
+      shippingAddressId: addressId,
+      signatureUrl: `Signature of ${playerText.name}`,
+    });
+
+    // Pay order to advance status to print queue
+    await api.payOrder(order.id);
+    
+    return order.orderNumber;
+  };
+
   const handleCheckout = () => {
+    const token = localStorage.getItem("ft_auth_token");
+    if (!token) {
+      alert("You must be logged in to proceed to checkout!");
+      window.location.href = "/login";
+      return;
+    }
     setIsSignatureOpen(true);
   };
 
@@ -126,6 +188,7 @@ export function CartDrawer({
         }}
         quantity={quantity}
         subtotal={subtotal}
+        onConfirm={handleConfirmCheckout}
       />
     </>
   );

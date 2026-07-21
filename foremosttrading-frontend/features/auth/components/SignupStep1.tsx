@@ -7,7 +7,7 @@ import { LogoMark } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 
 interface SignupStep1Props {
-  onNext: () => void;
+  onNext: (data: any) => void;
 }
 
 export function SignupStep1({ onNext }: SignupStep1Props) {
@@ -21,7 +21,13 @@ export function SignupStep1({ onNext }: SignupStep1Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onNext();
+    onNext({
+      email,
+      password,
+      firstName,
+      lastName,
+      phoneNumber: `${phonePrefix}${phoneNumber}`,
+    });
   };
 
   return (

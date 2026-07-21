@@ -6,7 +6,7 @@ import { LogoMark } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 
 interface SignupStep3Props {
-  onFinish: () => void;
+  onFinish: (data: any) => void;
 }
 
 export function SignupStep3({ onFinish }: SignupStep3Props) {
@@ -30,7 +30,11 @@ export function SignupStep3({ onFinish }: SignupStep3Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onFinish();
+    onFinish({
+      dob,
+      gender,
+      address,
+    });
   };
 
   return (

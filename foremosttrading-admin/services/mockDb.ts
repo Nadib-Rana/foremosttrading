@@ -354,7 +354,224 @@ export const mockDb = {
     }
   },
 
-  // Products
+  // HTTP Fetch Helper
+  fetchApi: async (url: string, options: RequestInit = {}) => {
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(options.headers as any),
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    const res = await fetch(`${API_BASE_URL}${url}`, {
+      ...options,
+      headers,
+    });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.message || 'API request failed');
+    }
+    return res.json();
+  },
+
+  // Async Products CRUD
+  getProductsAsync: async (): Promise<MockProduct[]> => {
+    try {
+      const res = await mockDb.fetchApi('/admin/products');
+      const products = res.data.products || [];
+      const mapped = products.map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        category: p.category?.name?.toUpperCase() || 'FOOTBALL',
+        basePrice: Number(p.basePrice),
+        description: p.description || '',
+        images: p.images?.map((img: any) => img.url) || ['https://images.unsplash.com/photo-1580087443864-44bfa286377e?w=500'],
+        isCustomizable: p.isCustomizable,
+        isActive: p.isActive,
+        createdAt: p.createdAt,
+      }));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("ft_products", JSON.stringify(mapped));
+      }
+      return mapped;
+    } catch (e) {
+      console.error("Products sync failed:", e);
+      return mockDb.getProducts();
+    }
+  },
+
+  getProductByIdAsync: async (id: string): Promise<MockProduct | undefined> => {
+    const products = await mockDb.getProductsAsync();
+    return products.find(p => p.id === id);
+  },
+
+  saveProductAsync: async (product: Omit<MockProduct, "id" | "createdAt">): Promise<MockProduct> => {
+    const catsRes = await mockDb.fetchApi('/categories');
+    const dbCats = catsRes.data || [];
+    const cat = dbCats.find((c: any) => c.name.toUpperCase() === product.category.toUpperCase()) || dbCats[0];
+    const categoryId = cat ? cat.id : undefined;
+
+    const payload: Record<string, any> = {
+      name: product.name,
+      slug: product.slug || product.name.toLowerCase().replace(/ /g, '-'),
+      description: product.description,
+      basePrice: Number(product.basePrice),
+      isCustomizable: product.isCustomizable !== false,
+      isActive: product.isActive !== false,
+      categoryId,
+      templateId: (product as any).templateId,
+      images: product.images?.map((url: string) => ({ url })) || [],
+    };
+
+    // Include uploadId so the backend links the staged SVG layers to the product
+    const uploadId = (product as any).uploadId;
+    if (uploadId) {
+      payload.uploadId = uploadId;
+    }
+
+    const res = await mockDb.fetchApi('/admin/products', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    await mockDb.getProductsAsync();
+    return res.data;
+  },
+
+  updateProductAsync: async (id: string, updates: Partial<MockProduct>): Promise<MockProduct> => {
+    const payload = {
+      name: updates.name,
+      description: updates.description,
+      basePrice: updates.basePrice ? Number(updates.basePrice) : undefined,
+      isCustomizable: updates.isCustomizable,
+      isActive: updates.isActive,
+      images: updates.images?.map((url: string) => ({ url })) || undefined,
+    };
+    const res = await mockDb.fetchApi(`/admin/products/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+    await mockDb.getProductsAsync();
+    return res.data;
+  },
+
+  deleteProductAsync: async (id: string): Promise<boolean> => {
+    await mockDb.fetchApi(`/admin/products/${id}`, {
+      method: 'DELETE',
+    });
+    await mockDb.getProductsAsync();
+    return true;
+  },
+
+  // Async Categories CRUD
+  getCategoriesAsync: async (): Promise<MockCategory[]> => {
+    try {
+      const res = await mockDb.fetchApi('/categories');
+      const cats = res.data || [];
+      const mapped = cats.map((c: any) => ({
+        id: c.id,
+        name: c.name,
+        slug: c.slug,
+        description: c.description || '',
+        productCount: c._count?.products || 0,
+      }));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("ft_categories", JSON.stringify(mapped));
+      }
+      return mapped;
+    } catch (e) {
+      console.error("Categories sync failed:", e);
+      return mockDb.getCategories();
+    }
+  },
+
+  saveCategoryAsync: async (category: Omit<MockCategory, "id" | "productCount">): Promise<MockCategory> => {
+    const res = await mockDb.fetchApi('/categories', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: category.name,
+        slug: category.slug || category.name.toLowerCase().replace(/ /g, '-'),
+        description: category.description,
+      }),
+    });
+    await mockDb.getCategoriesAsync();
+    return res.data;
+  },
+
+  deleteCategoryAsync: async (id: string): Promise<boolean> => {
+    await mockDb.fetchApi(`/categories/${id}`, {
+      method: 'DELETE',
+    });
+    await mockDb.getCategoriesAsync();
+    return true;
+  },
+
+  // Async Orders CRUD
+  getOrdersAsync: async (): Promise<MockOrder[]> => {
+    try {
+      const res = await mockDb.fetchApi('/admin/orders');
+      const orders = res.data || [];
+      const mapped = orders.map((o: any) => ({
+        id: o.id,
+        orderNumber: o.orderNumber,
+        customerName: o.customer ? `${o.customer.firstName} ${o.customer.lastName}` : 'Guest Customer',
+        customerEmail: o.customer?.user?.email || '',
+        items: o.items?.map((item: any) => ({
+          productId: item.productId,
+          productName: item.product?.name || 'Custom Kit',
+          quantity: item.quantity,
+          price: Number(item.unitPrice),
+          customized: !!item.savedDesignId,
+        })) || [],
+        total: Number(o.totalAmount),
+        status: o.orderStatus === 'PENDING' ? 'Pending'
+              : o.orderStatus === 'PROCESSING' ? 'Processing'
+              : o.orderStatus === 'PRINTING' ? 'Printing'
+              : o.orderStatus === 'SHIPPING' ? 'Shipping'
+              : 'Completed',
+        paymentStatus: o.paymentStatus === 'PAID' ? 'Paid' : 'Unpaid',
+        createdAt: o.createdAt,
+        shippingAddress: {
+          street: o.shippingAddress?.street || '',
+          city: o.shippingAddress?.city || '',
+          state: o.shippingAddress?.state || '',
+          zip: o.shippingAddress?.postalCode || '',
+          country: o.shippingAddress?.country || '',
+        },
+      }));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("ft_orders", JSON.stringify(mapped));
+      }
+      return mapped;
+    } catch (e) {
+      console.error("Orders sync failed:", e);
+      return mockDb.getOrders();
+    }
+  },
+
+  getOrderByIdAsync: async (id: string): Promise<MockOrder | undefined> => {
+    const orders = await mockDb.getOrdersAsync();
+    return orders.find(o => o.id === id);
+  },
+
+  updateOrderStatusAsync: async (id: string, status: MockOrder["status"]): Promise<any> => {
+    let dbStatus = 'PENDING';
+    if (status === 'Processing') dbStatus = 'PROCESSING';
+    else if (status === 'Printing') dbStatus = 'PRINTING';
+    else if (status === 'Shipping') dbStatus = 'SHIPPING';
+    else if (status === 'Completed') dbStatus = 'DELIVERED';
+
+    const res = await mockDb.fetchApi(`/admin/orders/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: dbStatus }),
+    });
+    await mockDb.getOrdersAsync();
+    return res.data;
+  },
+
+  // Synchronous fallbacks for backwards compatibility
   getProducts: (): MockProduct[] => {
     mockDb.initialize();
     if (typeof window === "undefined") return DEFAULT_PRODUCTS;
@@ -396,7 +613,6 @@ export const mockDb = {
     return products.length !== filtered.length;
   },
 
-  // Categories
   getCategories: (): MockCategory[] => {
     mockDb.initialize();
     if (typeof window === "undefined") return DEFAULT_CATEGORIES;
@@ -424,7 +640,6 @@ export const mockDb = {
     return categories.length !== filtered.length;
   },
 
-  // Templates
   getTemplates: (): MockTemplate[] => {
     mockDb.initialize();
     if (typeof window === "undefined") return DEFAULT_TEMPLATES;
@@ -451,7 +666,6 @@ export const mockDb = {
     return templates.length !== filtered.length;
   },
 
-  // Orders
   getOrders: (): MockOrder[] => {
     mockDb.initialize();
     if (typeof window === "undefined") return DEFAULT_ORDERS;
@@ -471,14 +685,12 @@ export const mockDb = {
     return orders[idx];
   },
 
-  // Customers
   getCustomers: (): MockCustomer[] => {
     mockDb.initialize();
     if (typeof window === "undefined") return DEFAULT_CUSTOMERS;
     return JSON.parse(localStorage.getItem("ft_customers") || "[]");
   },
 
-  // Coupons
   getCoupons: () => {
     mockDb.initialize();
     if (typeof window === "undefined") return DEFAULT_COUPONS;
@@ -502,7 +714,6 @@ export const mockDb = {
     return coupons.length !== filtered.length;
   },
 
-  // CMS
   getCms: () => {
     mockDb.initialize();
     if (typeof window === "undefined") return DEFAULT_CMS;
@@ -527,7 +738,6 @@ export const mockDb = {
     return newPage;
   },
 
-  // Media
   getMedia: () => {
     mockDb.initialize();
     if (typeof window === "undefined") return DEFAULT_MEDIA;

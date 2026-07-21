@@ -5,7 +5,7 @@ import { LogoMark } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 
 interface SignupStep2Props {
-  onSubmit: () => void;
+  onSubmit: (otpToken: string) => void;
 }
 
 export function SignupStep2({ onSubmit }: SignupStep2Props) {
@@ -35,7 +35,7 @@ export function SignupStep2({ onSubmit }: SignupStep2Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit();
+    onSubmit(otp.join(""));
   };
 
   return (

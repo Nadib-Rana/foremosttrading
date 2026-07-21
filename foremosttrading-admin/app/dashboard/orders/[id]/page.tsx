@@ -26,8 +26,15 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
 
   useEffect(() => {
     mockDb.initialize();
-    setOrder(mockDb.getOrderById(resolvedParams.id));
-    setMounted(true);
+    mockDb.getOrderByIdAsync(resolvedParams.id)
+      .then(fetched => {
+        setOrder(fetched);
+        setMounted(true);
+      })
+      .catch(err => {
+        console.error(err);
+        setMounted(true);
+      });
   }, [resolvedParams.id]);
 
   if (!mounted) {
@@ -46,9 +53,10 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
     );
   }
 
-  const handleStatusProgress = (nextStatus: MockOrder["status"]) => {
-    mockDb.updateOrderStatus(order.id, nextStatus);
-    setOrder(mockDb.getOrderById(order.id));
+  const handleStatusProgress = async (nextStatus: MockOrder["status"]) => {
+    await mockDb.updateOrderStatusAsync(order.id, nextStatus);
+    const updated = await mockDb.getOrderByIdAsync(order.id);
+    setOrder(updated);
   };
 
   const handlePrint = () => {

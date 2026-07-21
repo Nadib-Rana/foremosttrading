@@ -28,10 +28,18 @@ export default function DashboardOverviewPage() {
 
   useEffect(() => {
     mockDb.initialize();
-    setProducts(mockDb.getProducts());
-    setOrders(mockDb.getOrders());
-    setCustomersCount(mockDb.getCustomers().length);
-    setMounted(true);
+    Promise.all([
+      mockDb.getProductsAsync(),
+      mockDb.getOrdersAsync()
+    ]).then(([fetchedProducts, fetchedOrders]) => {
+      setProducts(fetchedProducts);
+      setOrders(fetchedOrders);
+      setCustomersCount(mockDb.getCustomers().length);
+      setMounted(true);
+    }).catch(err => {
+      console.error(err);
+      setMounted(true);
+    });
   }, []);
 
   if (!mounted) {

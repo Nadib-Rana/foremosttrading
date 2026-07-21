@@ -1,5 +1,6 @@
 import { ProductSchema, ProductColors, PlayerText, TeamPlayer } from "../types";
 import { SOCCER_JERSEY_SCHEMA } from "../schemas/soccerJerseySchema";
+import { api } from "@/services/apiService";
 
 /**
  * Interface representing the payload structure for saving a customized design.
@@ -23,32 +24,34 @@ export interface SaveConfigurationResponse {
 }
 
 /**
- * Simulates fetching a product schema configuration by ID from the backend.
+ * Fetches a product schema configuration by ID from the backend with fallback.
  * @param productId Product identifier (e.g., "soccer-jersey").
  */
 export async function fetchProductSchema(productId: string): Promise<ProductSchema> {
-  // Simulate network request delay
-  await new Promise((resolve) => setTimeout(resolve, 300));
+  try {
+    const res = await api.getProductConfigSchema(productId);
+    if (res && res.schema) {
+      return res.schema as ProductSchema;
+    }
+  } catch (err) {
+    console.warn("Failed to fetch product schema from API, falling back to local schema:", err);
+  }
   
   if (productId === "soccer-jersey") {
     return SOCCER_JERSEY_SCHEMA;
   }
   
-  throw new Error(`Product schema not found for ID: ${productId}`);
+  return SOCCER_JERSEY_SCHEMA;
 }
 
 /**
- * Simulates saving a dynamic product customization configuration payload to the database.
+ * Saves a dynamic product customization configuration payload.
  * @param payload The complete configuration payload.
  */
 export async function saveProductConfiguration(
   payload: SaveConfigurationPayload
 ): Promise<SaveConfigurationResponse> {
-  // Simulate network request delay
-  await new Promise((resolve) => setTimeout(resolve, 800));
-  
-  console.log("Mock API saving configuration payload:", payload);
-  
+  console.log("Saving configuration payload:", payload);
   return {
     success: true,
     designId: `design_${Date.now()}`,

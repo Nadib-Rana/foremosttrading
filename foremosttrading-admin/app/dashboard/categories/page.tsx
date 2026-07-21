@@ -19,8 +19,15 @@ export default function CategoriesPage() {
 
   useEffect(() => {
     mockDb.initialize();
-    setCategories(mockDb.getCategories());
-    setMounted(true);
+    mockDb.getCategoriesAsync()
+      .then(fetched => {
+        setCategories(fetched);
+        setMounted(true);
+      })
+      .catch(err => {
+        console.error(err);
+        setMounted(true);
+      });
   }, []);
 
   if (!mounted) {
@@ -31,24 +38,26 @@ export default function CategoriesPage() {
     );
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !slug) {
       setError("Name and slug are required.");
       return;
     }
-    mockDb.saveCategory({ name, slug, description });
-    setCategories(mockDb.getCategories());
+    await mockDb.saveCategoryAsync({ name, slug, description });
+    const updated = await mockDb.getCategoriesAsync();
+    setCategories(updated);
     setName("");
     setSlug("");
     setDescription("");
     setError("");
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this category?")) {
-      mockDb.deleteCategory(id);
-      setCategories(mockDb.getCategories());
+      await mockDb.deleteCategoryAsync(id);
+      const updated = await mockDb.getCategoriesAsync();
+      setCategories(updated);
     }
   };
 

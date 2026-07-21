@@ -42,11 +42,13 @@ export function WizardForm() {
     category: "FOOTBALL",
     basePrice: 149.99,
     description: "",
-    images: ["https://images.unsplash.com/photo-1580087443864-44bfa286377e?w=500"],
+    images: [],
     templateId: "temp-1",
     tempName: "Classic Striped Jersey Template",
     svgUploaded: false,
     svgName: "",
+    svgUrl: "",
+    uploadId: "",
     layers: [] as any[],
     allowedColors: ["#FF3B30", "#FF9500", "#FFCC00", "#4CD964", "#007AFF", "#000000", "#FFFFFF"],
     defaultFont: "Impact",
@@ -93,9 +95,9 @@ export function WizardForm() {
     }
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     try {
-      mockDb.saveProduct({
+      await mockDb.saveProductAsync({
         name: formData.name,
         slug: formData.slug,
         category: formData.category,
@@ -104,11 +106,14 @@ export function WizardForm() {
         images: formData.images,
         isCustomizable: formData.isCustomizable,
         isActive: formData.isActive,
-        shapes: formData.layers
+        templateId: formData.templateId,
+        svgUrl: formData.svgUrl,
+        uploadId: formData.uploadId,
+        shapes: formData.layers,
       });
       router.push("/dashboard/products");
     } catch (err: any) {
-      setError(err?.message || "Failed to save product to mock DB");
+      setError(err?.message || "Failed to save product");
     }
   };
 

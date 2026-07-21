@@ -92,13 +92,57 @@ export function BasicInfoStep({ formData, onChange }: Omit<StepProps, 'templates
 
 // STEP 2: Product Images
 export function ImagesStep({ formData, onChange }: Omit<StepProps, 'templates'>) {
-  const handleUrlAdd = () => {
-    const defaultImg = "https://images.unsplash.com/photo-1580087443864-44bfa286377e?w=500";
-    onChange({ images: [...(formData.images || []), defaultImg] });
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const fileInputRef = useState<HTMLInputElement | null>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Reset input so the same file can be re-selected if needed
+    e.target.value = "";
+
+    setUploading(true);
+    setUploadError("");
+
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
+      const formPayload = new FormData();
+      formPayload.append("file", file);
+
+      const res = await fetch(`${API_BASE_URL}/upload/admin/upload`, {
+        method: "POST",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          // Do NOT set Content-Type — browser sets it automatically with boundary for multipart
+        },
+        body: formPayload,
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData?.message || `Upload failed (${res.status})`);
+      }
+
+      const data = await res.json();
+      const uploadedUrl: string = data?.data?.url ?? data?.url;
+
+      if (!uploadedUrl) throw new Error("No URL returned from upload API");
+
+      onChange({ images: [...(formData.images || []), uploadedUrl] });
+    } catch (err: any) {
+      setUploadError(err?.message || "Image upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const removeImg = (idx: number) => {
     onChange({ images: formData.images.filter((_: any, i: number) => i !== idx) });
+    setUploadError("");
   };
 
   return (
@@ -119,16 +163,43 @@ export function ImagesStep({ formData, onChange }: Omit<StepProps, 'templates'>)
               </button>
             </div>
           ))}
-          <button 
-            type="button" 
-            onClick={handleUrlAdd}
-            className="h-20 w-20 rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center text-muted-foreground hover:bg-secondary/40 transition-colors"
+
+          {/* Hidden file input */}
+          <input
+            type="file"
+            id="img-upload-input"
+            accept="image/png,image/jpeg,image/webp,image/gif"
+            style={{ display: "none" }}
+            onChange={handleFileChange}
+          />
+
+          {/* Add Image trigger button */}
+          <button
+            type="button"
+            disabled={uploading}
+            onClick={() => document.getElementById("img-upload-input")?.click()}
+            className="h-20 w-20 rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center text-muted-foreground hover:bg-secondary/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Upload className="h-4 w-4" />
-            <span className="text-[9px] font-semibold mt-1">Add Image</span>
+            {uploading ? (
+              <span className="text-[9px] font-semibold animate-pulse">Uploading…</span>
+            ) : (
+              <>
+                <Upload className="h-4 w-4" />
+                <span className="text-[9px] font-semibold mt-1">Add Image</span>
+              </>
+            )}
           </button>
         </div>
-        <p className="text-[10px] text-muted-foreground">Select a primary image to display on your product card. Click 'Add Image' to import mock files.</p>
+
+        {uploadError && (
+          <p className="text-[10px] text-rose-600 font-semibold flex items-center gap-1">
+            <AlertCircle className="h-3 w-3 shrink-0" /> {uploadError}
+          </p>
+        )}
+
+        <p className="text-[10px] text-muted-foreground">
+          Select a product image (PNG, JPG, WebP). Images are uploaded to the server and linked to this product.
+        </p>
       </div>
     </div>
   );
@@ -165,22 +236,66 @@ export function TemplateStep({ formData, onChange, templates }: StepProps) {
 // STEP 4: Upload SVG Layout
 export function SvgUploadStep({ formData, onChange }: Omit<StepProps, 'templates'>) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const simulateSvgAnalysis = () => {
+  const handleSvgSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+
     setLoading(true);
-    setTimeout(() => {
-      onChange({ 
-        svgUploaded: true, 
-        svgName: "pro_striped_jersey.svg",
-        layers: [
-          { name: "Primary Collar", type: "Fill", visible: true, locked: false, defaultColor: "#FFFFFF", editable: true, required: true },
-          { name: "Sleeve Trim Left", type: "Fill", visible: true, locked: false, defaultColor: "#E2E2E2", editable: true, required: false },
-          { name: "Body Stripes Panel", type: "Pattern/Fill", visible: true, locked: false, defaultColor: "#000000", editable: true, required: true },
-          { name: "Back Number Area", type: "Text/Layer", visible: true, locked: true, defaultColor: "#000000", editable: false, required: true }
-        ]
+    setError("");
+
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
+      const body = new FormData();
+      body.append("file", file);
+
+      const res = await fetch(`${API_BASE_URL}/upload/uploads/svg`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body,
       });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        // Unwrap NestJS standard error shape: { data: { message } } or { message }
+        const msg = err?.data?.message ?? err?.message ?? `Upload failed (${res.status})`;
+        throw new Error(Array.isArray(msg) ? msg.join(", ") : msg);
+      }
+
+      const json = await res.json();
+      // Unwrap ResponseStandardizationInterceptor envelope: { data: { uploadId, svgUrl, layers, metadata } }
+      const payload = json?.data ?? json;
+
+      if (!payload?.uploadId) throw new Error("No uploadId returned from backend.");
+      if (!payload?.layers) throw new Error("No layers returned from backend.");
+
+      onChange({
+        svgUploaded: true,
+        svgName: file.name,
+        svgUrl: payload.svgUrl,
+        uploadId: payload.uploadId,
+        layers: (payload.layers as any[]).map((l: any) => ({
+          // Normalise backend layer fields to the display format LayerMappingStep expects
+          elementId: l.elementId,
+          name: l.layerName,
+          type: l.layerType.charAt(0) + l.layerType.slice(1).toLowerCase(), // FILL→Fill
+          defaultColor: l.defaultColor ?? "#FFFFFF",
+          parentGroupId: l.parentGroupId ?? null,
+          visible: true,
+          locked: false,
+          editable: true,
+          required: l.layerType !== "GROUP",
+        })),
+      });
+    } catch (err: any) {
+      setError(err?.message || "SVG upload failed. Please try again.");
+    } finally {
       setLoading(false);
-    }, 1200);
+    }
   };
 
   return (
@@ -191,9 +306,11 @@ export function SvgUploadStep({ formData, onChange }: Omit<StepProps, 'templates
         {formData.svgUploaded ? (
           <div>
             <h4 className="text-xs font-bold text-emerald-600 flex items-center justify-center gap-1">
-              <Check className="h-4 w-4" /> SVG Uploaded & Mapped
+              <Check className="h-4 w-4" /> SVG Uploaded &amp; Parsed
             </h4>
-            <p className="text-[10px] text-muted-foreground mt-1">Successfully extracted 4 custom vector path layers from <span className="font-semibold">{formData.svgName}</span>.</p>
+            <p className="text-[10px] text-muted-foreground mt-1">
+              Backend detected <span className="font-semibold">{formData.layers?.length ?? 0}</span> layers in <span className="font-semibold">{formData.svgName}</span>.
+            </p>
           </div>
         ) : (
           <div>
@@ -201,16 +318,31 @@ export function SvgUploadStep({ formData, onChange }: Omit<StepProps, 'templates
             <p className="text-[10px] text-muted-foreground mt-1">Files should be structured with explicit color group IDs and paths.</p>
           </div>
         )}
-        <Button 
-          type="button" 
-          variant={formData.svgUploaded ? "outline" : "default"} 
+
+        <input
+          type="file"
+          id="svg-upload-input"
+          accept=".svg,image/svg+xml"
+          style={{ display: "none" }}
+          onChange={handleSvgSelect}
+        />
+
+        <Button
+          type="button"
+          variant={formData.svgUploaded ? "outline" : "default"}
           size="sm"
           className="mt-2 text-xs h-8"
           disabled={loading}
-          onClick={simulateSvgAnalysis}
+          onClick={() => document.getElementById("svg-upload-input")?.click()}
         >
-          {loading ? "Parsing Layers..." : formData.svgUploaded ? "Re-upload SVG" : "Select SVG File"}
+          {loading ? "Uploading & Parsing…" : formData.svgUploaded ? "Re-upload SVG" : "Select SVG File"}
         </Button>
+
+        {error && (
+          <p className="text-[10px] text-rose-600 font-semibold flex items-center gap-1">
+            <AlertCircle className="h-3 w-3 shrink-0" /> {error}
+          </p>
+        )}
       </div>
     </div>
   );

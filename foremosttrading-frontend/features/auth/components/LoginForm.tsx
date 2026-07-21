@@ -6,14 +6,25 @@ import { Eye, EyeOff } from "lucide-react";
 import { LogoMark } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 
+import { api } from "@/services/apiService";
+
 export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Logging in as: ${email}`);
+    setErrorMsg("");
+    try {
+      const res = await api.login({ email, password });
+      localStorage.setItem("ft_auth_token", res.accessToken);
+      localStorage.setItem("ft_user", JSON.stringify(res.user));
+      window.location.href = "/account";
+    } catch (err: any) {
+      setErrorMsg(err.message || "Invalid credentials. Please try again.");
+    }
   };
 
   return (
@@ -79,6 +90,12 @@ export function LoginForm() {
           </div>
         </div>
       </div>
+
+      {errorMsg && (
+        <div className="w-full text-center text-xs text-red-500 font-bold mt-2">
+          {errorMsg}
+        </div>
+      )}
 
       {/* Forgot Password Link */}
       <div className="w-full flex justify-end mt-2">

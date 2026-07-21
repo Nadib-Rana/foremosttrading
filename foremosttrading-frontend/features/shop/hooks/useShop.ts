@@ -2,13 +2,15 @@
 
 import { useState, useRef, useEffect } from "react";
 import { FilterCustomizable, SortOption } from "../types";
-import { MOCK_PRODUCTS, ITEMS_PER_PAGE } from "../constants";
+import { api } from "@/services/apiService";
+import { ITEMS_PER_PAGE } from "../constants";
 
 export function useShop() {
   const [filterCustomizable, setFilterCustomizable] = useState<FilterCustomizable>("all");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [currentPage, setCurrentPage] = useState<number>(2); // Start on page 2 to match Figma active bar indicator default state
   const [isLoading, setIsLoading] = useState(false);
+  const [products, setProducts] = useState<any[]>([]);
 
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
@@ -30,8 +32,32 @@ export function useShop() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Fetch products from backend
+  useEffect(() => {
+    setIsLoading(true);
+    api.getProducts()
+      .then(res => {
+        const mapped = (res.products || []).map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          slug: p.slug,
+          basePrice: Number(p.basePrice),
+          salePrice: Number(p.basePrice),
+          images: p.images?.map((img: any) => img.url) || ["https://images.unsplash.com/photo-1580087443864-44bfa286377e?w=500"],
+          isCustomizable: p.isCustomizable,
+          category: p.category?.name || "FOOTBALL",
+        }));
+        setProducts(mapped);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to load products from API:", err);
+        setIsLoading(false);
+      });
+  }, []);
+
   // Filter products
-  let filtered = MOCK_PRODUCTS.filter((product) => {
+  let filtered = products.filter((product) => {
     if (filterCustomizable === "customizable") {
       return product.isCustomizable;
     }

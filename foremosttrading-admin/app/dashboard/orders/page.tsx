@@ -17,8 +17,15 @@ export default function OrdersPage() {
 
   useEffect(() => {
     mockDb.initialize();
-    setOrders(mockDb.getOrders());
-    setMounted(true);
+    mockDb.getOrdersAsync()
+      .then(fetched => {
+        setOrders(fetched);
+        setMounted(true);
+      })
+      .catch(err => {
+        console.error(err);
+        setMounted(true);
+      });
   }, []);
 
   if (!mounted) {

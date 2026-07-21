@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { setUser, setLoading, logout } from "@/lib/store/slices/authSlice";
@@ -13,6 +14,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { token } = useAppSelector((state) => state.auth);
+
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const { data, error, isLoading: isFetching } = useGetMeQuery(undefined, {
     skip: !token, // Only fetch if token is present
@@ -40,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [data, error, dispatch, router]);
 
-  if (isFetching || (token && !data && !error)) {
+  if (!isMounted || isFetching || (token && !data && !error)) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>

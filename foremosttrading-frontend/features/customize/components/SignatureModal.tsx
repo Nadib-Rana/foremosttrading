@@ -10,6 +10,7 @@ interface SignatureModalProps {
   onSuccessClose: () => void;
   quantity: number;
   subtotal: number;
+  onConfirm: () => Promise<string>;
 }
 
 export function SignatureModal({
@@ -18,9 +19,13 @@ export function SignatureModal({
   onSuccessClose,
   quantity,
   subtotal,
+  onConfirm,
 }: SignatureModalProps) {
   const [isAgreed, setIsAgreed] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [orderNumber, setOrderNumber] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   // Helper to format currency
   const formatCurrency = (val: number) => {
@@ -36,18 +41,30 @@ export function SignatureModal({
   useEffect(() => {
     if (isOpen && !isSuccess) {
       setIsAgreed(false);
+      setErrorMsg("");
     }
   }, [isOpen, isSuccess]);
 
   // Complete checkout
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isAgreed) return;
-    setIsSuccess(true);
+    setIsSubmitting(true);
+    setErrorMsg("");
+    try {
+      const orderRef = await onConfirm();
+      setOrderNumber(orderRef);
+      setIsSuccess(true);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Failed to process custom checkout. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleFinish = () => {
     setIsSuccess(false);
     onSuccessClose();
+    window.location.href = "/account";
   };
 
   if (!isOpen) return null;
@@ -107,10 +124,17 @@ export function SignatureModal({
               </label>
             </div>
 
+            {errorMsg && (
+              <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-2.5 rounded-xl text-[10px] font-bold text-center">
+                {errorMsg}
+              </div>
+            )}
+
             {/* Bottom Actions */}
             <div className="flex gap-3 mt-8">
               <Button
                 variant="destructive"
+                disabled={isSubmitting}
                 onClick={onClose}
                 className="flex-1 py-5 rounded-xl text-[10px] font-bold tracking-wider text-center cursor-pointer shadow-3xs transition-colors border-0"
               >
@@ -118,12 +142,18 @@ export function SignatureModal({
               </Button>
               <Button
                 variant="default"
-                disabled={!isAgreed}
+                disabled={!isAgreed || isSubmitting}
                 onClick={handleSubmit}
                 className="flex-1 bg-[#EF892A] hover:bg-[#D97310] text-white py-5 rounded-xl text-[10px] font-bold tracking-wider text-center cursor-pointer shadow-sm transition-colors border-0 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-1.5"
               >
-                <Check className="w-4 h-4" />
-                Confirm Order
+                {isSubmitting ? (
+                  <span>Processing...</span>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4" />
+                    Confirm Order
+                  </>
+                )}
               </Button>
             </div>
           </div>
@@ -144,7 +174,7 @@ export function SignatureModal({
             <div className="bg-gray-50/50 border border-gray-150 rounded-2xl p-4 w-full mt-6 text-left text-xs flex flex-col gap-2 shadow-3xs select-text">
               <div className="flex justify-between items-center pb-2 border-b border-gray-150">
                 <span className="font-bold text-gray-500">Order ID:</span>
-                <span className="font-bold text-gray-800 font-mono">FT-{Math.floor(100000 + Math.random() * 900000)}</span>
+                <span className="font-bold text-gray-800 font-mono">{orderNumber}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="font-bold text-gray-500">Subtotal:</span>

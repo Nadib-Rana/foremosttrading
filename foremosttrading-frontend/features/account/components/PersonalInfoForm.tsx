@@ -1,23 +1,65 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Save, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { api } from "@/services/apiService";
 
 export function PersonalInfoForm() {
-  const [name, setName] = useState("Rodro Khan");
-  const [dob, setDob] = useState("2005-01-20");
-  const [gender, setGender] = useState("Male");
-  const [phone, setPhone] = useState("+620-12345678");
-  const [email, setEmail] = useState("abcd1234@gmail.com");
-  const [address, setAddress] = useState("221B Baker Street, Marylebone, London NW1 6XE, United Kingdom");
+  const [name, setName] = useState("");
+  const [dob, setDob] = useState("");
+  const [gender, setGender] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop");
+  const [loading, setLoading] = useState(true);
 
-  const avatarUrl =
-    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop";
+  useEffect(() => {
+    api.getMe()
+      .then(user => {
+        setName(`${user.firstName} ${user.lastName}`);
+        setEmail(user.email);
+        setPhone(user.customer?.phoneNumber || "");
+        if (user.customer?.profile) {
+          if (user.customer.profile.dob) {
+            setDob(user.customer.profile.dob.split("T")[0]);
+          }
+          setGender(user.customer.profile.gender || "Male");
+          if (user.customer.profile.avatarUrl) {
+            setAvatarUrl(user.customer.profile.avatarUrl);
+          }
+        }
+        
+        // Fetch primary address
+        api.getAddresses()
+          .then(addrs => {
+            if (addrs && addrs.length > 0) {
+              const addr = addrs[0];
+              setAddress(`${addr.street}, ${addr.city}, ${addr.state} ${addr.postalCode}, ${addr.country}`);
+            }
+          })
+          .catch(console.error);
+        
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to load user profile:", err);
+        setLoading(false);
+      });
+  }, []);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Changes saved successfully!");
+    try {
+      await api.setupProfile({
+        dob: dob || undefined,
+        gender: gender || undefined,
+      });
+      alert("Changes saved successfully!");
+    } catch (err: any) {
+      alert(err.message || "Failed to update profile details");
+    }
   };
 
   return (
