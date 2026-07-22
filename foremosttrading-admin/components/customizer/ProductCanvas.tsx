@@ -60,13 +60,18 @@ export const ProductCanvas = forwardRef<ProductCanvasRef, ProductCanvasProps>(
       const canvas = fabricCanvasRef.current;
       if (!canvas) return;
 
-      const imageSrc = customShapeUrl || shapeImageMap[shapeName] || "/shapes/cloth-full-body.png";
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+      let imageSrc = customShapeUrl || shapeImageMap[shapeName] || "";
+      if (imageSrc && !imageSrc.startsWith("http://") && !imageSrc.startsWith("https://") && !imageSrc.startsWith("data:") && !imageSrc.startsWith("blob:") && imageSrc.startsWith("/")) {
+        imageSrc = `${API_BASE_URL}${imageSrc}`;
+      }
+      if (!imageSrc) return;
       
       fabric.Image.fromURL(imageSrc, (img) => {
-        // Scale image to fit canvas
+        if (!img || !img.width) return;
         const scaleX = canvas.getWidth() / (img.width || 1);
         const scaleY = canvas.getHeight() / (img.height || 1);
-        const scale = Math.min(scaleX, scaleY) * 0.9; // 90% of canvas to leave padding
+        const scale = Math.min(scaleX, scaleY) * 0.9;
 
         img.set({
           originX: "center",
@@ -79,7 +84,6 @@ export const ProductCanvas = forwardRef<ProductCanvasRef, ProductCanvasProps>(
           evented: false,
         });
 
-        // Apply tint color using blend filter if tintColor is provided and not transparent
         if (tintColor && tintColor !== "transparent" && img.filters) {
            const filter = new fabric.Image.filters.BlendColor({
               color: tintColor,
@@ -91,9 +95,8 @@ export const ProductCanvas = forwardRef<ProductCanvasRef, ProductCanvasProps>(
         }
 
         canvas.setBackgroundImage(img, () => {
-           // Also set the exact same image as an overlay with 'multiply' blend mode
-           // This perfectly preserves 3D shadows and wrinkles ON TOP of uploaded patterns/text
            fabric.Image.fromURL(imageSrc, (overlayImg) => {
+             if (!overlayImg || !overlayImg.width) return;
              overlayImg.set({
                originX: "center",
                originY: "center",
@@ -108,7 +111,7 @@ export const ProductCanvas = forwardRef<ProductCanvasRef, ProductCanvasProps>(
              canvas.setOverlayImage(overlayImg, canvas.renderAll.bind(canvas));
            });
         });
-      });
+      }, { crossOrigin: 'anonymous' });
     }, [shapeName, tintColor, customShapeUrl]);
 
     // Handle window resize
@@ -153,23 +156,32 @@ export const ProductCanvas = forwardRef<ProductCanvasRef, ProductCanvasProps>(
         if (!canvas) return;
 
         fabric.Image.fromURL(url, (img) => {
+          if (!img || !img.width) return;
+          const canvasWidth = canvas.getWidth() || 500;
+          const canvasHeight = canvas.getHeight() || 500;
+
           img.set({
-            left: canvas.getWidth() / 2,
-            top: canvas.getHeight() / 2,
+            left: canvasWidth / 2,
+            top: canvasHeight / 2,
             originX: "center",
             originY: "center",
-            globalCompositeOperation: "source-atop",
+            cornerColor: "#007AFF",
+            cornerStyle: "circle",
+            borderColor: "#007AFF",
+            transparentCorners: false,
+            cornerSize: 10,
           });
           
-          // scale down if image is too large
-          if ((img.width || 0) > canvas.getWidth() / 2) {
-             img.scaleToWidth(canvas.getWidth() / 2);
+          const maxDim = Math.min(canvasWidth, canvasHeight) * 0.4;
+          if ((img.width || 0) > maxDim || (img.height || 0) > maxDim) {
+            img.scaleToWidth(maxDim);
           }
           
           canvas.add(img);
           canvas.setActiveObject(img);
+          canvas.bringToFront(img);
           canvas.renderAll();
-        });
+        }, { crossOrigin: 'anonymous' });
       },
       updateSelectedColor: (color: string) => {
         const canvas = fabricCanvasRef.current;

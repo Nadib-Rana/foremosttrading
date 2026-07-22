@@ -12,10 +12,18 @@ export default function CustomizerPage() {
 
   useEffect(() => {
     mockDb.initialize();
-    // Filter only customizable products
-    const customList = mockDb.getProducts().filter(p => p.isCustomizable);
-    setProducts(customList);
-    setMounted(true);
+    mockDb.getProductsAsync()
+      .then((all) => {
+        const customList = all.filter((p) => p.isCustomizable);
+        setProducts(customList);
+        setMounted(true);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch products:", err);
+        const customList = mockDb.getProducts().filter((p) => p.isCustomizable);
+        setProducts(customList);
+        setMounted(true);
+      });
   }, []);
 
   if (!mounted) {
