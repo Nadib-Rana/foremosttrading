@@ -53,11 +53,17 @@ export interface ProductPatternSchema {
 
 export interface ProductSchema {
   id: string;
+  slug?: string;
   name: string;
   category: string;
+  /** Presigned MinIO URL for the product SVG — present only when product has an uploaded SVG */
+  svgUrl?: string;
+  /** Base price of the product for display */
+  basePrice?: number;
   customizableParts: ProductPartSchema[];
   patterns: ProductPatternSchema[];
   supportedTabs: CustomizerTab[];
   defaultColors: ProductColors;
   defaultPattern: string;
 }
+

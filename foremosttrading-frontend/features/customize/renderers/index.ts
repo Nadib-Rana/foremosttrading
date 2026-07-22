@@ -19,4 +19,5 @@ export function getProductRenderer(productId: string): ProductRendererComponent 
   }
 }
 
+// Re-export all renderers — DynamicSvgRenderer is co-located in SoccerJerseyRenderer.tsx
 export * from "./SoccerJerseyRenderer";

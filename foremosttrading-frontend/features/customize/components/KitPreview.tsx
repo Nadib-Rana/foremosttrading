@@ -2,7 +2,7 @@
 
 import { KitColors, PlayerText } from "../types";
 import { cn } from "@/lib/utils";
-import { getProductRenderer } from "../renderers";
+import { getProductRenderer, DynamicSvgRenderer } from "../renderers";
 
 interface KitPreviewProps {
   colors: KitColors;
@@ -11,7 +11,12 @@ interface KitPreviewProps {
   visibleParts: Record<string, boolean>;
   className?: string;
   productId?: string;
+  /** Presigned MinIO URL for the product's uploaded SVG — when set, DynamicSvgRenderer is used */
+  svgUrl?: string;
   isThumbnail?: boolean;
+  selectedLayerId?: string | null;
+  selectedLayerIds?: string[];
+  onLayerSelect?: (elementId: string, isMultiSelect?: boolean, isRangeSelect?: boolean) => void;
 }
 
 export function KitPreview({
@@ -21,9 +26,40 @@ export function KitPreview({
   visibleParts,
   className,
   productId = "soccer-jersey",
+  svgUrl,
   isThumbnail = false,
+  selectedLayerId,
+  selectedLayerIds,
+  onLayerSelect,
 }: KitPreviewProps) {
+  // When a backend SVG URL is available, use the dynamic renderer
+  const useDynamic = Boolean(svgUrl);
   const Renderer = getProductRenderer(productId);
+
+  const renderContent = () => {
+    if (useDynamic) {
+      return (
+        <DynamicSvgRenderer
+          svgUrl={svgUrl!}
+          colors={colors}
+          playerText={playerText}
+          visibleParts={visibleParts}
+          pattern={pattern}
+          selectedLayerId={selectedLayerId}
+          selectedLayerIds={selectedLayerIds}
+          onLayerSelect={onLayerSelect}
+        />
+      );
+    }
+    return (
+      <Renderer
+        colors={colors}
+        pattern={pattern}
+        playerText={playerText}
+        visibleParts={visibleParts}
+      />
+    );
+  };
 
   return (
     <>
@@ -39,25 +75,16 @@ export function KitPreview({
 
       {isThumbnail ? (
         <div className={cn("w-full h-full bg-transparent flex flex-row items-center justify-center overflow-hidden", className)}>
-          <Renderer
-            colors={colors}
-            pattern={pattern}
-            playerText={playerText}
-            visibleParts={visibleParts}
-          />
+          {renderContent()}
         </div>
       ) : (
         <div className={cn("w-full bg-white border border-gray-100 rounded-3xl p-4 sm:p-5 shadow-sm flex flex-col justify-between h-[350px] sm:h-[450px] lg:h-[650px] overflow-hidden", className)}>
           <div className="w-full flex-1 bg-gray-50 rounded-2xl p-4 md:p-8 flex flex-row items-center justify-center gap-2 md:gap-4 overflow-x-auto scrollbar-none overflow-hidden">
-            <Renderer
-              colors={colors}
-              pattern={pattern}
-              playerText={playerText}
-              visibleParts={visibleParts}
-            />
+            {renderContent()}
           </div>
         </div>
       )}
     </>
   );
 }
+

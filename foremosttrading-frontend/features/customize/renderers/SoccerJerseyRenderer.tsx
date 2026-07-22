@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { ProductColors, PlayerText } from "../types";
+import { Loader2 } from "lucide-react";
 
 interface SoccerJerseyRendererProps {
   colors: ProductColors;
@@ -159,3 +160,176 @@ export function SoccerJerseyRenderer({
     </>
   );
 }
+
+// ─── DynamicSvgRenderer ─────────────────────────────────────────────────────
+// Backend-driven SVG customizer renderer.
+// Fetches the SVG from the backend-issued presigned MinIO URL, then patches
+// colour and visibility for every element whose id matches a backend-resolved
+// layer elementId from parseSvg().
+//
+// Architecture invariant: Frontend NEVER parses SVG structure. Only applies
+// color patches to elements whose IDs were discovered by the backend.
+
+interface DynamicSvgRendererProps {
+  svgUrl: string;
+  colors: ProductColors;
+  playerText: PlayerText;
+  visibleParts: Record<string, boolean>;
+  pattern?: string;
+  selectedLayerId?: string | null;
+  selectedLayerIds?: string[];
+  onLayerSelect?: (elementId: string, isMultiSelect?: boolean, isRangeSelect?: boolean) => void;
+}
+
+const SUPPORTED_TAGS = ["path", "rect", "circle", "ellipse", "polygon", "polyline", "line", "text", "image", "use", "g"];
+
+export function DynamicSvgRenderer({
+  svgUrl,
+  colors,
+  playerText,
+  visibleParts,
+  selectedLayerId,
+  selectedLayerIds = [],
+  onLayerSelect,
+}: DynamicSvgRendererProps) {
+  const [svgContent, setSvgContent] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!svgUrl) return;
+    setLoading(true);
+    setError(null);
+    fetch(svgUrl)
+      .then((res) => {
+        if (!res.ok) throw new Error("SVG load failed (" + res.status + ")");
+        return res.text();
+      })
+      .then((text) => {
+        setSvgContent(text);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("[DynamicSvgRenderer] fetch error:", err);
+        setError("Failed to load product SVG.");
+        setLoading(false);
+      });
+  }, [svgUrl]);
+
+  const activeSelectedIds = selectedLayerIds.length > 0 
+    ? selectedLayerIds 
+    : (selectedLayerId ? [selectedLayerId] : []);
+
+  const applyPatches = useCallback(() => {
+    if (!containerRef.current) return;
+    const svgEl = containerRef.current.querySelector("svg");
+    if (!svgEl) return;
+
+    Object.entries(colors).forEach(([elementId, color]) => {
+      const el = svgEl.querySelector("#" + CSS.escape(elementId)) as HTMLElement | SVGElement | null;
+      if (!el) return;
+      el.style.cursor = "pointer";
+      el.style.filter = "";
+      el.style.outline = "";
+
+      const stroke = el.getAttribute("stroke");
+      const fill = el.getAttribute("fill");
+      if (stroke && stroke !== "none" && (!fill || fill === "none")) {
+        el.setAttribute("stroke", color);
+      } else {
+        el.setAttribute("fill", color);
+        el.querySelectorAll(SUPPORTED_TAGS.join(",")).forEach((c) => {
+          const cf = c.getAttribute("fill");
+          if (cf && cf !== "none") c.setAttribute("fill", color);
+        });
+      }
+    });
+
+    if (activeSelectedIds.length > 0) {
+      activeSelectedIds.forEach((id) => {
+        const selectedEl = svgEl.querySelector("#" + CSS.escape(id)) as HTMLElement | SVGElement | null;
+        if (selectedEl) {
+          selectedEl.style.filter = "drop-shadow(0 0 5px #2563eb) drop-shadow(0 0 10px #3b82f6)";
+          selectedEl.style.outline = "2px solid #3b82f6";
+          selectedEl.style.transition = "filter 0.15s ease-in-out, outline 0.15s ease-in-out";
+        }
+      });
+    }
+
+    Object.entries(visibleParts).forEach(([elementId, visible]) => {
+      const el = svgEl.querySelector("#" + CSS.escape(elementId)) as HTMLElement | null;
+      if (!el) return;
+      el.style.display = visible ? "" : "none";
+    });
+
+    svgEl.setAttribute("width", "100%");
+    svgEl.setAttribute("height", "100%");
+    svgEl.style.width = "100%";
+    svgEl.style.height = "100%";
+    svgEl.style.maxWidth = "100%";
+    svgEl.style.maxHeight = "100%";
+  }, [colors, visibleParts, activeSelectedIds]);
+
+  useEffect(() => {
+    if (!svgContent || !containerRef.current) return;
+    containerRef.current.innerHTML = svgContent;
+    applyPatches();
+
+    const svgEl = containerRef.current.querySelector("svg");
+    if (!svgEl) return;
+
+    const handleClick = (e: MouseEvent) => {
+      let target: Element | null = e.target as Element;
+      while (target && target !== svgEl) {
+        const id = target.getAttribute("id");
+        if (id && colors.hasOwnProperty(id)) {
+          if (onLayerSelect) {
+            const isMulti = e.ctrlKey || e.metaKey;
+            const isRange = e.shiftKey;
+            onLayerSelect(id, isMulti, isRange);
+          }
+          break;
+        }
+        target = target.parentElement;
+      }
+    };
+
+    svgEl.addEventListener("click", handleClick);
+    return () => {
+      svgEl.removeEventListener("click", handleClick);
+    };
+  }, [svgContent, applyPatches, colors, onLayerSelect]);
+
+  useEffect(() => {
+    if (!svgContent) return;
+    applyPatches();
+  }, [colors, visibleParts, selectedLayerId, applyPatches, svgContent]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full h-full gap-3 text-gray-400">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="text-xs font-medium">Loading product preview…</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full h-full gap-2 text-red-400">
+        <span className="text-sm font-semibold">Preview unavailable</span>
+        <span className="text-xs text-gray-400">{error}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      className="w-full h-full flex items-center justify-center [&>svg]:max-w-full [&>svg]:max-h-full"
+      aria-label="Product SVG preview"
+    />
+  );
+}
+

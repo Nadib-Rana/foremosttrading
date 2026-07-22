@@ -55,6 +55,7 @@ export function PersonalInfoForm() {
       await api.setupProfile({
         dob: dob || undefined,
         gender: gender || undefined,
+        address: address || undefined,
       });
       alert("Changes saved successfully!");
     } catch (err: any) {

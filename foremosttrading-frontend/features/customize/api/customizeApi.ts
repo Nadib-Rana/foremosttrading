@@ -30,18 +30,64 @@ export interface SaveConfigurationResponse {
 export async function fetchProductSchema(productId: string): Promise<ProductSchema> {
   try {
     const res = await api.getProductConfigSchema(productId);
-    if (res && res.schema) {
-      return res.schema as ProductSchema;
+    if (res && (res.id || res.customizableParts)) {
+      return {
+        id: res.id || productId,
+        slug: res.slug || productId,
+        name: res.name || "Custom Product",
+        category: res.category || "Apparel",
+        basePrice: res.basePrice ?? 99.99,
+        svgUrl: res.svgUrl || undefined,
+        customizableParts: res.customizableParts || [],
+        patterns: res.patterns || [],
+        fonts: res.fonts || [],
+        supportedTabs: res.supportedTabs || ["colors", "designs", "elements", "players", "text"],
+        defaultColors: res.defaultColors || {},
+        defaultPattern: res.defaultPattern || "classic",
+      };
     }
   } catch (err) {
-    console.warn("Failed to fetch product schema from API, falling back to local schema:", err);
+    console.warn("Failed to fetch product schema from API:", err);
   }
-  
+
+  try {
+    const product = await api.getProductBySlug(productId);
+    if (product) {
+      return {
+        id: product.id || productId,
+        slug: product.slug || productId,
+        name: product.name || "Custom Product",
+        category: product.category?.name || "Apparel",
+        basePrice: Number(product.basePrice) || 99.99,
+        customizableParts: [],
+        patterns: [],
+        fonts: [],
+        supportedTabs: ["colors", "designs", "elements", "players", "text"],
+        defaultColors: {},
+        defaultPattern: "classic",
+      };
+    }
+  } catch (err) {
+    console.warn("Failed to fetch product info from API:", err);
+  }
+
   if (productId === "soccer-jersey") {
     return SOCCER_JERSEY_SCHEMA;
   }
-  
-  return SOCCER_JERSEY_SCHEMA;
+
+  return {
+    id: productId,
+    slug: productId,
+    name: "Custom Product",
+    category: "Apparel",
+    basePrice: 99.99,
+    customizableParts: [],
+    patterns: [],
+    fonts: [],
+    supportedTabs: ["colors", "designs", "elements", "players", "text"],
+    defaultColors: {},
+    defaultPattern: "classic",
+  };
 }
 
 /**

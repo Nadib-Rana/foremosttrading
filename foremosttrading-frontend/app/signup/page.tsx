@@ -49,6 +49,8 @@ export default function SignupPage() {
       await api.setupProfile({
         dob: profileData.dob,
         gender: profileData.gender,
+        address: profileData.address,
+        ...(profileData.profileImageUrl ? { profileImageUrl: profileData.profileImageUrl } : {}),
       });
       alert("Profile set up successfully! Account registration complete.");
       window.location.href = "/account";

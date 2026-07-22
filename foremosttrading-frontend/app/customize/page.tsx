@@ -1,5 +1,7 @@
 "use client";
 
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 
@@ -13,9 +15,49 @@ import { TabText } from "@/features/customize/components/TabText";
 import { TabPlayers } from "@/features/customize/components/TabPlayers";
 import { Accordions } from "@/features/customize/components/Accordions";
 import { SizeGuide } from "@/features/customize/components/SizeGuide";
+import { fetchProductSchema } from "@/features/customize/api/customizeApi";
+import { ProductSchema } from "@/features/customize/types";
+import { SOCCER_JERSEY_SCHEMA } from "@/features/customize/schemas/soccerJerseySchema";
+import { Loader2 } from "lucide-react";
 
-export default function CustomizePage() {
-  const custom = useCustomize();
+function CustomizePageContent({ initialProductId }: { initialProductId: string | null }) {
+  const [schema, setSchema] = useState<ProductSchema | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const targetId = initialProductId || "soccer-jersey";
+    setLoading(true);
+    fetchProductSchema(targetId)
+      .then((s) => {
+        setSchema(s);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  }, [initialProductId]);
+
+  if (loading || !schema) {
+    return (
+      <div className="flex-1 flex items-center justify-center py-24 text-gray-400">
+        <Loader2 className="h-8 w-8 animate-spin text-[#EF892A]" />
+        <span className="ml-3 text-sm font-medium">Loading product customizer…</span>
+      </div>
+    );
+  }
+
+  return <CustomizeWorkspace key={schema.id} schema={schema} />;
+}
+
+function CustomizePageInner() {
+  const searchParams = useSearchParams();
+  const productId = searchParams.get("id") || searchParams.get("productId");
+
+  return <CustomizePageContent initialProductId={productId} />;
+}
+
+function CustomizeWorkspace({ schema }: { schema: ProductSchema }) {
+  const custom = useCustomize(schema);
 
   const handleNextFromText = () => {
     if (typeof window !== "undefined") {
@@ -37,12 +79,21 @@ export default function CustomizePage() {
 
         {/* Title Block */}
         <div className="mb-8 text-center sm:text-left">
-          <h1 className="font-heading text-3xl md:text-4xl font-black uppercase tracking-tight text-gray-900">
-            Evolution Football Kit
-          </h1>
-          <p className="text-sm font-black text-[#EF892A] uppercase mt-1 tracking-wider">
-            $199 - $699
-          </p>
+          {loading ? (
+            <div className="flex items-center gap-2 text-gray-400">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <span className="text-sm font-medium">Loading product…</span>
+            </div>
+          ) : (
+            <>
+              <h1 className="font-heading text-3xl md:text-4xl font-black uppercase tracking-tight text-gray-900">
+                {schema.name}
+              </h1>
+              <p className="text-sm font-black text-[#EF892A] uppercase mt-1 tracking-wider">
+                {schema.basePrice ? `$${schema.basePrice.toFixed(2)}` : "Customize Your Kit"}
+              </p>
+            </>
+          )}
         </div>
 
         {/* 2-Column Responsive Workspace */}
@@ -55,6 +106,13 @@ export default function CustomizePage() {
               pattern={custom.pattern}
               playerText={custom.playerText}
               visibleParts={custom.visibleParts}
+              productId={schema.id}
+              svgUrl={schema.svgUrl}
+              selectedLayerId={custom.activePartToEdit}
+              onLayerSelect={(layerId) => {
+                custom.setActiveTab("colors");
+                custom.setActivePartToEdit(layerId);
+              }}
             />
           </div>
 
@@ -155,3 +213,16 @@ export default function CustomizePage() {
     </main>
   );
 }
+
+export default function CustomizePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#F9F9F9]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#EF892A]" />
+      </div>
+    }>
+      <CustomizePageInner />
+    </Suspense>
+  );
+}
+
