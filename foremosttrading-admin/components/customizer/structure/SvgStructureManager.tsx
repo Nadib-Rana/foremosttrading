@@ -25,6 +25,9 @@ interface SvgStructureManagerProps {
   objects: SvgStructureObject[];
   onUpdateObject: (updatedObj: SvgStructureObject) => void;
   onSelectObject?: (objId: string, isMulti?: boolean) => void;
+  onSelectAllObjects?: (objectIds: string[]) => void;
+  onClearSelection?: () => void;
+  onColorChange?: (objId: string, color: string) => void;
   selectedObjectIds?: string[];
   onToggleLock?: (objId: string) => void;
   onToggleVisibility?: (objId: string) => void;
@@ -34,6 +37,9 @@ export function SvgStructureManager({
   objects,
   onUpdateObject,
   onSelectObject,
+  onSelectAllObjects,
+  onClearSelection,
+  onColorChange,
   selectedObjectIds = [],
   onToggleLock,
   onToggleVisibility,
@@ -43,10 +49,20 @@ export function SvgStructureManager({
   const [editingTextObj, setEditingTextObj] = useState<SvgStructureObject | null>(null);
   const [editingImageObj, setEditingImageObj] = useState<SvgStructureObject | null>(null);
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const colorInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
-  // Auto-scroll selected layer row into view inside SvgStructureManager (Figma-style auto-detect focus)
+  // Reset page to 1 when filter or search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, activeFilter]);
+
+  // Auto-scroll selected layer row into view inside SvgStructureManager
   useEffect(() => {
     if (selectedObjectIds.length > 0) {
       const lastSelectedId = selectedObjectIds[selectedObjectIds.length - 1];
@@ -75,6 +91,18 @@ export function SvgStructureManager({
     return true;
   });
 
+  const totalPages = Math.max(1, Math.ceil(filteredObjects.length / pageSize));
+  const validPage = Math.min(currentPage, totalPages);
+  const startIndex = (validPage - 1) * pageSize;
+  const paginatedObjects = filteredObjects.slice(startIndex, startIndex + pageSize);
+
+  const handleSelectAll = () => {
+    if (onSelectAllObjects) {
+      const idsToSelect = filteredObjects.map((o) => o.id);
+      onSelectAllObjects(idsToSelect);
+    }
+  };
+
   const textCount = objects.filter((o) => {
     const lower = (o.id + " " + o.name).toLowerCase();
     return o.type === "TEXT" || lower.includes("text") || lower.includes("name") || lower.includes("number") || lower.includes("player");
@@ -87,23 +115,39 @@ export function SvgStructureManager({
 
   return (
     <div className="space-y-3 bg-white border border-gray-200 rounded-xl p-3 shadow-2xs">
-      {/* Header & Filter Tabs */}
+      {/* Header & Selection Actions */}
       <div className="flex flex-col gap-2 pb-2 border-b border-gray-100">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5">
-            <FolderTree className="h-4 w-4 text-blue-600" />
-            <span className="text-xs font-extrabold uppercase tracking-tight text-gray-900">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <FolderTree className="h-4 w-4 text-blue-600 shrink-0" />
+            <span className="text-xs font-extrabold uppercase tracking-tight text-gray-900 truncate">
               SVG Structure ({objects.length})
             </span>
           </div>
 
-          {selectedObjectIds.length > 0 && (
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 flex items-center gap-1">
-              <CheckCircle2 className="h-3 w-3 text-blue-600" /> {selectedObjectIds.length} Selected
-            </span>
-          )}
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              type="button"
+              onClick={handleSelectAll}
+              className="px-2 py-0.5 text-[11px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded transition-colors"
+              title="Select all filtered layers"
+            >
+              Select All
+            </button>
+            {selectedObjectIds.length > 0 && (
+              <button
+                type="button"
+                onClick={onClearSelection}
+                className="px-2 py-0.5 text-[11px] font-semibold text-gray-500 hover:bg-gray-100 rounded transition-colors"
+                title="Clear layer selection"
+              >
+                Clear ({selectedObjectIds.length})
+              </button>
+            )}
+          </div>
         </div>
 
+        {/* Filter Tabs */}
         <div className="flex items-center gap-1 bg-gray-100 p-0.5 rounded-lg text-[10px] font-bold overflow-x-auto">
           <button
             onClick={() => setActiveFilter("ALL")}
@@ -140,32 +184,51 @@ export function SvgStructureManager({
         </div>
       </div>
 
-      {/* Search Input */}
-      <div className="relative">
-        <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-gray-400" />
-        <Input
-          placeholder="Search layers by name or elementId…"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="text-xs pl-8 h-8 bg-gray-50/50"
-        />
-        {searchQuery && (
-          <button
-            onClick={() => setSearchQuery("")}
-            className="absolute right-2 top-2 text-[10px] text-gray-400 hover:text-gray-700"
-          >
-            Clear
-          </button>
-        )}
+      {/* Search & Page Size Bar */}
+      <div className="flex gap-2 items-center">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-gray-400" />
+          <Input
+            placeholder="Search layers by name or elementId…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="text-xs pl-8 h-8 bg-gray-50/50"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2 top-2 text-[10px] text-gray-400 hover:text-gray-700"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        <select
+          value={pageSize}
+          onChange={(e) => {
+            setPageSize(Number(e.target.value));
+            setCurrentPage(1);
+          }}
+          className="h-8 border border-gray-200 rounded-lg text-xs bg-gray-50 text-gray-700 px-1 font-medium cursor-pointer"
+          title="Items per page"
+        >
+          <option value={15}>15/pg</option>
+          <option value={25}>25/pg</option>
+          <option value={50}>50/pg</option>
+          <option value={100}>100/pg</option>
+        </select>
       </div>
 
       {/* Object List */}
-      <div ref={containerRef} className="max-h-64 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
-        {filteredObjects.length === 0 ? (
-          <div className="text-xs text-gray-400 italic text-center py-4">No matching SVG layers found</div>
+      <div ref={containerRef} className="max-h-72 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
+        {paginatedObjects.length === 0 ? (
+          <div className="text-xs text-gray-400 italic text-center py-6">No matching SVG layers found</div>
         ) : (
-          filteredObjects.map((obj) => {
+          paginatedObjects.map((obj) => {
             const isSelected = selectedObjectIds.includes(obj.id);
+            const layerColor = obj.color || "#FFFFFF";
+
             return (
               <div
                 key={obj.id}
@@ -182,12 +245,31 @@ export function SvgStructureManager({
                     : "bg-white border-gray-100 hover:bg-gray-50 text-gray-800"
                 }`}
               >
-                <div className="flex items-center gap-2 min-w-0">
-                  {obj.type === "TEXT" && <Type className="h-4 w-4 text-blue-600 flex-shrink-0" />}
-                  {obj.type === "IMAGE" && <ImageIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />}
-                  {obj.type === "GROUP" && <FolderTree className="h-4 w-4 text-amber-500 flex-shrink-0" />}
+                <div className="flex items-center gap-2.5 min-w-0">
+                  {/* Layer Color Badge (Click to Recolor) */}
+                  <div className="relative shrink-0 flex items-center" onClick={(e) => e.stopPropagation()}>
+                    <span
+                      onClick={() => colorInputRefs.current[obj.id]?.click()}
+                      className="w-4 h-4 rounded-full border border-black/30 shrink-0 shadow-xs cursor-pointer hover:scale-110 transition-transform block"
+                      style={{ backgroundColor: layerColor }}
+                      title={`Recolor #${obj.id} (Current: ${layerColor})`}
+                    />
+                    {onColorChange && (
+                      <input
+                        ref={(el) => { colorInputRefs.current[obj.id] = el; }}
+                        type="color"
+                        value={layerColor}
+                        onChange={(e) => onColorChange(obj.id, e.target.value)}
+                        className="sr-only"
+                      />
+                    )}
+                  </div>
+
+                  {obj.type === "TEXT" && <Type className="h-3.5 w-3.5 text-blue-600 flex-shrink-0" />}
+                  {obj.type === "IMAGE" && <ImageIcon className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" />}
+                  {obj.type === "GROUP" && <FolderTree className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />}
                   {(obj.type === "FILL" || obj.type === "STROKE") && (
-                    <Layers className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                    <Layers className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
                   )}
 
                   <div className="flex flex-col min-w-0">
@@ -254,6 +336,38 @@ export function SvgStructureManager({
           })
         )}
       </div>
+
+      {/* Pagination Footer */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-2 border-t border-gray-100 text-xs">
+          <span className="text-[11px] text-gray-500 font-medium">
+            {startIndex + 1}–{Math.min(startIndex + pageSize, filteredObjects.length)} of {filteredObjects.length}
+          </span>
+          <div className="flex items-center gap-1">
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={validPage <= 1}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              className="h-6 px-2 text-[11px]"
+            >
+              Prev
+            </Button>
+            <span className="text-[11px] font-bold text-gray-700 px-1">
+              {validPage} / {totalPages}
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={validPage >= totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              className="h-6 px-2 text-[11px]"
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Configuration Modals */}
       <TextObjectSettingsModal

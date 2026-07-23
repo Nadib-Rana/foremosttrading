@@ -367,19 +367,42 @@ export function LayerMappingStep({ formData, onChange }: Omit<StepProps, 'templa
     onChange({ layers: updatedLayers });
   };
 
-  const handleColorChange = (idx: number, color: string) => {
+  const handleFieldUpdate = (idx: number, field: string, value: any) => {
     const updatedLayers = formData.layers.map((l: any, i: number) => {
       if (i === idx) {
-        return { ...l, defaultColor: color };
+        return { ...l, [field]: value };
       }
       return l;
     });
     onChange({ layers: updatedLayers });
   };
 
+  const handleColorChange = (idx: number, color: string) => {
+    handleFieldUpdate(idx, 'defaultColor', color);
+  };
+
+  const getCategoryBadgeClass = (category?: string) => {
+    switch (category) {
+      case 'BODY': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300';
+      case 'SLEEVE': return 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300';
+      case 'COLLAR': return 'bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-300';
+      case 'CUFF': return 'bg-pink-100 text-pink-800 dark:bg-pink-950/40 dark:text-pink-300';
+      case 'LOGO': case 'BADGE': return 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300';
+      case 'SPONSOR': return 'bg-orange-100 text-orange-800 dark:bg-orange-950/40 dark:text-orange-300';
+      case 'TEXT_NAME': case 'TEXT_NUMBER': return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300';
+      case 'IMAGE_PLACEHOLDER': return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-950/40 dark:text-cyan-300';
+      case 'PATTERN': return 'bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300';
+      default: return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400';
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-bold text-foreground uppercase tracking-wide border-b pb-2 border-border">5. Vector Layer Rules</h3>
+      <div className="flex items-center justify-between border-b pb-2 border-border">
+        <h3 className="text-sm font-bold text-foreground uppercase tracking-wide">5. Vector Layer Rules &amp; Hierarchy</h3>
+        <span className="text-xs text-muted-foreground font-mono">Total Layers: {formData.layers?.length || 0}</span>
+      </div>
+
       {!formData.svgUploaded ? (
         <div className="p-6 border border-dashed rounded-lg text-center text-xs text-muted-foreground flex flex-col items-center gap-2">
           <AlertCircle className="h-5 w-5 text-amber-500" />
@@ -392,11 +415,10 @@ export function LayerMappingStep({ formData, onChange }: Omit<StepProps, 'templa
               <tr className="border-b bg-secondary/35 text-muted-foreground font-semibold">
                 <th className="p-2.5">Layer Name</th>
                 <th className="p-2.5">Element ID</th>
+                <th className="p-2.5">Category</th>
                 <th className="p-2.5">Type</th>
-                <th className="p-2.5">Fill</th>
-                <th className="p-2.5">Stroke</th>
-                <th className="p-2.5">Opacity</th>
                 <th className="p-2.5">Default Color</th>
+                <th className="p-2.5">Rules &amp; Placeholder</th>
                 <th className="p-2.5 text-center">Editable</th>
                 <th className="p-2.5 text-center">Required</th>
                 <th className="p-2.5 text-center">Locked</th>
@@ -405,8 +427,22 @@ export function LayerMappingStep({ formData, onChange }: Omit<StepProps, 'templa
             <tbody className="divide-y divide-border">
               {(formData.layers || []).map((layer: any, idx: number) => (
                 <tr key={idx} className="hover:bg-muted/30">
-                  <td className="p-2 font-bold text-foreground max-w-[100px] truncate" title={layer.name}>{layer.name}</td>
-                  <td className="p-2 font-mono text-[9px] text-muted-foreground max-w-[80px] truncate" title={layer.elementId}>{layer.elementId}</td>
+                  <td className="p-2 font-bold text-foreground max-w-[120px]">
+                    <input
+                      type="text"
+                      value={layer.name || ''}
+                      onChange={(e) => handleFieldUpdate(idx, 'name', e.target.value)}
+                      className="w-full bg-transparent border border-transparent hover:border-border focus:border-primary rounded px-1 text-xs font-semibold focus:outline-none"
+                    />
+                  </td>
+                  <td className="p-2 font-mono text-[9px] text-muted-foreground max-w-[90px] truncate" title={layer.elementId}>
+                    {layer.elementId}
+                  </td>
+                  <td className="p-2">
+                    <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${getCategoryBadgeClass(layer.category)}`}>
+                      {layer.category || 'DECORATION'}
+                    </span>
+                  </td>
                   <td className="p-2">
                     <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
                       layer.type === 'Fill' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
@@ -417,41 +453,44 @@ export function LayerMappingStep({ formData, onChange }: Omit<StepProps, 'templa
                     }`}>{layer.type}</span>
                   </td>
                   <td className="p-2">
-                    {layer.fill && layer.fill !== 'none' ? (
-                      <div className="flex items-center gap-1.5">
-                        {layer.fill.startsWith('#') && (
-                          <div className="w-3 h-3 rounded-sm border border-border" style={{ background: layer.fill }} />
-                        )}
-                        <span className="font-mono text-[9px] truncate max-w-[50px]">{layer.fill}</span>
-                      </div>
-                    ) : <span className="text-muted-foreground/50 text-[9px]">—</span>}
-                  </td>
-                  <td className="p-2">
-                    {layer.stroke && layer.stroke !== 'none' ? (
-                      <div className="flex items-center gap-1.5">
-                        {layer.stroke.startsWith('#') && (
-                          <div className="w-3 h-3 rounded-sm border-2 border-current" style={{ borderColor: layer.stroke, background: 'transparent' }} />
-                        )}
-                        <span className="font-mono text-[9px] truncate max-w-[50px]">{layer.stroke}</span>
-                      </div>
-                    ) : <span className="text-muted-foreground/50 text-[9px]">—</span>}
-                  </td>
-                  <td className="p-2 font-mono text-[9px]">{layer.opacity ?? '1'}</td>
-                  <td className="p-2">
                     <div className="flex items-center gap-2">
                       <input 
                         type="color" 
-                        value={layer.defaultColor} 
+                        value={layer.defaultColor || '#FFFFFF'} 
                         onChange={(e) => handleColorChange(idx, e.target.value)}
                         className="w-5 h-5 rounded border border-border cursor-pointer p-0 bg-transparent"
                       />
-                      <span className="font-mono text-[9px] uppercase">{layer.defaultColor}</span>
+                      <span className="font-mono text-[9px] uppercase">{layer.defaultColor || '#FFFFFF'}</span>
                     </div>
+                  </td>
+                  <td className="p-2">
+                    {layer.type === 'Text' || layer.category?.startsWith('TEXT') ? (
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="text"
+                          placeholder="Placeholder"
+                          value={layer.placeholder || ''}
+                          onChange={(e) => handleFieldUpdate(idx, 'placeholder', e.target.value)}
+                          className="w-24 bg-background border border-border rounded px-1.5 py-0.5 text-[10px]"
+                        />
+                        <input
+                          type="number"
+                          placeholder="Max"
+                          value={layer.maxChars || ''}
+                          onChange={(e) => handleFieldUpdate(idx, 'maxChars', parseInt(e.target.value, 10) || undefined)}
+                          className="w-12 bg-background border border-border rounded px-1 py-0.5 text-[10px]"
+                        />
+                      </div>
+                    ) : layer.type === 'Image' || layer.category === 'IMAGE_PLACEHOLDER' ? (
+                      <span className="text-[10px] text-muted-foreground font-mono">Formats: PNG, SVG, JPG</span>
+                    ) : (
+                      <span className="text-muted-foreground/40 text-[9px]">—</span>
+                    )}
                   </td>
                   <td className="p-2 text-center">
                     <input 
                       type="checkbox" 
-                      checked={layer.editable} 
+                      checked={layer.editable !== false} 
                       onChange={() => toggleLayerField(idx, 'editable')}
                       className="h-3.5 w-3.5 rounded border-border"
                     />
@@ -459,7 +498,7 @@ export function LayerMappingStep({ formData, onChange }: Omit<StepProps, 'templa
                   <td className="p-2 text-center">
                     <input 
                       type="checkbox" 
-                      checked={layer.required} 
+                      checked={layer.required !== false} 
                       onChange={() => toggleLayerField(idx, 'required')}
                       className="h-3.5 w-3.5 rounded border-border"
                     />
@@ -467,7 +506,7 @@ export function LayerMappingStep({ formData, onChange }: Omit<StepProps, 'templa
                   <td className="p-2 text-center">
                     <input 
                       type="checkbox" 
-                      checked={layer.locked} 
+                      checked={Boolean(layer.locked)} 
                       onChange={() => toggleLayerField(idx, 'locked')}
                       className="h-3.5 w-3.5 rounded border-border"
                     />
@@ -478,6 +517,7 @@ export function LayerMappingStep({ formData, onChange }: Omit<StepProps, 'templa
           </table>
         </div>
       )}
+
 
       {/* DEBUG UI */}
       <div className="p-4 mt-4 bg-muted/50 rounded-lg border border-border font-mono text-xs space-y-1">

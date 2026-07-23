@@ -18,4 +18,6 @@ export interface SvgStructureObject {
   maxSizeBytes?: number;
   isEditable?: boolean;
   isLocked?: boolean;
+  isHidden?: boolean;
+  color?: string;
 }

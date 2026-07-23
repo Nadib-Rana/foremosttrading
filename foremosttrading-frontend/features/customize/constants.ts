@@ -29,10 +29,22 @@ export const DESIGN_PATTERNS: { id: DesignPattern; label: string; image: string 
 ];
 
 export const FONT_FAMILIES = [
-  { id: "font-heading", name: "Oswald Italic" },
-  { id: "Arial-Black", name: "Arial Black" },
+  { id: "Oswald", name: "Oswald" },
+  { id: "Montserrat", name: "Montserrat" },
+  { id: "Roboto", name: "Roboto" },
   { id: "Impact", name: "Impact" },
-  { id: "Courier-New", name: "Courier Bold" },
+  { id: "Arial", name: "Arial" },
+  { id: "Courier New", name: "Courier" },
+  { id: "Georgia", name: "Georgia" },
+  { id: "Trebuchet MS", name: "Trebuchet" },
+];
+
+export const FONT_WEIGHTS = [
+  { id: "normal", name: "Normal" },
+  { id: "500", name: "Medium" },
+  { id: "600", name: "SemiBold" },
+  { id: "bold", name: "Bold" },
+  { id: "900", name: "Black" },
 ];
 
 export const SIZE_CHART = [

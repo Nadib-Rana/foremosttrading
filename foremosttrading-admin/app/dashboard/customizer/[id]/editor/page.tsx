@@ -723,6 +723,9 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
   const [previewColors, setPreviewColors] = useState<Record<string, string> | null>(null);
   const [textInput, setTextInput] = useState("YOUR TEXT");
   const [textColor, setTextColor] = useState("#000000");
+  const [textFontFamily, setTextFontFamily] = useState("Oswald");
+  const [textFontWeight, setTextFontWeight] = useState("bold");
+  const [textFontSize, setTextFontSize] = useState(36);
 
   const [hiddenLayerIds, setHiddenLayerIds] = useState<string[]>([]);
   const [lockedLayerIds, setLockedLayerIds] = useState<string[]>([]);
@@ -758,7 +761,114 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
 
   const canvasRef = useRef<ProductCanvasRef>(null);
   const colorInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const layerRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [uploadingSvg, setUploadingSvg] = useState(false);
+
+  const handleSvgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !productId) return;
+    e.target.value = "";
+
+    setUploadingSvg(true);
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") || localStorage.getItem("token") : null;
+      const body = new FormData();
+      body.append("file", file);
+
+      const res = await fetch(`${API_BASE_URL}/upload/uploads/svg`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body,
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.data?.message || err?.message || "SVG upload failed");
+      }
+
+      const json = await res.json();
+      const payload = json?.data ?? json;
+
+      if (!payload?.uploadId) throw new Error("No uploadId returned from backend.");
+
+      await mockDb.updateProductAsync(productId, {
+        uploadId: payload.uploadId,
+      } as any);
+
+      // Re-fetch config schema
+      const schemaRes = await mockDb.fetchApi(`/products/${productId}/config-schema`);
+      const schemaData = schemaRes?.data !== undefined ? schemaRes.data : schemaRes;
+
+      if (schemaData) {
+        setProduct((prev) => prev ? {
+          ...prev,
+          svgUrl: schemaData.svgUrl || payload.svgUrl,
+          svgRaw: schemaData.svgRaw || payload.svgRaw,
+          views: schemaData.views || [],
+          customizableParts: schemaData.customizableParts || prev.customizableParts,
+        } : prev);
+      }
+    } catch (err: any) {
+      console.error("SVG upload error:", err);
+      alert(err.message || "Failed to upload SVG template");
+    } finally {
+      setUploadingSvg(false);
+    }
+  };
+
+  const viewFileInputRef = useRef<HTMLInputElement>(null);
+  const [activeUploadViewName, setActiveUploadViewName] = useState<string>("FRONT");
+
+  const handleSpecificViewUpload = async (file: File, viewName: string) => {
+    if (!file || !productId) return;
+
+    setUploadingSvg(true);
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") || localStorage.getItem("token") : null;
+      const body = new FormData();
+      body.append("file", file);
+
+      const res = await fetch(`${API_BASE_URL}/upload/uploads/svg`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body,
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.data?.message || err?.message || "SVG upload failed");
+      }
+
+      const json = await res.json();
+      const payload = json?.data ?? json;
+
+      if (!payload?.uploadId) throw new Error("No uploadId returned from backend.");
+
+      await mockDb.updateProductAsync(productId, {
+        views: [{ name: viewName, uploadId: payload.uploadId }],
+      } as any);
+
+      // Re-fetch config schema
+      const schemaRes = await mockDb.fetchApi(`/products/${productId}/config-schema`);
+      const schemaData = schemaRes?.data !== undefined ? schemaRes.data : schemaRes;
+
+      if (schemaData) {
+        setProduct((prev) => prev ? {
+          ...prev,
+          svgUrl: schemaData.svgUrl || payload.svgUrl,
+          svgRaw: schemaData.svgRaw || payload.svgRaw,
+          views: schemaData.views || [],
+          customizableParts: schemaData.customizableParts || prev.customizableParts,
+        } : prev);
+      }
+    } catch (err: any) {
+      console.error("SVG view upload error:", err);
+      alert(err.message || "Failed to upload SVG view");
+    } finally {
+      setUploadingSvg(false);
+    }
+  };
 
   const handleLayersDetected = useCallback(
     (detectedLayers: Array<{ id: string; label: string; defaultColor: string; layerType: string }>) => {
@@ -978,7 +1088,12 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
 
   const handleAddText = () => {
     if (canvasRef.current) {
-      canvasRef.current.addText(textInput, { fill: textColor });
+      canvasRef.current.addText(textInput, {
+        fill: textColor,
+        fontFamily: textFontFamily,
+        fontWeight: textFontWeight,
+        fontSize: textFontSize,
+      });
     }
   };
 
@@ -1106,6 +1221,13 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center p-8 text-center space-y-3 bg-white/80 backdrop-blur-xs rounded-2xl border border-gray-200 shadow-sm max-w-md">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept=".svg"
+                    className="hidden"
+                    onChange={handleSvgUpload}
+                  />
                   <Layers className="h-10 w-10 text-blue-500 mx-auto" />
                   <div className="space-y-1">
                     <h3 className="text-sm font-bold text-gray-900">No SVG Vector Template Uploaded</h3>
@@ -1113,11 +1235,22 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
                       Product <strong>{product.name}</strong> has no SVG template file linked yet. Upload an SVG template to configure vector customization layers.
                     </p>
                   </div>
-                  <Link href={`/dashboard/products/${product.id}`}>
-                    <Button size="sm" className="text-xs h-8">
-                      <Upload className="h-3.5 w-3.5 mr-1.5" /> Upload SVG Template
-                    </Button>
-                  </Link>
+                  <Button
+                    size="sm"
+                    className="text-xs h-8 cursor-pointer"
+                    disabled={uploadingSvg}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {uploadingSvg ? (
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Uploading &amp; Parsing...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-3.5 w-3.5 mr-1.5" /> Upload SVG Template
+                      </>
+                    )}
+                  </Button>
                 </div>
               )}
 
@@ -1159,44 +1292,102 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
                 {/* VIEWS TAB */}
                 {activeTab === "views" && (
                   <div className="flex flex-col gap-4 pb-4">
-                    <h3 className="font-semibold text-gray-800 text-sm">Product Views</h3>
-                    <p className="text-xs text-gray-500">Loaded views for <strong>{product.name}</strong> from database.</p>
+                    <input
+                      type="file"
+                      ref={viewFileInputRef}
+                      accept=".svg"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          handleSpecificViewUpload(file, activeUploadViewName);
+                        }
+                        e.target.value = "";
+                      }}
+                    />
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="font-semibold text-gray-800 text-sm">Product 360° Views</h3>
+                        <p className="text-xs text-gray-500">4-View Vector Canvas System for <strong>{product.name}</strong></p>
+                      </div>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                        {product.views?.length || 0} / 4 Views Loaded
+                      </span>
+                    </div>
 
-                    {product.views && product.views.length > 0 ? (
-                      <div className="grid grid-cols-2 gap-3">
-                        {product.views.map((view, i) => (
+                    <div className="grid grid-cols-2 gap-3">
+                      {["FRONT", "BACK", "LEFT", "RIGHT"].map((viewName) => {
+                        const matchingIndex = product.views?.findIndex(
+                          (v) => v.name.toUpperCase() === viewName
+                        );
+                        const loadedView = matchingIndex !== undefined && matchingIndex !== -1 ? product.views[matchingIndex] : null;
+                        const isActiveView = matchingIndex !== undefined && matchingIndex !== -1 && activeViewIndex === matchingIndex;
+
+                        return (
                           <div
-                            key={view.id || i}
-                            onClick={() => setActiveViewIndex(i)}
+                            key={viewName}
+                            onClick={() => {
+                              if (matchingIndex !== undefined && matchingIndex !== -1) {
+                                setActiveViewIndex(matchingIndex);
+                              }
+                            }}
                             className={cn(
-                              "p-3 rounded-lg border-2 cursor-pointer transition-all shadow-sm flex flex-col items-center justify-center gap-2 group text-center",
-                              activeViewIndex === i
-                                ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/20"
-                                : "border-gray-200 bg-gray-50 hover:border-blue-400"
+                              "p-3 rounded-xl border-2 transition-all shadow-sm flex flex-col items-center justify-between gap-2 group text-center bg-white relative overflow-hidden",
+                              isActiveView
+                                ? "border-blue-600 ring-2 ring-blue-600/20 bg-blue-50/20"
+                                : loadedView
+                                ? "border-gray-200 hover:border-blue-400 cursor-pointer"
+                                : "border-dashed border-gray-300 bg-gray-50/80"
                             )}
                           >
-                            {view.svgUrl ? (
-                              <img src={resolveUrl(view.svgUrl)} alt={view.name} className="h-20 w-auto object-contain" />
-                            ) : (
-                              <Layers className="h-8 w-8 text-blue-600" />
-                            )}
-                            <span className="text-xs font-bold text-gray-800 uppercase tracking-wider">
-                              {view.name}
-                            </span>
+                            {/* View Header */}
+                            <div className="w-full flex items-center justify-between">
+                              <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
+                                {viewName}
+                              </span>
+                              {loadedView ? (
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">
+                                  LOADED
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-gray-200 text-gray-600">
+                                  PENDING
+                                </span>
+                              )}
+                            </div>
+
+                            {/* View Image Preview */}
+                            <div className="h-20 w-full flex items-center justify-center my-1">
+                              {loadedView?.svgUrl ? (
+                                <img
+                                  src={resolveUrl(loadedView.svgUrl)}
+                                  alt={viewName}
+                                  className="h-20 w-auto object-contain"
+                                />
+                              ) : (
+                                <Layers className="h-8 w-8 text-gray-300" />
+                              )}
+                            </div>
+
+                            {/* View Upload Button */}
+                            <Button
+                              size="sm"
+                              variant={loadedView ? "ghost" : "outline"}
+                              className="w-full text-[11px] h-7 cursor-pointer"
+                              disabled={uploadingSvg}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveUploadViewName(viewName);
+                                viewFileInputRef.current?.click();
+                              }}
+                            >
+                              <Upload className="h-3 w-3 mr-1" />
+                              {loadedView ? "Replace SVG" : `Upload ${viewName}`}
+                            </Button>
                           </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="p-6 text-center border-2 border-dashed border-gray-200 rounded-lg bg-gray-50 space-y-3">
-                        <SlidersHorizontal className="h-8 w-8 text-gray-400 mx-auto" />
-                        <p className="text-xs text-gray-600 font-medium">No SVG view templates uploaded yet for this product record.</p>
-                        <Link href={`/dashboard/products/${product.id}`}>
-                          <Button size="sm" variant="outline" className="text-xs mt-1">
-                            Upload SVG Views
-                          </Button>
-                        </Link>
-                      </div>
-                    )}
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
 
@@ -1255,9 +1446,16 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
                         isEditable: p.isEditable,
                         isLocked: lockedLayerIds.includes(p.id) || Boolean(p.isLocked),
                         isHidden: hiddenLayerIds.includes(p.id),
+                        color: activeColorMap[p.id] || p.defaultColor || "#FFFFFF",
                       }))}
                       selectedObjectIds={selectedLayerIds}
                       onSelectObject={(id, isMulti) => handleLayerSelect(id, Boolean(isMulti), false)}
+                      onSelectAllObjects={(ids) => setSelectedLayerIds(ids)}
+                      onClearSelection={() => handleClearSelection()}
+                      onColorChange={(layerId, newColor) => {
+                        setPreviewColors(null);
+                        setLayerColors((prev) => ({ ...prev, [layerId]: newColor }));
+                      }}
                       onToggleLock={toggleLayerLock}
                       onToggleVisibility={toggleLayerVisibility}
                       onUpdateObject={async (updated) => {
@@ -1294,122 +1492,54 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
                       }}
                     />
 
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                      <div>
-                        <h3 className="font-semibold text-gray-800 text-xs uppercase tracking-wider">Detected SVG Layers</h3>
-                        <p className="text-[10px] text-gray-500">Hold <kbd className="px-1 py-0.5 bg-gray-100 border border-gray-300 rounded text-[9px]">Ctrl</kbd> to multi-select.</p>
-                      </div>
-                      <div className="flex gap-1">
-                        <button
-                          onClick={handleSelectAllLayers}
-                          className="px-2 py-1 text-[11px] font-semibold text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                          title="Select all SVG layers"
-                        >
-                          Select All
-                        </button>
-                        {selectedLayerIds.length > 0 && (
-                          <button
-                            onClick={handleClearSelection}
-                            className="px-2 py-1 text-[11px] font-semibold text-gray-500 hover:bg-gray-100 rounded transition-colors"
-                            title="Clear layer selection"
-                          >
-                            Clear
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    {product.customizableParts && product.customizableParts.length > 0 ? (
-                      <div className="flex flex-col gap-4">
-                        {/* Scrollable Layer Panel List */}
-                        <div className="flex flex-col gap-1.5 max-h-[220px] overflow-y-auto pr-1 border border-gray-100 rounded-xl p-1.5 bg-gray-50/50 custom-scrollbar">
-                          {product.customizableParts.map((part) => {
-                            const isSelected = selectedLayerIds.includes(part.id);
-                            return (
-                              <div
-                                key={part.id}
-                                ref={(el) => { layerRefs.current[part.id] = el; }}
-                                onClick={(e) => handleLayerSelect(part.id, e.ctrlKey || e.metaKey, e.shiftKey)}
-                                className={cn(
-                                  "p-2.5 rounded-lg border transition-all cursor-pointer flex items-center justify-between gap-3 text-xs font-semibold select-none",
-                                  isSelected
-                                    ? "bg-blue-50/90 border-blue-600 ring-2 ring-blue-600/20 text-blue-900 shadow-xs"
-                                    : "bg-white border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50/30"
-                                )}
-                              >
-                                <div className="flex items-center gap-2.5 min-w-0">
-                                  <div className={cn(
-                                    "w-4 h-4 rounded flex items-center justify-center border transition-colors shrink-0",
-                                    isSelected ? "bg-blue-600 border-blue-600 text-white" : "border-gray-300 bg-white"
-                                  )}>
-                                    {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
-                                  </div>
-                                  <span
-                                    className="w-3.5 h-3.5 rounded-full border border-black/20 shrink-0 shadow-xs"
-                                    style={{ backgroundColor: activeColorMap[part.id] || "#FFFFFF" }}
-                                  />
-                                  <span className="truncate">{part.label}</span>
-                                </div>
-                                <span className="text-[10px] font-mono text-gray-400 shrink-0">#{part.id}</span>
-                              </div>
-                            );
-                          })}
+                    {/* Batch & Single Color Customization Box */}
+                    {selectedLayerIds.length > 0 ? (
+                      <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3 shadow-xs">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-blue-600" />
+                            <span className="text-xs font-bold text-gray-800">
+                              {selectedLayerIds.length === 1 ? (
+                                <>Color for <span className="text-blue-600 font-extrabold">{partsMap[selectedLayerIds[0]] || selectedLayerIds[0]}</span></>
+                              ) : (
+                                <>Recolor <span className="text-blue-600 font-extrabold">{selectedLayerIds.length} Selected Layers</span></>
+                              )}
+                            </span>
+                          </div>
+                          <input
+                            ref={colorInputRef}
+                            type="color"
+                            value={activeLayerColor}
+                            onInput={(e) => handleBatchColorChange((e.target as HTMLInputElement).value)}
+                            onChange={(e) => handleBatchColorChange((e.target as HTMLInputElement).value)}
+                            className="h-8 w-14 border border-gray-300 rounded cursor-pointer p-0"
+                          />
                         </div>
 
-                        {/* Batch & Single Color Customization Box */}
-                        {selectedLayerIds.length > 0 ? (
-                          <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3 shadow-xs">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <Sparkles className="w-4 h-4 text-blue-600" />
-                                <span className="text-xs font-bold text-gray-800">
-                                  {selectedLayerIds.length === 1 ? (
-                                    <>Color for <span className="text-blue-600 font-extrabold">{partsMap[selectedLayerIds[0]] || selectedLayerIds[0]}</span></>
-                                  ) : (
-                                    <>Recolor <span className="text-blue-600 font-extrabold">{selectedLayerIds.length} Selected Layers</span></>
-                                  )}
-                                </span>
-                              </div>
-                              <input
-                                ref={colorInputRef}
-                                type="color"
-                                value={activeLayerColor}
-                                onInput={(e) => handleBatchColorChange((e.target as HTMLInputElement).value)}
-                                onChange={(e) => handleBatchColorChange((e.target as HTMLInputElement).value)}
-                                className="h-8 w-14 border border-gray-300 rounded cursor-pointer p-0"
-                              />
-                            </div>
-
-                            {/* Preset Swatches with Hover Live Preview */}
-                            <div className="grid grid-cols-6 gap-2 pt-1">
-                              {PRESET_COLORS.map((color, i) => (
-                                <button
-                                  key={i}
-                                  onClick={() => handleBatchColorChange(color)}
-                                  onMouseEnter={() => handleSwatchHover(color)}
-                                  onMouseLeave={handleSwatchLeave}
-                                  className={cn(
-                                    "w-full aspect-square rounded-full shadow-xs border-2 transition-transform hover:scale-110 flex items-center justify-center relative",
-                                    activeLayerColor === color ? "border-blue-600 ring-2 ring-blue-600/30" : "border-gray-200"
-                                  )}
-                                  style={{ backgroundColor: color }}
-                                >
-                                  {activeLayerColor === color && (
-                                    <Check className={cn("w-3.5 h-3.5", color === "#FFFFFF" ? "text-black" : "text-white")} />
-                                  )}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="p-4 bg-blue-50/50 text-blue-800 text-xs rounded-xl border border-blue-100 text-center font-medium">
-                            Click any SVG layer on the garment or select layers above to customize colors.
-                          </div>
-                        )}
+                        {/* Preset Swatches with Hover Live Preview */}
+                        <div className="grid grid-cols-6 gap-2 pt-1">
+                          {PRESET_COLORS.map((color, i) => (
+                            <button
+                              key={i}
+                              onClick={() => handleBatchColorChange(color)}
+                              onMouseEnter={() => handleSwatchHover(color)}
+                              onMouseLeave={handleSwatchLeave}
+                              className={cn(
+                                "w-full aspect-square rounded-full shadow-xs border-2 transition-transform hover:scale-110 flex items-center justify-center relative",
+                                activeLayerColor === color ? "border-blue-600 ring-2 ring-blue-600/30" : "border-gray-200"
+                              )}
+                              style={{ backgroundColor: color }}
+                            >
+                              {activeLayerColor === color && (
+                                <Check className={cn("w-3.5 h-3.5", color === "#FFFFFF" ? "text-black" : "text-white")} />
+                              )}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     ) : (
-                      <div className="p-4 bg-amber-50 text-amber-800 text-xs rounded-lg border border-amber-200">
-                        No parsed layer mappings found for this product. Upload an SVG template with element IDs to enable dynamic layer color editing.
+                      <div className="p-4 bg-blue-50/50 text-blue-800 text-xs rounded-xl border border-blue-100 text-center font-medium">
+                        Click any SVG layer on the garment or select layers above to customize colors.
                       </div>
                     )}
                   </div>
@@ -1442,25 +1572,109 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
                   <div className="flex flex-col gap-4">
                     <h3 className="font-semibold text-gray-800 text-sm">Add Custom Text</h3>
 
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-4">
+                      {/* Text Input */}
                       <div>
                         <label className="text-xs font-medium text-gray-600 mb-1 block">Text Content</label>
                         <input
                           type="text"
                           value={textInput}
                           onChange={(e) => setTextInput(e.target.value)}
-                          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold"
                           placeholder="Enter text..."
                         />
                       </div>
 
+                      {/* Font Family Selector (Dropdown) */}
+                      <div>
+                        <label className="text-xs font-medium text-gray-600 mb-1.5 block">Font Family</label>
+                        <select
+                          value={textFontFamily}
+                          onChange={(e) => {
+                            const font = e.target.value;
+                            setTextFontFamily(font);
+                            canvasRef.current?.updateSelectedFont(font);
+                          }}
+                          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-2xs"
+                        >
+                          <option value="Oswald">Oswald</option>
+                          <option value="Montserrat">Montserrat</option>
+                          <option value="Roboto">Roboto</option>
+                          <option value="Impact">Impact</option>
+                          <option value="Arial">Arial</option>
+                          <option value="Courier New">Courier New</option>
+                          <option value="Georgia">Georgia</option>
+                          <option value="Trebuchet MS">Trebuchet MS</option>
+                          <option value="Verdana">Verdana</option>
+                          <option value="Times New Roman">Times New Roman</option>
+                          <option value="Comic Sans MS">Comic Sans</option>
+                        </select>
+                      </div>
+
+                      {/* Font Weight Selector (Boldness) */}
+                      <div>
+                        <label className="text-xs font-medium text-gray-600 mb-1.5 block">
+                          Font Weight
+                        </label>
+                        <div className="grid grid-cols-5 gap-1">
+                          {[
+                            { id: "normal", label: "Normal" },
+                            { id: "500", label: "Medium" },
+                            { id: "600", label: "Semi" },
+                            { id: "bold", label: "Bold" },
+                            { id: "900", label: "Black" },
+                          ].map((w) => (
+                            <button
+                              key={w.id}
+                              type="button"
+                              onClick={() => {
+                                setTextFontWeight(w.id);
+                                canvasRef.current?.updateSelectedFontWeight(w.id);
+                              }}
+                              className={cn(
+                                "py-1 px-1.5 border rounded text-[11px] font-semibold text-center transition-all cursor-pointer",
+                                textFontWeight === w.id
+                                  ? "bg-blue-600 border-blue-600 text-white shadow-2xs"
+                                  : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                              )}
+                            >
+                              {w.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Font Size Slider */}
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="text-xs font-medium text-gray-600">Font Size</label>
+                          <span className="text-xs font-bold text-blue-600">{textFontSize}px</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="14"
+                          max="96"
+                          value={textFontSize}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            setTextFontSize(val);
+                            canvasRef.current?.updateSelectedFontSize(val);
+                          }}
+                          className="w-full accent-blue-600 cursor-pointer"
+                        />
+                      </div>
+
+                      {/* Text Color & Add Action */}
                       <div>
                         <label className="text-xs font-medium text-gray-600 mb-1 block">Text Color</label>
                         <div className="flex gap-2">
                           <input
                             type="color"
                             value={textColor}
-                            onChange={(e) => setTextColor(e.target.value)}
+                            onChange={(e) => {
+                              setTextColor(e.target.value);
+                              canvasRef.current?.updateSelectedColor(e.target.value);
+                            }}
                             className="h-10 w-16 border border-gray-200 p-0 rounded cursor-pointer"
                           />
                           <Button

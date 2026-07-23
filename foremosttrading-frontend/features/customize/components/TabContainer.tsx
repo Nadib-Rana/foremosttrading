@@ -71,7 +71,7 @@ export function TabContainer({ activeTab, setActiveTab, tabs }: TabContainerProp
         className="flex-1 bg-[#F4F5F7] rounded-xl p-1.5 overflow-x-auto lg:overflow-x-visible scrollbar-none scroll-smooth scroll-px-4"
       >
         <div className="flex min-w-max lg:min-w-0 lg:w-full gap-1.5">
-          {tabs.map((tab) => {
+          {(Array.isArray(tabs) ? tabs : []).map((tab) => {
             const isActive = activeTab === tab.id;
             return (
               <button

@@ -1,4 +1,5 @@
 export const applyVisibilityPatches = (svgEl: SVGSVGElement, visibleParts: Record<string, boolean>) => {
+  if (!visibleParts) return;
   Object.entries(visibleParts).forEach(([elementId, visible]) => {
     const el = svgEl.querySelector("#" + CSS.escape(elementId)) as HTMLElement | null;
     if (!el) return;

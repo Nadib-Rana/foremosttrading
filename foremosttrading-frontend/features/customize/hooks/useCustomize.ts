@@ -6,25 +6,36 @@ import { SOCCER_JERSEY_SCHEMA } from "../schemas/soccerJerseySchema";
 import { saveProductConfiguration } from "../api/customizeApi";
 
 export function useCustomize(schema: ProductSchema = SOCCER_JERSEY_SCHEMA) {
+  const safeSchema = schema || SOCCER_JERSEY_SCHEMA;
+  const parts = Array.isArray(safeSchema.customizableParts) && safeSchema.customizableParts.length > 0
+    ? safeSchema.customizableParts
+    : SOCCER_JERSEY_SCHEMA.customizableParts;
+
+  const supportedTabs = Array.isArray(safeSchema.supportedTabs) && safeSchema.supportedTabs.length > 0
+    ? safeSchema.supportedTabs
+    : SOCCER_JERSEY_SCHEMA.supportedTabs;
+
   const [activeTab, setActiveTab] = useState<CustomizerTab>(() => {
-    return schema.supportedTabs[0] || "colors";
+    return supportedTabs[0] || "colors";
   });
 
   // Initialize dynamic color map from schema customizable parts
   const [colors, setColors] = useState<KitColors>(() => {
-    const initialColors: Record<string, string> = {};
-    schema.customizableParts.forEach((part) => {
-      initialColors[part.id] = part.defaultColor;
+    const initialColors: Record<string, string> = { ...(safeSchema.defaultColors || {}) };
+    parts.forEach((part) => {
+      if (!initialColors[part.id]) {
+        initialColors[part.id] = part.defaultColor || "#FFFFFF";
+      }
     });
     return initialColors;
   });
 
-  const [pattern, setPattern] = useState<DesignPattern>(schema.defaultPattern);
+  const [pattern, setPattern] = useState<DesignPattern>(safeSchema.defaultPattern || SOCCER_JERSEY_SCHEMA.defaultPattern);
   
   // Dynamic visible/locked states from schema customizable parts
   const [lockedParts, setLockedParts] = useState<Record<string, boolean>>(() => {
     const initialLocks: Record<string, boolean> = {};
-    schema.customizableParts.forEach((part) => {
+    parts.forEach((part) => {
       initialLocks[part.id] = false;
     });
     return initialLocks;
@@ -32,14 +43,14 @@ export function useCustomize(schema: ProductSchema = SOCCER_JERSEY_SCHEMA) {
 
   const [visibleParts, setVisibleParts] = useState<Record<string, boolean>>(() => {
     const initialVisibility: Record<string, boolean> = {};
-    schema.customizableParts.forEach((part) => {
+    parts.forEach((part) => {
       initialVisibility[part.id] = true;
     });
     return initialVisibility;
   });
 
   const [activePartToEdit, setActivePartToEdit] = useState<string | null>(() => {
-    return schema.customizableParts[0]?.id || null;
+    return parts[0]?.id || null;
   });
 
   const [playerText, setPlayerText] = useState<PlayerText>({
@@ -176,7 +187,7 @@ export function useCustomize(schema: ProductSchema = SOCCER_JERSEY_SCHEMA) {
     }
   };
 
-  const tabs = schema.supportedTabs.map((tabId) => {
+  const tabs = supportedTabs.map((tabId) => {
     switch (tabId) {
       case "elements":
         return { id: "elements" as CustomizerTab, label: "Decals" };
@@ -201,7 +212,7 @@ export function useCustomize(schema: ProductSchema = SOCCER_JERSEY_SCHEMA) {
   };
 
   return {
-    schema,
+    schema: safeSchema,
     activeTab,
     setActiveTab,
     colors,

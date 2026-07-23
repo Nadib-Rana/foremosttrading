@@ -28,65 +28,66 @@ export interface SaveConfigurationResponse {
  * @param productId Product identifier (e.g., "soccer-jersey").
  */
 export async function fetchProductSchema(productId: string): Promise<ProductSchema> {
+  const target = productId || "soccer-jersey";
+
+  // 1. Try to fetch product schema from NestJS API endpoint GET /products/:idOrSlug/config-schema
   try {
-    const res = await api.getProductConfigSchema(productId);
-    if (res && (res.id || res.customizableParts)) {
+    const res = await api.getProductConfigSchema(target);
+    if (res && res.id) {
+      const parts = res.customizableParts && res.customizableParts.length > 0
+        ? res.customizableParts
+        : SOCCER_JERSEY_SCHEMA.customizableParts;
+      const patterns = res.patterns && res.patterns.length > 0
+        ? res.patterns
+        : SOCCER_JERSEY_SCHEMA.patterns;
+
       return {
-        id: res.id || productId,
-        slug: res.slug || productId,
-        name: res.name || "Custom Product",
+        id: res.id || target,
+        slug: res.slug || target,
+        name: res.name || "Custom Kit",
         category: res.category || "Apparel",
-        basePrice: res.basePrice ?? 99.99,
+        basePrice: Number(res.basePrice ?? 149.99),
         svgUrl: res.svgUrl || undefined,
-        customizableParts: res.customizableParts || [],
-        patterns: res.patterns || [],
-        fonts: res.fonts || [],
-        supportedTabs: res.supportedTabs || ["colors", "designs", "elements", "players", "text"],
-        defaultColors: res.defaultColors || {},
-        defaultPattern: res.defaultPattern || "classic",
+        customizableParts: parts,
+        patterns: patterns,
+        fonts: res.fonts && res.fonts.length > 0 ? res.fonts : SOCCER_JERSEY_SCHEMA.fonts,
+        supportedTabs: res.supportedTabs || SOCCER_JERSEY_SCHEMA.supportedTabs,
+        defaultColors: Object.keys(res.defaultColors || {}).length > 0 ? res.defaultColors : SOCCER_JERSEY_SCHEMA.defaultColors,
+        defaultPattern: res.defaultPattern || SOCCER_JERSEY_SCHEMA.defaultPattern,
+        views: res.views || [],
+        texts: res.texts || [],
+        imagePlaceholders: res.imagePlaceholders || [],
+        layerGroups: res.layerGroups || [],
+        images: res.images || [],
       };
     }
   } catch (err) {
-    console.warn("Failed to fetch product schema from API:", err);
+    console.warn("Failed to fetch config-schema from API for target:", target, err);
   }
 
+  // 2. Try fetching product info by slug directly
   try {
-    const product = await api.getProductBySlug(productId);
+    const product = await api.getProductBySlug(target);
     if (product) {
       return {
-        id: product.id || productId,
-        slug: product.slug || productId,
-        name: product.name || "Custom Product",
+        ...SOCCER_JERSEY_SCHEMA,
+        id: product.id || target,
+        slug: product.slug || target,
+        name: product.name || "Custom Kit",
         category: product.category?.name || "Apparel",
-        basePrice: Number(product.basePrice) || 99.99,
-        customizableParts: [],
-        patterns: [],
-        fonts: [],
-        supportedTabs: ["colors", "designs", "elements", "players", "text"],
-        defaultColors: {},
-        defaultPattern: "classic",
+        basePrice: Number(product.basePrice) || 149.99,
+        images: product.images?.map((i: any) => i.imageUrl || i) || [],
       };
     }
   } catch (err) {
-    console.warn("Failed to fetch product info from API:", err);
+    console.warn("Failed to fetch product by slug:", err);
   }
 
-  if (productId === "soccer-jersey") {
-    return SOCCER_JERSEY_SCHEMA;
-  }
-
+  // 3. Fallback to default SOCCER_JERSEY_SCHEMA so customizer page ALWAYS renders cleanly
   return {
-    id: productId,
-    slug: productId,
-    name: "Custom Product",
-    category: "Apparel",
-    basePrice: 99.99,
-    customizableParts: [],
-    patterns: [],
-    fonts: [],
-    supportedTabs: ["colors", "designs", "elements", "players", "text"],
-    defaultColors: {},
-    defaultPattern: "classic",
+    ...SOCCER_JERSEY_SCHEMA,
+    id: target,
+    slug: target,
   };
 }
 

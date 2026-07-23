@@ -1,3 +1,7 @@
+import { Lock, Unlock, Eye, EyeOff, Palette } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { KitColors } from "../types";
+import { COLOR_SWATCHES } from "../constants";
 import { CustomerLayerGroup } from "../types/groups";
 import { CustomerLayerGroupPanel } from "./CustomerLayerGroupPanel";
 
@@ -63,6 +67,7 @@ export function TabColors({
           const isExpanded = activePartToEdit === part.id;
           const isLocked = lockedParts[part.id];
           const isVisible = visibleParts[part.id];
+          const partColor = colors[part.id] || "#FFFFFF";
 
           return (
             <div
@@ -76,7 +81,7 @@ export function TabColors({
                   className="flex-1 flex items-center gap-3"
                 >
                   <div
-                    style={{ backgroundColor: colors[part.id] }}
+                    style={{ backgroundColor: partColor }}
                     className="w-5 h-5 rounded-md border border-gray-200/80 shadow-3xs"
                   />
                   <span className="text-xs font-bold uppercase tracking-wider text-gray-800">
@@ -114,7 +119,7 @@ export function TabColors({
               {isExpanded && !isLocked && (
                 <div className="px-3 pb-3 pt-1.5 border-t border-gray-50 bg-gray-50/50 flex flex-wrap gap-1.5 animate-in fade-in duration-200">
                   {COLOR_SWATCHES.map((swatch) => {
-                    const isActive = colors[part.id].toLowerCase() === swatch.hex.toLowerCase();
+                    const isActive = partColor.toLowerCase() === swatch.hex.toLowerCase();
                     return (
                       <button
                         key={swatch.name}
@@ -134,7 +139,7 @@ export function TabColors({
                   <div className="relative w-6 h-6 rounded-full border border-gray-200 hover:border-gray-400 overflow-hidden cursor-pointer bg-white flex items-center justify-center shadow-xs transition-transform hover:scale-110">
                     <input
                       type="color"
-                      value={colors[part.id]}
+                      value={partColor}
                       onChange={(e) => onChangeColor(part.id, e.target.value)}
                       className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                       title="Custom color picker"

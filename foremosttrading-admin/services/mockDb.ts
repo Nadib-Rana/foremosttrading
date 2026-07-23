@@ -425,10 +425,14 @@ export const mockDb = {
       payload.templateId = templateId;
     }
 
-    // Include uploadId so the backend links the staged SVG layers to the product
+    // Include uploadId or views so the backend links the staged SVG layers to the product
     const uploadId = (product as any).uploadId;
     if (uploadId) {
       payload.uploadId = uploadId;
+    }
+    const views = (product as any).views;
+    if (views && Array.isArray(views) && views.length > 0) {
+      payload.views = views;
     }
 
     const res = await mockDb.fetchApi('/admin/products', {
@@ -440,7 +444,7 @@ export const mockDb = {
   },
 
   updateProductAsync: async (id: string, updates: Partial<MockProduct>): Promise<MockProduct> => {
-    const payload = {
+    const payload: Record<string, any> = {
       name: updates.name,
       description: updates.description,
       basePrice: updates.basePrice ? Number(updates.basePrice) : undefined,
@@ -449,6 +453,9 @@ export const mockDb = {
       images: updates.images || undefined,
       category: updates.category || undefined,
     };
+    if ((updates as any).uploadId) {
+      payload.uploadId = (updates as any).uploadId;
+    }
     const res = await mockDb.fetchApi(`/admin/products/${id}`, {
       method: 'PUT',
       body: JSON.stringify(payload),
@@ -527,10 +534,10 @@ export const mockDb = {
         })) || [],
         total: Number(o.totalAmount),
         status: o.orderStatus === 'PENDING' ? 'Pending'
-              : o.orderStatus === 'PROCESSING' ? 'Processing'
-              : o.orderStatus === 'PRINTING' ? 'Printing'
+          : o.orderStatus === 'PROCESSING' ? 'Processing'
+            : o.orderStatus === 'PRINTING' ? 'Printing'
               : o.orderStatus === 'SHIPPING' ? 'Shipping'
-              : 'Completed',
+                : 'Completed',
         paymentStatus: o.paymentStatus === 'PAID' ? 'Paid' : 'Unpaid',
         createdAt: o.createdAt,
         shippingAddress: {

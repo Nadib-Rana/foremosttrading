@@ -84,15 +84,16 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Brand Logo */}
-            <Link href="/" className="flex items-center gap-2 group">
-              <LogoMark className="w-8 h-8 md:w-9 md:h-9 text-primary transition-transform group-hover:scale-105" />
-              <span className="font-heading font-black text-lg md:text-xl tracking-wider text-gray-900">
-                FOREMOST<span className="text-[#EF892A]">.</span>
-              </span>
+            <Link href="/" className="flex items-center group py-1">
+              <img
+                src="/logo/Logo.png"
+                alt="FOREMOST"
+                className="h-11 md:h-13 w-auto object-contain transition-transform group-hover:scale-105"
+              />
             </Link>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+            <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
                 return (
@@ -100,12 +101,12 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
                     key={link.href}
                     href={link.href}
                     className={cn(
-                      "px-3 py-2 rounded-lg text-xs font-extrabold transition-all duration-200 tracking-wide",
+                      "text-sm font-semibold transition-all duration-200 tracking-wide",
                       isActive
-                        ? "text-[#EF892A] bg-[#EF892A]/10 font-black"
+                        ? "text-[#EF892A] font-bold"
                         : isLight
-                        ? "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-                        : "text-gray-200 hover:text-white hover:bg-white/10"
+                        ? "text-slate-600 hover:text-[#EF892A]"
+                        : "text-gray-200 hover:text-white"
                     )}
                   >
                     {link.label}
@@ -116,46 +117,45 @@ export function Navbar({ theme = "dynamic", onCartClick }: NavbarProps) {
 
             {/* Right Action Icons */}
             <div className="hidden lg:flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="icon"
+              <button
+                type="button"
                 onClick={onCartClick}
-                className={cn(
-                  "rounded-lg transition-colors duration-200 h-10 w-10",
-                  isLight
-                    ? "border-gray-200 text-gray-700 bg-white hover:border-primary/50 hover:text-primary hover:bg-primary/5"
-                    : "bg-black/20 border-white/20 text-white hover:border-primary/50 hover:text-primary hover:bg-primary/5"
-                )}
+                className="w-10 h-10 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-700 transition-colors shadow-3xs cursor-pointer"
+                aria-label="Shopping Cart"
               >
-                <ShoppingCart className="w-5 h-5" />
-              </Button>
+                <ShoppingCart className="w-5 h-5 text-slate-700" />
+              </button>
+
               {user ? (
                 <Link
                   href="/account"
-                  className="flex items-center gap-1.5 p-1 bg-gray-50 border border-gray-200/80 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
+                  className="flex items-center gap-1 p-1 bg-slate-100/80 hover:bg-slate-200/80 border border-slate-200 rounded-2xl transition-colors cursor-pointer"
                   title="My Account"
                 >
                   {avatarImg ? (
                     <img
                       src={avatarImg}
                       alt={user.fullName || "User Profile"}
-                      className="w-8 h-8 rounded-lg object-cover border border-gray-100"
+                      className="w-8 h-8 rounded-xl object-cover shadow-2xs"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#EF892A] to-[#D97310] flex items-center justify-center text-white font-heading font-black text-xs">
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#EF892A] to-[#D97310] flex items-center justify-center text-white font-heading font-black text-xs">
                       {user.fullName ? user.fullName[0].toUpperCase() : <UserIcon className="w-4 h-4" />}
                     </div>
                   )}
-                  <ChevronDown className="w-4 h-4 text-gray-400 mr-1" />
+                  <ChevronDown className="w-4 h-4 text-slate-500 mx-1" />
                 </Link>
               ) : (
-                <Button
-                  className="bg-[#EF892A] hover:bg-[#D97310] text-white py-2 px-4.5 rounded-lg font-bold text-xs flex items-center justify-center border-0 cursor-pointer shadow-sm ml-2 h-11"
-                  render={<Link href="/login" />}
-                  nativeButton={false}
+                <Link
+                  href="/account"
+                  className="flex items-center gap-1 p-1 bg-slate-100/80 hover:bg-slate-200/80 border border-slate-200 rounded-2xl transition-colors cursor-pointer"
+                  title="Account"
                 >
-                  Log In
-                </Button>
+                  <div className="w-8 h-8 rounded-xl bg-slate-300 flex items-center justify-center text-slate-600">
+                    <UserIcon className="w-4 h-4" />
+                  </div>
+                  <ChevronDown className="w-4 h-4 text-slate-500 mx-1" />
+                </Link>
               )}
             </div>
             <div className="lg:hidden flex items-center gap-2">

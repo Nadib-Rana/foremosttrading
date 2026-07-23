@@ -29,10 +29,12 @@ function CustomizePageContent({ initialProductId }: { initialProductId: string |
     setLoading(true);
     fetchProductSchema(targetId)
       .then((s) => {
-        setSchema(s);
+        setSchema(s || SOCCER_JERSEY_SCHEMA);
         setLoading(false);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("Error loading product schema:", err);
+        setSchema(SOCCER_JERSEY_SCHEMA);
         setLoading(false);
       });
   }, [initialProductId]);
@@ -88,7 +90,7 @@ function CustomizeWorkspace({ schema }: { schema: ProductSchema }) {
             {schema.name}
           </h1>
           <p className="text-sm font-black text-[#EF892A] uppercase mt-1 tracking-wider">
-            {schema.basePrice ? `$${schema.basePrice.toFixed(2)}` : "Customize Your Kit"}
+            {schema.basePrice ? `$${Number(schema.basePrice).toFixed(2)}` : "Customize Your Kit"}
           </p>
         </div>
 

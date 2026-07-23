@@ -8,6 +8,8 @@ export interface ProductCanvasRef {
   addImage: (url: string) => void;
   updateSelectedColor: (color: string) => void;
   updateSelectedFont: (fontFamily: string) => void;
+  updateSelectedFontWeight: (fontWeight: string) => void;
+  updateSelectedFontSize: (fontSize: number) => void;
   deleteSelected: () => void;
   saveCanvas: () => string;
 }
@@ -200,6 +202,24 @@ export const ProductCanvas = forwardRef<ProductCanvasRef, ProductCanvasProps>(
         const activeObj = canvas.getActiveObject() as fabric.IText;
         if (activeObj && activeObj.type === "i-text") {
           activeObj.set("fontFamily", fontFamily);
+          canvas.renderAll();
+        }
+      },
+      updateSelectedFontWeight: (fontWeight: string) => {
+        const canvas = fabricCanvasRef.current;
+        if (!canvas) return;
+        const activeObj = canvas.getActiveObject() as fabric.IText;
+        if (activeObj && activeObj.type === "i-text") {
+          activeObj.set("fontWeight", fontWeight as any);
+          canvas.renderAll();
+        }
+      },
+      updateSelectedFontSize: (fontSize: number) => {
+        const canvas = fabricCanvasRef.current;
+        if (!canvas) return;
+        const activeObj = canvas.getActiveObject() as fabric.IText;
+        if (activeObj && activeObj.type === "i-text") {
+          activeObj.set("fontSize", fontSize);
           canvas.renderAll();
         }
       },

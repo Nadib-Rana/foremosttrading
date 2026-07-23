@@ -38,6 +38,35 @@ export interface TeamPlayer {
   size: string;
 }
 
+export interface ProductViewSchema {
+  id: string;
+  name: string;
+  svgUrl?: string;
+  viewOrder?: number;
+}
+
+export interface ProductTextSchema {
+  id: string;
+  layerName: string;
+  textValue: string;
+  fontFamily: string;
+  fontSize: string;
+  placeholder?: string;
+  maxChars?: number;
+  minChars?: number;
+  allowedFonts?: string[];
+}
+
+export interface ProductImagePlaceholderSchema {
+  id: string;
+  layerName: string;
+  href?: string;
+  width?: string;
+  height?: string;
+  allowedFormats?: string[];
+  maxSizeBytes?: number;
+}
+
 // Product Schema Definition for Backend Integration
 export interface ProductPartSchema {
   id: string;
@@ -65,5 +94,10 @@ export interface ProductSchema {
   supportedTabs: CustomizerTab[];
   defaultColors: ProductColors;
   defaultPattern: string;
+  views?: ProductViewSchema[];
+  texts?: ProductTextSchema[];
+  imagePlaceholders?: ProductImagePlaceholderSchema[];
+  layerGroups?: any[];
+  images?: string[];
 }
 

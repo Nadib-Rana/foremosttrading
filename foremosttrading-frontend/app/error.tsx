@@ -11,7 +11,7 @@ interface ErrorProps {
 }
 
 export default function Error({ error, reset }: ErrorProps) {
-  const [showDetails, setShowDetails] = useState(false);
+  const [showDetails, setShowDetails] = useState(true);
 
   useEffect(() => {
     // Log the error to an error reporting service
@@ -20,7 +20,7 @@ export default function Error({ error, reset }: ErrorProps) {
 
   return (
     <main className="min-h-screen bg-[#F4F5F7] flex flex-col items-center justify-center px-6 py-24 select-none">
-      <div className="text-center max-w-md w-full flex flex-col items-center">
+      <div className="text-center max-w-xl w-full flex flex-col items-center">
         {/* Warning Icon Container */}
         <div className="w-16 h-16 rounded-2xl bg-red-55/10 border border-red-200 flex items-center justify-center text-red-500 mb-6 shadow-3xs">
           <AlertCircle className="w-8 h-8" />
@@ -32,7 +32,7 @@ export default function Error({ error, reset }: ErrorProps) {
         </h1>
 
         <p className="text-xs text-gray-500 font-semibold leading-relaxed mt-4 px-4">
-          An unexpected error occurred while loading this page. Please try refreshing or contact support if the issue persists.
+          An unexpected error occurred while loading this page. Please try refreshing or check the log details below.
         </p>
 
         {/* Buttons Action Group */}
@@ -60,19 +60,24 @@ export default function Error({ error, reset }: ErrorProps) {
         <div className="w-full px-4 mt-8">
           <button
             onClick={() => setShowDetails(!showDetails)}
-            className="flex items-center justify-center gap-1.5 text-[10px] font-bold text-gray-400 hover:text-gray-600 transition-colors mx-auto cursor-pointer"
+            className="flex items-center justify-center gap-1.5 text-[10px] font-bold text-gray-400 hover:text-gray-600 transition-colors mx-auto cursor-pointer mb-2"
           >
             {showDetails ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-            {showDetails ? "Hide error logs" : "Show error logs"}
+            {showDetails ? "Hide error details" : "Show error details"}
           </button>
 
           {showDetails && (
-            <div className="mt-4 text-left bg-gray-55/80 border border-gray-150 rounded-xl p-4 overflow-x-auto text-[10px] font-mono text-gray-600 max-h-40 leading-relaxed shadow-3xs">
-              <p className="font-bold text-red-600 mb-1">
-                Message: {error.message || "Unknown runtime exception."}
+            <div className="text-left bg-red-50/80 border border-red-200 rounded-xl p-4 overflow-x-auto text-[11px] font-mono text-red-900 max-h-60 leading-relaxed shadow-3xs select-text">
+              <p className="font-black text-red-700 mb-1">
+                {error.name || "Error"}: {error.message || "Unknown runtime exception"}
               </p>
+              {error.stack && (
+                <pre className="mt-2 text-[10px] text-red-800 whitespace-pre-wrap font-mono">
+                  {error.stack}
+                </pre>
+              )}
               {error.digest && (
-                <p className="mt-1 text-gray-500 font-semibold">
+                <p className="mt-2 text-gray-500 font-semibold text-[10px]">
                   Digest ID: {error.digest}
                 </p>
               )}

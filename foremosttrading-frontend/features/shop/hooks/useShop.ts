@@ -50,7 +50,7 @@ export function useShop() {
 
         const mapped: Product[] = rawList.map((p: any) => {
           let mainImage: string | null = null;
-          
+
           if (p.images && p.images.length > 0) {
             const rawUrl = p.images[0].imageUrl || p.images[0].url || (typeof p.images[0] === "string" ? p.images[0] : null);
             if (rawUrl && typeof rawUrl === "string") {

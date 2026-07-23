@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { 
-  Plus, 
-  Search, 
-  Grid, 
-  List, 
-  Copy, 
-  Trash2, 
-  Eye, 
+import {
+  Plus,
+  Search,
+  Grid,
+  List,
+  Copy,
+  Trash2,
+  Eye,
   SlidersHorizontal,
   ChevronLeft,
   ChevronRight,
@@ -88,12 +88,12 @@ export default function ProductsPage() {
 
   // Filter products
   const filteredProducts = products.filter((p) => {
-    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || 
-                          p.description.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.description.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = categoryFilter === "ALL" || p.category === categoryFilter;
-    const matchesCustomizable = customizableFilter === "ALL" || 
-                                (customizableFilter === "CUSTOMIZABLE" && p.isCustomizable) ||
-                                (customizableFilter === "STANDARD" && !p.isCustomizable);
+    const matchesCustomizable = customizableFilter === "ALL" ||
+      (customizableFilter === "CUSTOMIZABLE" && p.isCustomizable) ||
+      (customizableFilter === "STANDARD" && !p.isCustomizable);
     return matchesSearch && matchesCategory && matchesCustomizable;
   });
 
@@ -131,15 +131,15 @@ export default function ProductsPage() {
         <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search products..." 
+            <Input
+              placeholder="Search products..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
               className="pl-9 bg-secondary/30"
             />
           </div>
           <div className="flex gap-2">
-            <select 
+            <select
               value={categoryFilter}
               onChange={(e) => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
               className="h-9 rounded-md border border-input bg-secondary/10 px-3 text-xs font-semibold focus-visible:outline-none"
@@ -150,7 +150,7 @@ export default function ProductsPage() {
               <option value="TENNIS">Tennis</option>
               <option value="ACCESSORIES">Accessories</option>
             </select>
-            <select 
+            <select
               value={customizableFilter}
               onChange={(e) => { setCustomizableFilter(e.target.value); setCurrentPage(1); }}
               className="h-9 rounded-md border border-input bg-secondary/10 px-3 text-xs font-semibold focus-visible:outline-none"
@@ -165,7 +165,7 @@ export default function ProductsPage() {
         <div className="flex items-center gap-3">
           <div className="flex gap-1.5 items-center">
             <span className="text-xs text-muted-foreground font-medium">Sort:</span>
-            <select 
+            <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               className="h-9 rounded-md border border-input bg-secondary/10 px-3 text-xs font-semibold focus-visible:outline-none"
@@ -180,17 +180,17 @@ export default function ProductsPage() {
           <div className="h-6 w-px bg-border hidden sm:block" />
 
           <div className="flex border border-input rounded-md overflow-hidden shrink-0">
-            <Button 
-              variant={viewMode === "grid" ? "default" : "ghost"} 
-              size="icon" 
+            <Button
+              variant={viewMode === "grid" ? "default" : "ghost"}
+              size="icon"
               className="h-8 w-8 rounded-none"
               onClick={() => setViewMode("grid")}
             >
               <Grid className="h-4 w-4" />
             </Button>
-            <Button 
-              variant={viewMode === "list" ? "default" : "ghost"} 
-              size="icon" 
+            <Button
+              variant={viewMode === "list" ? "default" : "ghost"}
+              size="icon"
               className="h-8 w-8 rounded-none"
               onClick={() => setViewMode("list")}
             >
@@ -228,11 +228,10 @@ export default function ProductsPage() {
                     Customizable
                   </span>
                 )}
-                <span className={`absolute top-2 right-2 inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold border ${
-                  p.isActive 
-                    ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400" 
+                <span className={`absolute top-2 right-2 inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold border ${p.isActive
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400"
                     : "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/20 dark:text-rose-400"
-                }`}>
+                  }`}>
                   {p.isActive ? "Active" : "Inactive"}
                 </span>
               </div>
@@ -257,27 +256,27 @@ export default function ProductsPage() {
                       </Button>
                     </Link>
                   )}
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0 border border-border"
                     title="Duplicate"
                     onClick={() => handleDuplicate(p)}
                   >
                     <Copy className="h-3.5 w-3.5" />
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="h-8 w-8 text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/20 shrink-0 border border-border"
                     title="Delete"
                     onClick={() => handleDelete(p.id)}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className={`h-8 w-8 shrink-0 border border-border ${p.isActive ? 'text-amber-600 hover:text-amber-700' : 'text-emerald-600 hover:text-emerald-700'}`}
                     title={p.isActive ? "Deactivate" : "Activate"}
                     onClick={() => handleToggleActive(p.id, p.isActive)}
@@ -323,20 +322,18 @@ export default function ProductsPage() {
                     <td className="p-3 capitalize">{p.category.toLowerCase()}</td>
                     <td className="p-3 font-semibold text-foreground">${p.basePrice.toFixed(2)}</td>
                     <td className="p-3">
-                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold border ${
-                        p.isActive 
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400" 
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold border ${p.isActive
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400"
                           : "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/20 dark:text-rose-400"
-                      }`}>
+                        }`}>
                         {p.isActive ? "Active" : "Inactive"}
                       </span>
                     </td>
                     <td className="p-3">
-                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold ${
-                        p.isCustomizable 
-                          ? "bg-primary/10 text-primary" 
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold ${p.isCustomizable
+                          ? "bg-primary/10 text-primary"
                           : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
-                      }`}>
+                        }`}>
                         {p.isCustomizable ? "Customizable" : "Standard"}
                       </span>
                     </td>
@@ -349,27 +346,27 @@ export default function ProductsPage() {
                             </Button>
                           </Link>
                         )}
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           className="h-8 w-8 border border-border"
                           onClick={() => handleDuplicate(p)}
                           title="Duplicate"
                         >
                           <Copy className="h-3.5 w-3.5" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           className="h-8 w-8 text-rose-600 border border-border hover:bg-rose-50 dark:hover:bg-rose-950/20"
                           onClick={() => handleDelete(p.id)}
                           title="Delete"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           className="h-8 w-8 border border-border text-muted-foreground"
                           onClick={() => handleToggleActive(p.id, p.isActive)}
                           title={p.isActive ? "Deactivate" : "Activate"}
@@ -393,18 +390,18 @@ export default function ProductsPage() {
             Showing Page <span className="text-foreground">{currentPage}</span> of <span className="text-foreground">{totalPages}</span>
           </span>
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage(prev => prev - 1)}
               className="h-8 text-xs px-3"
             >
               <ChevronLeft className="h-3.5 w-3.5 mr-1" /> Previous
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage(prev => prev + 1)}
               className="h-8 text-xs px-3"

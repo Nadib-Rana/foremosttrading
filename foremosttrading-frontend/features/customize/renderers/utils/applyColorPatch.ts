@@ -27,6 +27,7 @@ export const applyColorToNode = (node: SVGElement, color: string, svgEl: SVGSVGE
 };
 
 export const applyColorPatches = (svgEl: SVGSVGElement, colors: Record<string, string>) => {
+  if (!colors) return;
   Object.entries(colors).forEach(([elementId, color]) => {
     if (!color) return;
     const el = findSvgElement(svgEl, elementId);

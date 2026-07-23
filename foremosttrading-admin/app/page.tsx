@@ -12,7 +12,7 @@ export default function LoginPage() {
   const [login, { isLoading: isPending, error: apiError }] = useLoginMutation();
   const dispatch = useAppDispatch();
   const router = useRouter();
-  
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -20,10 +20,10 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
-    
+
     try {
       const response = await login({ email, password }).unwrap();
-      
+
       if (response.data && response.data.accessToken) {
         dispatch(setCredentials({
           user: response.data.user || { email },
@@ -50,7 +50,7 @@ export default function LoginPage() {
             Sign in to access the foremosttrading dashboard
           </p>
         </div>
-        
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
@@ -74,7 +74,7 @@ export default function LoginPage() {
                 />
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="password">
                 Password
