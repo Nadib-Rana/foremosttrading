@@ -15,11 +15,8 @@ export function useCustomize(schema: ProductSchema = SOCCER_JERSEY_SCHEMA) {
     ? safeSchema.supportedTabs
     : SOCCER_JERSEY_SCHEMA.supportedTabs;
 
-  const [activeTab, setActiveTab] = useState<CustomizerTab>(() => {
-    return supportedTabs[0] || "colors";
-  });
+  const [activeTab, setActiveTab] = useState<CustomizerTab>(() => supportedTabs[0] || "colors");
 
-  // Initialize dynamic color map from schema customizable parts
   const [colors, setColors] = useState<KitColors>(() => {
     const initialColors: Record<string, string> = { ...(safeSchema.defaultColors || {}) };
     parts.forEach((part) => {
@@ -31,27 +28,20 @@ export function useCustomize(schema: ProductSchema = SOCCER_JERSEY_SCHEMA) {
   });
 
   const [pattern, setPattern] = useState<DesignPattern>(safeSchema.defaultPattern || SOCCER_JERSEY_SCHEMA.defaultPattern);
-  
-  // Dynamic visible/locked states from schema customizable parts
+
   const [lockedParts, setLockedParts] = useState<Record<string, boolean>>(() => {
     const initialLocks: Record<string, boolean> = {};
-    parts.forEach((part) => {
-      initialLocks[part.id] = false;
-    });
+    parts.forEach((part) => { initialLocks[part.id] = false; });
     return initialLocks;
   });
 
   const [visibleParts, setVisibleParts] = useState<Record<string, boolean>>(() => {
     const initialVisibility: Record<string, boolean> = {};
-    parts.forEach((part) => {
-      initialVisibility[part.id] = true;
-    });
+    parts.forEach((part) => { initialVisibility[part.id] = true; });
     return initialVisibility;
   });
 
-  const [activePartToEdit, setActivePartToEdit] = useState<string | null>(() => {
-    return parts[0]?.id || null;
-  });
+  const [activePartToEdit, setActivePartToEdit] = useState<string | null>(() => parts[0]?.id || null);
 
   const [playerText, setPlayerText] = useState<PlayerText>({
     name: "PLAYER",
@@ -61,7 +51,6 @@ export function useCustomize(schema: ProductSchema = SOCCER_JERSEY_SCHEMA) {
     textColor: "#FFFFFF",
   });
 
-  // Roster players state
   const [players, setPlayers] = useState<TeamPlayer[]>([
     { id: "1", number: "09", name: "PLAYER", size: "M" }
   ]);
@@ -72,26 +61,16 @@ export function useCustomize(schema: ProductSchema = SOCCER_JERSEY_SCHEMA) {
   const [isSaved, setIsSaved] = useState(false);
 
   const changeColor = (part: string, color: string) => {
-    if (lockedParts[part]) return; // Do not edit if locked
+    if (lockedParts[part]) return;
     setColors((prev) => ({ ...prev, [part]: color }));
   };
 
-  const toggleLock = (part: string) => {
-    setLockedParts((prev) => ({ ...prev, [part]: !prev[part] }));
-  };
-
-  const toggleVisibility = (part: string) => {
-    setVisibleParts((prev) => ({ ...prev, [part]: !prev[part] }));
-  };
-
-  const selectPattern = (newPattern: DesignPattern) => {
-    setPattern(newPattern);
-  };
+  const toggleLock = (part: string) => setLockedParts((prev) => ({ ...prev, [part]: !prev[part] }));
+  const toggleVisibility = (part: string) => setVisibleParts((prev) => ({ ...prev, [part]: !prev[part] }));
+  const selectPattern = (newPattern: DesignPattern) => setPattern(newPattern);
 
   const updatePlayerText = (updates: Partial<PlayerText>) => {
     setPlayerText((prev) => ({ ...prev, ...updates }));
-    
-    // Also sync the active player row text
     if (updates.name !== undefined || updates.number !== undefined) {
       setPlayers((prev) =>
         prev.map((p) =>
@@ -107,9 +86,7 @@ export function useCustomize(schema: ProductSchema = SOCCER_JERSEY_SCHEMA) {
     }
   };
 
-  const addUploadedFile = (fileUrl: string) => {
-    setUploadedFiles((prev) => [...prev, fileUrl]);
-  };
+  const addUploadedFile = (fileUrl: string) => setUploadedFiles((prev) => [...prev, fileUrl]);
 
   const saveConfiguration = async () => {
     setIsSaved(true);
@@ -130,31 +107,16 @@ export function useCustomize(schema: ProductSchema = SOCCER_JERSEY_SCHEMA) {
 
   const addPlayer = () => {
     const nextNum = (players.length + 1).toString().padStart(2, "0");
-    const newPlayer: TeamPlayer = {
-      id: Date.now().toString(),
-      number: nextNum,
-      name: `PLAYER`,
-      size: "M"
-    };
+    const newPlayer: TeamPlayer = { id: Date.now().toString(), number: nextNum, name: `PLAYER`, size: "M" };
     setPlayers((prev) => [...prev, newPlayer]);
     setActivePlayerId(newPlayer.id);
-    setPlayerText((prev) => ({
-      ...prev,
-      name: newPlayer.name,
-      number: newPlayer.number,
-    }));
+    setPlayerText((prev) => ({ ...prev, name: newPlayer.name, number: newPlayer.number }));
   };
 
   const updatePlayer = (id: string, field: keyof TeamPlayer, value: string) => {
-    setPlayers((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, [field]: value } : p))
-    );
-    
+    setPlayers((prev) => prev.map((p) => (p.id === id ? { ...p, [field]: value } : p)));
     if (id === activePlayerId) {
-      setPlayerText((prev) => ({
-        ...prev,
-        [field === "number" ? "number" : "name"]: value
-      }));
+      setPlayerText((prev) => ({ ...prev, [field === "number" ? "number" : "name"]: value }));
     }
   };
 
@@ -165,11 +127,7 @@ export function useCustomize(schema: ProductSchema = SOCCER_JERSEY_SCHEMA) {
       if (id === activePlayerId) {
         const fallback = filtered[0];
         setActivePlayerId(fallback.id);
-        setPlayerText((prevText) => ({
-          ...prevText,
-          name: fallback.name || "PLAYER",
-          number: fallback.number || "00",
-        }));
+        setPlayerText((prevText) => ({ ...prevText, name: fallback.name || "PLAYER", number: fallback.number || "00" }));
       }
       return filtered;
     });
@@ -179,36 +137,24 @@ export function useCustomize(schema: ProductSchema = SOCCER_JERSEY_SCHEMA) {
     setActivePlayerId(id);
     const target = players.find((p) => p.id === id);
     if (target) {
-      setPlayerText((prev) => ({
-        ...prev,
-        name: target.name || "PLAYER",
-        number: target.number || "00",
-      }));
+      setPlayerText((prev) => ({ ...prev, name: target.name || "PLAYER", number: target.number || "00" }));
     }
   };
 
   const tabs = supportedTabs.map((tabId) => {
     switch (tabId) {
-      case "elements":
-        return { id: "elements" as CustomizerTab, label: "Decals" };
-      case "colors":
-        return { id: "colors" as CustomizerTab, label: "Colors" };
-      case "designs":
-        return { id: "designs" as CustomizerTab, label: "Patterns" };
-      case "text":
-        return { id: "text" as CustomizerTab, label: "Text" };
-      case "players":
-        return { id: "players" as CustomizerTab, label: "Players" };
-      default:
-        return { id: tabId, label: tabId };
+      case "elements": return { id: "elements" as CustomizerTab, label: "Decals" };
+      case "colors": return { id: "colors" as CustomizerTab, label: "Colors" };
+      case "designs": return { id: "designs" as CustomizerTab, label: "Patterns" };
+      case "text": return { id: "text" as CustomizerTab, label: "Text" };
+      case "players": return { id: "players" as CustomizerTab, label: "Players" };
+      default: return { id: tabId, label: tabId };
     }
   });
 
   const goToNextTab = () => {
     const currentIndex = tabs.findIndex((t) => t.id === activeTab);
-    if (currentIndex < tabs.length - 1) {
-      setActiveTab(tabs[currentIndex + 1].id);
-    }
+    if (currentIndex < tabs.length - 1) setActiveTab(tabs[currentIndex + 1].id);
   };
 
   return {
