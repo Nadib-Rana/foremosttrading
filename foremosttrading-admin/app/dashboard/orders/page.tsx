@@ -1,52 +1,59 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { Search, ShoppingCart, ArrowUpRight, Calendar, User, Package, Check } from "lucide-react";
-import { mockDb, MockOrder } from "@/services/mockDb";
+import { Search, ShoppingCart, ArrowUpRight, Calendar, User, Package, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  useGetOrdersQuery,
+  useUpdateOrderStatusMutation,
+} from "@/lib/store/api/orderApi";
 
 export default function OrdersPage() {
-  const [mounted, setMounted] = useState(false);
-  const [orders, setOrders] = useState<MockOrder[]>([]);
+  const { data: ordersData, isLoading, refetch } = useGetOrdersQuery(undefined);
+  const [updateOrderStatus] = useUpdateOrderStatusMutation();
+
   const [search, setSearch] = useState("");
   const [statusTab, setStatusTab] = useState<string>("ALL");
   const [paymentFilter, setPaymentFilter] = useState<string>("ALL");
 
-  useEffect(() => {
-    mockDb.initialize();
-    mockDb.getOrdersAsync()
-      .then(fetched => {
-        setOrders(fetched);
-        setMounted(true);
-      })
-      .catch(err => {
-        console.error(err);
-        setMounted(true);
-      });
-  }, []);
+  const rawOrders = Array.isArray(ordersData)
+    ? ordersData
+    : ordersData?.orders || ordersData?.data || [];
 
-  if (!mounted) {
+  const orders = rawOrders.map((o: any) => ({
+    id: o.id,
+    orderNumber: o.orderNumber,
+    customerName: o.customer ? `${o.customer.firstName || ''} ${o.customer.lastName || ''}`.trim() || 'Customer' : 'Customer',
+    customerEmail: o.customer?.email || 'customer@example.com',
+    status: o.orderStatus || 'PENDING',
+    paymentStatus: o.paymentStatus || 'UNPAID',
+    totalAmount: Number(o.totalAmount) || 0,
+    itemsCount: o.items?.length || 1,
+    createdAt: o.createdAt ? new Date(o.createdAt).toLocaleDateString() : 'Today',
+  }));
+
+  if (isLoading) {
     return (
-      <div className="flex h-[50vh] w-full items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-primary"></div>
+      <div className="flex h-[50vh] w-full items-center justify-center text-gray-400">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  const filteredOrders = orders.filter((o) => {
-    const matchesSearch = 
+  const filteredOrders = orders.filter((o: any) => {
+    const matchesSearch =
       o.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
       o.customerName.toLowerCase().includes(search.toLowerCase()) ||
       o.customerEmail.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusTab === "ALL" || o.status === statusTab;
-    const matchesPayment = paymentFilter === "ALL" || o.paymentStatus === paymentFilter;
+    const matchesStatus = statusTab === "ALL" || o.status.toUpperCase() === statusTab.toUpperCase();
+    const matchesPayment = paymentFilter === "ALL" || o.paymentStatus.toUpperCase() === paymentFilter.toUpperCase();
     return matchesSearch && matchesStatus && matchesPayment;
   });
 
-  const orderStatuses = ["ALL", "Pending", "Processing", "Printing", "Shipping", "Completed"];
+  const orderStatuses = ["ALL", "PENDING", "PROCESSING", "PRINTING", "SHIPPING", "COMPLETED"];
 
   return (
     <div className="space-y-6">
@@ -155,14 +162,25 @@ export default function OrdersPage() {
                       </span>
                     </td>
                     <td className="p-3.5">
-                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold border ${
-                        o.status === "Completed" ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400" :
-                        o.status === "Printing" ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400" :
-                        o.status === "Processing" ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400" :
-                        "bg-zinc-100 text-zinc-700 border border-zinc-200 dark:bg-zinc-850 dark:text-zinc-300"
-                      }`}>
-                        {o.status}
-                      </span>
+                      <select
+                        value={o.status}
+                        onChange={async (e) => {
+                          const newStatus = e.target.value;
+                          try {
+                            await updateOrderStatus({ orderId: o.id, status: newStatus }).unwrap();
+                            refetch();
+                          } catch (err) {
+                            console.error("Failed to update order status:", err);
+                          }
+                        }}
+                        className="text-[10px] font-bold rounded-lg border border-gray-200 bg-white px-2 py-1 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                      >
+                        <option value="PENDING">PENDING</option>
+                        <option value="PROCESSING">PROCESSING</option>
+                        <option value="PRINTING">PRINTING</option>
+                        <option value="SHIPPING">SHIPPING</option>
+                        <option value="COMPLETED">COMPLETED</option>
+                      </select>
                     </td>
                     <td className="p-3.5 text-right">
                       <Link href={`/dashboard/orders/${o.id}`}>

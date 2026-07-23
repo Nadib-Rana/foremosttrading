@@ -17,7 +17,14 @@ export const authApi = baseApi.injectEndpoints({
       }),
       providesTags: ['User'],
     }),
+    getAdminCustomers: builder.query({
+      query: () => ({
+        url: '/admin/customers',
+        method: 'GET',
+      }),
+      providesTags: ['User'],
+    }),
   }),
 });
 
-export const { useLoginMutation, useGetMeQuery } = authApi;
+export const { useLoginMutation, useGetMeQuery, useGetAdminCustomersQuery } = authApi;

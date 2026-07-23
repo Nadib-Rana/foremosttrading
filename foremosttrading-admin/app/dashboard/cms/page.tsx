@@ -1,58 +1,62 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Plus, FileText, Globe, Eye, Trash2, CheckCircle2, FileEdit } from "lucide-react";
-import { mockDb } from "@/services/mockDb";
+import { useState } from "react";
+import { Plus, FileText, Globe, Eye, Trash2, CheckCircle2, FileEdit, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  useGetCmsQuery,
+  useCreateCmsPostMutation,
+  useCreateCmsPageMutation,
+} from "@/lib/store/api/cmsApi";
 
 export default function CmsPage() {
-  const [mounted, setMounted] = useState(false);
+  const { data: cmsData, isLoading, refetch } = useGetCmsQuery(undefined);
+  const [createCmsPost] = useCreateCmsPostMutation();
+  const [createCmsPage] = useCreateCmsPageMutation();
+
   const [activeTab, setActiveTab] = useState<"posts" | "pages">("posts");
-  const [posts, setPosts] = useState<any[]>([]);
-  const [pages, setPages] = useState<any[]>([]);
-  
-  // Blog form state
   const [postTitle, setPostTitle] = useState("");
   const [postAuthor, setPostAuthor] = useState("Admin");
-  
-  // Page form state
   const [pageTitle, setPageTitle] = useState("");
   const [pageSlug, setPageSlug] = useState("");
 
-  useEffect(() => {
-    mockDb.initialize();
-    const cms = mockDb.getCms();
-    setPosts(cms.posts || []);
-    setPages(cms.pages || []);
-    setMounted(true);
-  }, []);
+  const posts = cmsData?.posts || [];
+  const pages = cmsData?.pages || [];
 
-  if (!mounted) {
+  if (isLoading) {
     return (
-      <div className="flex h-[50vh] w-full items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-primary"></div>
+      <div className="flex h-[50vh] w-full items-center justify-center text-gray-400">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  const handlePostSubmit = (e: React.FormEvent) => {
+  const handlePostSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!postTitle) return;
-    const newPost = mockDb.saveCmsPost({ title: postTitle, author: postAuthor, status: "Published" });
-    setPosts(prev => [...prev, newPost]);
-    setPostTitle("");
+    try {
+      await createCmsPost({ title: postTitle, author: postAuthor, status: "Published" }).unwrap();
+      setPostTitle("");
+      refetch();
+    } catch (err) {
+      console.error("Failed to create CMS post:", err);
+    }
   };
 
-  const handlePageSubmit = (e: React.FormEvent) => {
+  const handlePageSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!pageTitle || !pageSlug) return;
-    const newPage = mockDb.saveCmsPage({ title: pageTitle, slug: pageSlug, status: "Active" });
-    setPages(prev => [...prev, newPage]);
-    setPageTitle("");
-    setPageSlug("");
+    try {
+      await createCmsPage({ title: pageTitle, slug: pageSlug, status: "Active" }).unwrap();
+      setPageTitle("");
+      setPageSlug("");
+      refetch();
+    } catch (err) {
+      console.error("Failed to create CMS page:", err);
+    }
   };
 
   return (

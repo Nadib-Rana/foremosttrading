@@ -1,39 +1,36 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Plus, Trash2, FolderTree, AlertCircle } from "lucide-react";
-import { mockDb, MockCategory } from "@/services/mockDb";
+import { useState } from "react";
+import { Plus, Trash2, FolderTree, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  useGetCategoriesQuery,
+  useCreateCategoryMutation,
+  useDeleteCategoryMutation,
+} from "@/lib/store/api/categoryApi";
 
 export default function CategoriesPage() {
-  const [mounted, setMounted] = useState(false);
-  const [categories, setCategories] = useState<MockCategory[]>([]);
+  const { data: categoriesData, isLoading, refetch } = useGetCategoriesQuery(undefined);
+  const [createCategory, { isLoading: isCreating }] = useCreateCategoryMutation();
+  const [deleteCategory] = useDeleteCategoryMutation();
+
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    mockDb.initialize();
-    mockDb.getCategoriesAsync()
-      .then(fetched => {
-        setCategories(fetched);
-        setMounted(true);
-      })
-      .catch(err => {
-        console.error(err);
-        setMounted(true);
-      });
-  }, []);
+  const categories = Array.isArray(categoriesData)
+    ? categoriesData
+    : categoriesData?.categories || [];
 
-  if (!mounted) {
+  if (isLoading) {
     return (
-      <div className="flex h-[50vh] w-full items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-primary"></div>
+      <div className="flex h-[50vh] w-full items-center justify-center text-gray-400">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -44,20 +41,26 @@ export default function CategoriesPage() {
       setError("Name and slug are required.");
       return;
     }
-    await mockDb.saveCategoryAsync({ name, slug, description });
-    const updated = await mockDb.getCategoriesAsync();
-    setCategories(updated);
-    setName("");
-    setSlug("");
-    setDescription("");
-    setError("");
+    try {
+      await createCategory({ name, slug, description }).unwrap();
+      setName("");
+      setSlug("");
+      setDescription("");
+      setError("");
+      refetch();
+    } catch (err: any) {
+      setError(err?.data?.message || "Failed to create category");
+    }
   };
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this category?")) {
-      await mockDb.deleteCategoryAsync(id);
-      const updated = await mockDb.getCategoriesAsync();
-      setCategories(updated);
+      try {
+        await deleteCategory(id).unwrap();
+        refetch();
+      } catch (err) {
+        console.error("Failed to delete category:", err);
+      }
     }
   };
 

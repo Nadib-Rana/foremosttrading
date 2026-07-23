@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { UploadCloud, ChevronDown } from "lucide-react";
+import { UploadCloud, ChevronDown, Loader2 } from "lucide-react";
 import { LogoMark } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
+import { api } from "@/services/apiService";
 
 interface SignupStep3Props {
   onFinish: (data: any) => void;
@@ -13,18 +14,31 @@ export function SignupStep3({ onFinish }: SignupStep3Props) {
   const [dob, setDob] = useState("2005-01-10");
   const [gender, setGender] = useState("Male");
   const [address, setAddress] = useState("221B Baker Street, Marylebone, London NW1 6XE, United Kingdom");
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleUploadClick = () => {
-    fileInputRef.current?.click();
+    if (!uploading) {
+      fileInputRef.current?.click();
+    }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setProfileImage(url);
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const uploadedUrl = await api.uploadFile(file);
+      if (uploadedUrl) {
+        setProfileImageUrl(uploadedUrl);
+      }
+    } catch (err: any) {
+      alert("Failed to upload profile picture: " + (err.message || "Upload error"));
+    } finally {
+      setUploading(false);
+      e.target.value = "";
     }
   };
 
@@ -34,6 +48,7 @@ export function SignupStep3({ onFinish }: SignupStep3Props) {
       dob,
       gender,
       address,
+      profileImageUrl: profileImageUrl || undefined,
     });
   };
 
@@ -71,9 +86,16 @@ export function SignupStep3({ onFinish }: SignupStep3Props) {
           onClick={handleUploadClick}
           className="w-24 h-24 rounded-xl border border-dashed border-gray-250 bg-white flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 transition-colors p-2 text-center shadow-3xs overflow-hidden"
         >
-          {profileImage ? (
+          {uploading ? (
+            <div className="flex flex-col items-center justify-center gap-1">
+              <Loader2 className="w-6 h-6 animate-spin text-[#EF892A]" />
+              <span className="text-[8px] font-bold text-gray-500 uppercase">
+                Uploading...
+              </span>
+            </div>
+          ) : profileImageUrl ? (
             <img
-              src={profileImage}
+              src={profileImageUrl}
               alt="Profile preview"
               className="w-full h-full object-cover rounded-lg"
             />
@@ -144,9 +166,10 @@ export function SignupStep3({ onFinish }: SignupStep3Props) {
       {/* Finish Button */}
       <Button
         type="submit"
+        disabled={uploading}
         className="w-full mt-6 bg-[#EF892A] hover:bg-[#D97310] text-white py-6 rounded-xl font-bold transition-colors shadow-sm text-xs flex items-center justify-center cursor-pointer border-0"
       >
-        Finish
+        {uploading ? "Saving Profile..." : "Finish"}
       </Button>
     </form>
   );

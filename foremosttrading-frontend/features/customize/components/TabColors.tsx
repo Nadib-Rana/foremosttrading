@@ -1,9 +1,5 @@
-"use client";
-
-import { Lock, Unlock, Eye, EyeOff, Palette } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { KitColors } from "../types";
-import { COLOR_SWATCHES } from "../constants";
+import { CustomerLayerGroup } from "../types/groups";
+import { CustomerLayerGroupPanel } from "./CustomerLayerGroupPanel";
 
 interface TabColorsProps {
   colors: KitColors;
@@ -20,6 +16,11 @@ interface TabColorsProps {
   versionName: string;
   onVersionNameChange: (name: string) => void;
   parts: { id: string; label: string }[];
+  layerGroups?: CustomerLayerGroup[];
+  selectedLayerIds?: string[];
+  onSelectGroup?: (group: CustomerLayerGroup) => void;
+  onSelectLayer?: (layerId: string) => void;
+  onGroupColorChange?: (groupId: string, newColor: string) => void;
 }
 
 export function TabColors({
@@ -37,11 +38,27 @@ export function TabColors({
   versionName,
   onVersionNameChange,
   parts,
+  layerGroups = [],
+  selectedLayerIds = [],
+  onSelectGroup,
+  onSelectLayer,
+  onGroupColorChange,
 }: TabColorsProps) {
 
   return (
     <div className="flex flex-col h-full min-h-0 justify-between">
       <div className="flex-1 overflow-y-auto min-h-0 mb-4 pr-1 flex flex-col gap-3">
+        {layerGroups && layerGroups.length > 0 && onSelectGroup && onSelectLayer && (
+          <CustomerLayerGroupPanel
+            groups={layerGroups}
+            allParts={parts}
+            colorMap={colors}
+            selectedLayerIds={selectedLayerIds}
+            onSelectGroup={onSelectGroup}
+            onSelectLayer={onSelectLayer}
+            onGroupColorChange={onGroupColorChange}
+          />
+        )}
         {parts.map((part) => {
           const isExpanded = activePartToEdit === part.id;
           const isLocked = lockedParts[part.id];

@@ -1,13 +1,18 @@
 "use client";
 
-import { useState, useEffect, use, useRef, useCallback } from "react";
+import { LayerGroupManager } from "@/components/customizer/groups/LayerGroupManager";
+import { useLayerGroups } from "@/components/customizer/groups/useLayerGroups";
+import { SvgStructureManager } from "@/components/customizer/structure/SvgStructureManager";
+import { SvgStructureObject } from "@/components/customizer/structure/types";
+
+import { useState, useEffect, use, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { 
-  Palette, 
-  Droplet, 
-  Shapes, 
+import {
+  Palette,
+  Droplet,
+  Shapes,
   Type,
   Upload,
   Type as TypeIcon,
@@ -17,7 +22,8 @@ import {
   ArrowLeft,
   SlidersHorizontal,
   Layers,
-  Check
+  Check,
+  Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { mockDb } from "@/services/mockDb";
@@ -35,23 +41,41 @@ const resolveUrl = (url?: string | null) => {
 
 const SUPPORTED_TAGS = ["path", "rect", "circle", "ellipse", "polygon", "polyline", "line", "text", "image", "use", "g"];
 
+// Module-level in-memory SVG cache for admin editor
+const adminSvgCache = new Map<string, string>();
+const adminPendingFetches = new Map<string, Promise<string>>();
+
 function DynamicSvgRenderer({
   svgUrl,
   svgRaw,
   colors,
-  selectedLayerId,
+  selectedLayerIds = [],
+  partsMap = {},
+  hiddenLayerIds = [],
+  lockedLayerIds = [],
   onLayerSelect,
+  onLayersDetected,
 }: {
   svgUrl?: string;
   svgRaw?: string;
   colors: Record<string, string>;
-  selectedLayerId?: string | null;
-  onLayerSelect?: (elementId: string) => void;
+  selectedLayerIds?: string[];
+  partsMap?: Record<string, string>;
+  hiddenLayerIds?: string[];
+  lockedLayerIds?: string[];
+  onLayerSelect?: (elementId: string, isMultiSelect: boolean, isRangeSelect: boolean) => void;
+  onLayersDetected?: (layers: Array<{ id: string; label: string; defaultColor: string; layerType: string }>) => void;
 }) {
-  const [svgContent, setSvgContent] = useState<string | null>(svgRaw || null);
-  const [loading, setLoading] = useState(!svgRaw && Boolean(svgUrl));
+  const [svgContent, setSvgContent] = useState<string | null>(() => {
+    if (svgRaw) return svgRaw;
+    if (svgUrl && adminSvgCache.has(svgUrl)) return adminSvgCache.get(svgUrl)!;
+    return null;
+  });
+  const [loading, setLoading] = useState(!svgRaw && Boolean(svgUrl) && !adminSvgCache.has(svgUrl || ""));
   const [error, setError] = useState<string | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [hoveredBadge, setHoveredBadge] = useState<{ label: string; type?: string; x: number; y: number } | null>(null);
+  const svgContainerRef = useRef<HTMLDivElement>(null);
+  const elementCacheRef = useRef<Map<string, SVGElement>>(new Map());
 
   useEffect(() => {
     if (svgRaw) {
@@ -60,54 +84,421 @@ function DynamicSvgRenderer({
       return;
     }
     if (!svgUrl) return;
+
+    if (adminSvgCache.has(svgUrl)) {
+      setSvgContent(adminSvgCache.get(svgUrl)!);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    let isMounted = true;
     setLoading(true);
     setError(null);
-    fetch(svgUrl)
-      .then((res) => {
-        if (!res.ok) throw new Error("SVG load failed (" + res.status + ")");
-        return res.text();
+
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("admin_token") || localStorage.getItem("token")
+        : null;
+
+    let fetchPromise = adminPendingFetches.get(svgUrl);
+    if (!fetchPromise) {
+      fetchPromise = fetch(svgUrl, {
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
       })
+        .then((res) => {
+          if (!res.ok) throw new Error("SVG load failed (" + res.status + ")");
+          return res.text();
+        })
+        .then((text) => {
+          adminSvgCache.set(svgUrl, text);
+          adminPendingFetches.delete(svgUrl);
+          return text;
+        })
+        .catch((err) => {
+          adminPendingFetches.delete(svgUrl);
+          throw err;
+        });
+      adminPendingFetches.set(svgUrl, fetchPromise);
+    }
+
+    fetchPromise
       .then((text) => {
-        setSvgContent(text);
-        setLoading(false);
+        if (isMounted) {
+          setSvgContent(text);
+          setLoading(false);
+        }
       })
       .catch((err) => {
         console.error("SVG fetch error:", err);
-        setError("Failed to load SVG template.");
-        setLoading(false);
+        if (isMounted) {
+          setError("Failed to load SVG template: " + (err.message || "403 Forbidden"));
+          setLoading(false);
+        }
       });
+
+    return () => {
+      isMounted = false;
+    };
   }, [svgUrl, svgRaw]);
 
-  const applyPatches = useCallback(() => {
-    if (!containerRef.current) return;
-    const svgEl = containerRef.current.querySelector("svg");
-    if (!svgEl) return;
 
-    Object.entries(colors).forEach(([elementId, color]) => {
-      const el = svgEl.querySelector("#" + CSS.escape(elementId)) as HTMLElement | SVGElement | null;
-      if (!el) return;
-      el.style.cursor = "pointer";
-      el.style.filter = "";
 
-      const stroke = el.getAttribute("stroke");
-      const fill = el.getAttribute("fill");
-      if (stroke && stroke !== "none" && (!fill || fill === "none")) {
-        el.setAttribute("stroke", color);
-      } else {
-        el.setAttribute("fill", color);
-        el.querySelectorAll(SUPPORTED_TAGS.join(",")).forEach((c) => {
-          const cf = c.getAttribute("fill");
-          if (cf && cf !== "none") c.setAttribute("fill", color);
-        });
+  // Extract and auto-detect all meaningful vector shape layers from SVG DOM
+  const extractLayersFromSvgDom = useCallback((svg: SVGSVGElement) => {
+    const isUtilityNode = (el: Element) => {
+      return Boolean(el.closest("defs, clipPath, mask, pattern, symbol"));
+    };
+
+    const viewBox = svg.viewBox?.baseVal;
+    const svgW = viewBox?.width || svg.clientWidth || 1000;
+    const svgH = viewBox?.height || svg.clientHeight || 1000;
+
+    const isFullBleedBackground = (el: Element) => {
+      const tag = el.tagName.toLowerCase();
+      if (tag === "rect" || tag === "path") {
+        const wAttr = el.getAttribute("width");
+        const hAttr = el.getAttribute("height");
+        if (wAttr === "100%" || hAttr === "100%") return true;
+        if (wAttr && parseFloat(wAttr) >= svgW * 0.98 && hAttr && parseFloat(hAttr) >= svgH * 0.98) return true;
+      }
+      return false;
+    };
+
+    const formatLabel = (raw: string) => {
+      return raw
+        .replace(/[-_]/g, " ")
+        .replace(/([a-z])([A-Z])/g, "$1 $2")
+        .replace(/\b\w/g, (c) => c.toUpperCase())
+        .trim();
+    };
+
+    const results: Array<{ id: string; label: string; defaultColor: string; layerType: string }> = [];
+    const processedIds = new Set<string>();
+
+    // 1. First, harvest all named groups and named vector elements
+    const namedElements = Array.from(svg.querySelectorAll("[id], [data-name], [inkscape\\:label]")).filter((el) => {
+      if (el.id === "svg-selection-overlay" || el.closest("#svg-selection-overlay")) return false;
+      if (isUtilityNode(el)) return false;
+      if (isFullBleedBackground(el)) return false;
+      const tag = el.tagName.toLowerCase();
+      if (tag === "svg" || tag === "style" || tag === "script" || tag === "metadata") return false;
+      if (tag === "g" && el.children.length === 0) return false;
+      return true;
+    });
+
+    namedElements.forEach((node) => {
+      const id = node.getAttribute("id") || node.getAttribute("data-name");
+      if (!id || processedIds.has(id)) return;
+
+      const lowerId = id.toLowerCase();
+      if (lowerId === "svg" || lowerId === "root" || lowerId === "canvas" || lowerId === "viewport" || lowerId === "g") return;
+
+      processedIds.add(id);
+
+      const tagName = node.tagName.toLowerCase();
+      let layerType = "FILL";
+      if (tagName === "text") layerType = "TEXT";
+      else if (tagName === "image") layerType = "IMAGE";
+      else if (tagName === "g") layerType = "GROUP";
+      else {
+        const stroke = node.getAttribute("stroke") || (node as HTMLElement).style.stroke;
+        const fill = node.getAttribute("fill") || (node as HTMLElement).style.fill;
+        if (stroke && stroke !== "none" && fill === "none") layerType = "STROKE";
+      }
+
+      const rawLabel = node.getAttribute("data-name") || node.getAttribute("inkscape:label") || id;
+      const label = formatLabel(rawLabel);
+      const fillAttr = node.getAttribute("fill") || (node as HTMLElement).style.fill || "#FFFFFF";
+
+      results.push({
+        id,
+        label: label || id,
+        defaultColor: fillAttr.startsWith("url") ? "#FFFFFF" : fillAttr,
+        layerType,
+      });
+    });
+
+    // 2. Next, for any standalone shape that is NOT inside an already-processed named group
+    const standaloneShapes = Array.from(
+      svg.querySelectorAll("path, rect, circle, ellipse, polygon, polyline, line, text, tspan, textPath, image")
+    ).filter((el) => {
+      if (el.id === "svg-selection-overlay" || el.closest("#svg-selection-overlay")) return false;
+      if (isUtilityNode(el)) return false;
+      if (isFullBleedBackground(el)) return false;
+      const existingId = el.getAttribute("id");
+      if (existingId && processedIds.has(existingId)) return false;
+
+      // Skip if nested inside an already-processed parent group
+      let parent = el.parentElement;
+      while (parent && parent !== svg) {
+        const parentId = parent.getAttribute("id") || parent.getAttribute("data-name");
+        if (parentId && processedIds.has(parentId)) {
+          return false;
+        }
+        parent = parent.parentElement;
+      }
+      return true;
+    });
+
+    let shapeCounter = 1;
+    standaloneShapes.forEach((node) => {
+      let id = node.getAttribute("id");
+      const tagName = node.tagName.toLowerCase();
+
+      if (!id) {
+        id = `${tagName}_${shapeCounter++}`;
+        node.setAttribute("id", id);
+      }
+
+      if (processedIds.has(id)) return;
+      processedIds.add(id);
+
+      let layerType = "FILL";
+      if (tagName === "text" || tagName === "tspan" || tagName === "textpath") layerType = "TEXT";
+      else if (tagName === "image") layerType = "IMAGE";
+      else {
+        const stroke = node.getAttribute("stroke") || (node as HTMLElement).style.stroke;
+        const fill = node.getAttribute("fill") || (node as HTMLElement).style.fill;
+        if (stroke && stroke !== "none" && fill === "none") layerType = "STROKE";
+      }
+
+      const rawLabel = node.getAttribute("data-name") || node.getAttribute("inkscape:label") || id;
+      const label = formatLabel(rawLabel);
+
+      results.push({
+        id,
+        label: label || id,
+        defaultColor: "#FFFFFF",
+        layerType,
+      });
+    });
+
+    const getEffectiveColor = (el: Element): string => {
+      const fillAttr = el.getAttribute("fill");
+      if (fillAttr && fillAttr !== "none" && !fillAttr.startsWith("url(")) return fillAttr;
+
+      const strokeAttr = el.getAttribute("stroke");
+      if (strokeAttr && strokeAttr !== "none" && !strokeAttr.startsWith("url(")) return strokeAttr;
+
+      if (el instanceof HTMLElement || el instanceof SVGElement) {
+        if (el.style.fill && el.style.fill !== "none" && !el.style.fill.startsWith("url(")) return el.style.fill;
+        if (el.style.stroke && el.style.stroke !== "none" && !el.style.stroke.startsWith("url(")) return el.style.stroke;
+
+        if (typeof window !== "undefined") {
+          try {
+            const comp = window.getComputedStyle(el);
+            if (comp.fill && comp.fill !== "none" && comp.fill !== "rgba(0, 0, 0, 0)" && !comp.fill.startsWith("url(")) {
+              return comp.fill;
+            }
+            if (comp.stroke && comp.stroke !== "none" && comp.stroke !== "rgba(0, 0, 0, 0)" && !comp.stroke.startsWith("url(")) {
+              return comp.stroke;
+            }
+          } catch (e) { }
+        }
+      }
+
+      // Check first child if group
+      if (el.children && el.children.length > 0) {
+        for (let i = 0; i < el.children.length; i++) {
+          const childColor = getEffectiveColor(el.children[i]);
+          if (childColor && childColor !== "#1F1F1F") return childColor;
+        }
+      }
+
+      return "#1F1F1F";
+    };
+
+    results.forEach((item, index) => {
+      const el = findSvgElement(svg, item.id);
+      if (el) {
+        item.defaultColor = getEffectiveColor(el);
       }
     });
 
-    if (selectedLayerId) {
-      const selectedEl = svgEl.querySelector("#" + CSS.escape(selectedLayerId)) as HTMLElement | SVGElement | null;
-      if (selectedEl) {
-        selectedEl.style.filter = "drop-shadow(0 0 5px #2563eb) drop-shadow(0 0 10px #3b82f6)";
-        selectedEl.style.transition = "filter 0.2s ease-in-out";
+    return results;
+  }, []);
+
+  // Set of detected layer IDs for quick lookup during canvas clicks
+  const detectedLayerIdsRef = useRef<Set<string>>(new Set());
+
+  // 1. Ingest SVG Content into DOM ONCE when template changes & Auto-detect layers
+  useEffect(() => {
+    if (!svgContent || !svgContainerRef.current) return;
+    svgContainerRef.current.innerHTML = svgContent;
+
+    const svgEl = svgContainerRef.current.querySelector("svg");
+    if (svgEl) {
+      const detected = extractLayersFromSvgDom(svgEl);
+      detectedLayerIdsRef.current = new Set(detected.map((d) => d.id));
+
+      if (onLayersDetected && detected.length > 0) {
+        onLayersDetected(detected);
       }
+      try {
+        applyPatches();
+      } catch (e) {
+        console.error("[DynamicSvgRenderer] applyPatches error:", e);
+      }
+    }
+  }, [svgContent, extractLayersFromSvgDom, onLayersDetected]);
+
+  const findSvgElement = (svg: SVGSVGElement, id: string): SVGElement | null => {
+    if (!id) return null;
+    try {
+      const exact = svg.querySelector("#" + CSS.escape(id)) as SVGElement | null;
+      if (exact) return exact;
+    } catch (e) { }
+
+    const lowerId = id.toLowerCase();
+    const cleanId = lowerId.replace(/[-_]/g, "");
+    const all = svg.querySelectorAll("[id]");
+    for (let i = 0; i < all.length; i++) {
+      const item = all[i] as SVGElement;
+      if (item.id && item.id !== "svg-selection-overlay") {
+        const itemLower = item.id.toLowerCase();
+        if (itemLower === lowerId || itemLower.replace(/[-_]/g, "") === cleanId) {
+          return item;
+        }
+      }
+    }
+
+    // Index-based fallback ONLY on artwork vector shapes
+    const numMatch = id.match(/\d+/);
+    if (numMatch) {
+      const layerIdx = parseInt(numMatch[0], 10) - 1;
+      if (layerIdx >= 0) {
+        const viewBox = svg.viewBox?.baseVal;
+        const svgW = viewBox?.width || svg.clientWidth || 1000;
+        const svgH = viewBox?.height || svg.clientHeight || 1000;
+
+        const leafShapes = Array.from(
+          svg.querySelectorAll("path, rect, circle, ellipse, polygon, polyline, line")
+        ).filter((el) => {
+          if (el.id === "svg-selection-overlay" || el.closest("#svg-selection-overlay")) return false;
+          if (el.closest("defs, clipPath, mask, pattern, symbol")) return false;
+          const wAttr = el.getAttribute("width");
+          const hAttr = el.getAttribute("height");
+          if (wAttr === "100%" || hAttr === "100%") return false;
+          if (wAttr && parseFloat(wAttr) >= svgW * 0.95 && hAttr && parseFloat(hAttr) >= svgH * 0.95) return false;
+
+          return true;
+        });
+
+        if (leafShapes[layerIdx]) {
+          return leafShapes[layerIdx] as SVGElement;
+        }
+      }
+    }
+
+    return null;
+  };
+
+  const applyPatches = useCallback(() => {
+    if (!svgContainerRef.current) return;
+    const svgEl = svgContainerRef.current.querySelector("svg");
+    if (!svgEl) return;
+
+    // Create or reset top-level SVG selection overlay group
+    let overlay = svgEl.querySelector("#svg-selection-overlay");
+    if (overlay) {
+      overlay.remove();
+    }
+    overlay = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    overlay.setAttribute("id", "svg-selection-overlay");
+    (overlay as HTMLElement).style.pointerEvents = "none";
+    svgEl.appendChild(overlay);
+
+    const applyColorToNode = (node: SVGElement, color: string) => {
+      node.style.cursor = "pointer";
+
+      const fillAttr = node.getAttribute("fill") || node.style.fill;
+      const strokeAttr = node.getAttribute("stroke") || node.style.stroke;
+
+      // Do not overwrite url() fill gradients
+      if (fillAttr && fillAttr.startsWith("url(")) return;
+
+      if (fillAttr && fillAttr !== "none") {
+        node.style.setProperty("fill", color, "important");
+        node.setAttribute("fill", color);
+      } else if (strokeAttr && strokeAttr !== "none") {
+        node.style.setProperty("stroke", color, "important");
+        node.setAttribute("stroke", color);
+      }
+
+      if (node.children && node.children.length > 0) {
+        Array.from(node.children).forEach((child) => {
+          if (child instanceof SVGElement && child.id !== "svg-selection-overlay") {
+            applyColorToNode(child, color);
+          }
+        });
+      }
+    };
+
+    Object.entries(colors).forEach(([elementId, color]) => {
+      if (!color) return;
+      const el = findSvgElement(svgEl, elementId);
+      if (!el) return;
+
+      // Skip applying if color is white default and element already has a valid dark/colored fill
+      const currentFill = el.getAttribute("fill") || el.style.fill;
+      if (
+        (color === "#FFFFFF" || color === "#ffffff") &&
+        currentFill &&
+        currentFill !== "#FFFFFF" &&
+        currentFill !== "#ffffff" &&
+        currentFill !== "none"
+      ) {
+        return;
+      }
+
+      applyColorToNode(el, color);
+    });
+
+    // Handle hidden layers
+    if (hiddenLayerIds && hiddenLayerIds.length > 0) {
+      hiddenLayerIds.forEach((id) => {
+        const hiddenEl = findSvgElement(svgEl, id);
+        if (hiddenEl) {
+          (hiddenEl as HTMLElement).style.display = "none";
+        }
+      });
+    }
+
+    if (selectedLayerIds && selectedLayerIds.length > 0) {
+      selectedLayerIds.forEach((id) => {
+        const selectedEl = findSvgElement(svgEl, id);
+        if (!selectedEl) return;
+
+        // Non-destructive filter glow indicator
+        selectedEl.style.filter = "drop-shadow(0 0 6px rgba(37, 99, 235, 0.9)) brightness(1.1)";
+        selectedEl.style.transition = "filter 0.15s ease-in-out";
+
+        // Non-destructive Figma bounding box overlay
+        if ("getBBox" in selectedEl) {
+          try {
+            const bbox = (selectedEl as SVGGraphicsElement).getBBox();
+            if (bbox && bbox.width > 0 && bbox.height > 0) {
+              const pad = Math.max(3, Math.min(bbox.width, bbox.height) * 0.04);
+              const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+              rect.setAttribute("x", String(bbox.x - pad));
+              rect.setAttribute("y", String(bbox.y - pad));
+              rect.setAttribute("width", String(bbox.width + pad * 2));
+              rect.setAttribute("height", String(bbox.height + pad * 2));
+              rect.setAttribute("rx", "4");
+              rect.setAttribute("ry", "4");
+              rect.setAttribute("fill", "rgba(59, 130, 246, 0.15)");
+              rect.setAttribute("stroke", "#2563eb");
+              rect.setAttribute("stroke-width", "2");
+              rect.setAttribute("stroke-dasharray", "4,3");
+              (rect as HTMLElement).style.pointerEvents = "none";
+              overlay?.appendChild(rect);
+            }
+          } catch (err) { }
+        }
+      });
     }
 
     svgEl.setAttribute("width", "100%");
@@ -116,40 +507,120 @@ function DynamicSvgRenderer({
     svgEl.style.height = "100%";
     svgEl.style.maxWidth = "100%";
     svgEl.style.maxHeight = "100%";
-  }, [colors, selectedLayerId]);
+  }, [colors, selectedLayerIds, hiddenLayerIds]);
 
+  // 2. Patch colors and selection overlays when selection or colors change
   useEffect(() => {
-    if (!svgContent || !containerRef.current) return;
-    containerRef.current.innerHTML = svgContent;
-    applyPatches();
+    if (!svgContent || !svgContainerRef.current) return;
+    try {
+      applyPatches();
+    } catch (e) {
+      console.error("[DynamicSvgRenderer] applyPatches error:", e);
+    }
+  }, [colors, selectedLayerIds, hiddenLayerIds, applyPatches, svgContent]);
 
-    const svgEl = containerRef.current.querySelector("svg");
+  // 3. Figma-style interactive SVG layer selection & click detection
+  useEffect(() => {
+    if (!svgContainerRef.current) return;
+    const svgEl = svgContainerRef.current.querySelector("svg");
     if (!svgEl) return;
 
     const handleClick = (e: MouseEvent) => {
       let target: Element | null = e.target as Element;
       while (target && target !== svgEl) {
+        if (target.id === "svg-selection-overlay" || target.closest("#svg-selection-overlay")) {
+          return;
+        }
+        if (target.closest("defs, clipPath, mask, pattern, symbol")) {
+          return;
+        }
+
         const id = target.getAttribute("id");
-        if (id && colors.hasOwnProperty(id)) {
+        // Ascend tree to find the nearest recognized layer ID
+        if (id && (detectedLayerIdsRef.current.has(id) || colors.hasOwnProperty(id))) {
+          if (lockedLayerIds && lockedLayerIds.includes(id)) {
+            target = target.parentElement;
+            continue;
+          }
+
+          try {
+            (target as HTMLElement).animate(
+              [
+                { opacity: 0.6, transform: "scale(0.98)" },
+                { opacity: 1, transform: "scale(1)" }
+              ],
+              { duration: 180, easing: "ease-out" }
+            );
+          } catch (err) { }
+
           if (onLayerSelect) {
-            onLayerSelect(id);
+            onLayerSelect(id, e.ctrlKey || e.metaKey, e.shiftKey);
+          }
+          break;
+        }
+
+        target = target.parentElement;
+      }
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      let target: Element | null = e.target as Element;
+      while (target && target !== svgEl) {
+        if (target.id === "svg-selection-overlay" || target.closest("#svg-selection-overlay")) {
+          return;
+        }
+        if (target.closest("defs, clipPath, mask, pattern, symbol")) {
+          return;
+        }
+
+        const id = target.getAttribute("id");
+        if (id && (detectedLayerIdsRef.current.has(id) || colors.hasOwnProperty(id))) {
+          const displayLabel = partsMap[id] || id.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
+          if (!selectedLayerIds.includes(id)) {
+            (target as HTMLElement).style.filter = "drop-shadow(0 0 6px rgba(59, 130, 246, 0.8)) brightness(1.08)";
+            (target as HTMLElement).style.transition = "filter 0.15s ease-in-out";
+          }
+
+          if (svgContainerRef.current) {
+            const rect = svgContainerRef.current.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const tagName = target.tagName.toUpperCase();
+            setHoveredBadge({ label: displayLabel, type: tagName, x, y });
+          }
+          return;
+        }
+        target = target.parentElement;
+      }
+      setHoveredBadge(null);
+    };
+
+    const handleMouseOut = (e: MouseEvent) => {
+      let target: Element | null = e.target as Element;
+      while (target && target !== svgEl) {
+        const id = target.getAttribute("id");
+        if (id) {
+          if (!selectedLayerIds.includes(id)) {
+            (target as HTMLElement).style.filter = "";
           }
           break;
         }
         target = target.parentElement;
       }
+      setHoveredBadge(null);
     };
 
     svgEl.addEventListener("click", handleClick);
+    svgEl.addEventListener("mousemove", handleMouseMove);
+    svgEl.addEventListener("mouseout", handleMouseOut);
+
     return () => {
       svgEl.removeEventListener("click", handleClick);
+      svgEl.removeEventListener("mousemove", handleMouseMove);
+      svgEl.removeEventListener("mouseout", handleMouseOut);
     };
-  }, [svgContent, applyPatches, colors, onLayerSelect]);
-
-  useEffect(() => {
-    if (!svgContent) return;
-    applyPatches();
-  }, [colors, selectedLayerId, applyPatches, svgContent]);
+  }, [svgContent, colors, selectedLayerIds, lockedLayerIds, partsMap, onLayerSelect]);
 
   if (loading) {
     return (
@@ -169,10 +640,21 @@ function DynamicSvgRenderer({
   }
 
   return (
-    <div
-      ref={containerRef}
-      className="w-full h-full flex items-center justify-center [&>svg]:max-w-full [&>svg]:max-h-full"
-    />
+    <div className="w-full h-full flex items-center justify-center relative">
+      <div
+        ref={svgContainerRef}
+        className="w-full h-full flex items-center justify-center [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:w-full [&>svg]:h-full"
+      />
+      {hoveredBadge && (
+        <div
+          className="absolute z-30 pointer-events-none bg-gray-900/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-md shadow-xl backdrop-blur-xs transition-transform transform -translate-x-1/2 -translate-y-full border border-white/20 whitespace-nowrap flex items-center gap-1.5"
+          style={{ left: hoveredBadge.x, top: hoveredBadge.y - 8 }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+          Layer: {hoveredBadge.label} {hoveredBadge.type ? `(${hoveredBadge.type})` : ""}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -184,8 +666,8 @@ const tabs = [
 ];
 
 const PRESET_COLORS = [
-  "#FFFFFF", "#000000", "#FF3B30", "#FF9500", "#FFCC00", 
-  "#4CD964", "#5AC8FA", "#007AFF", "#5856D6", "#FF2D55", 
+  "#FFFFFF", "#000000", "#FF3B30", "#FF9500", "#FFCC00",
+  "#4CD964", "#5AC8FA", "#007AFF", "#5856D6", "#FF2D55",
   "#555555", "#8E8E93"
 ];
 
@@ -234,18 +716,87 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [product, setProduct] = useState<ProductSchema | null>(null);
-  
+
   const [activeTab, setActiveTab] = useState("colors");
   const [activeViewIndex, setActiveViewIndex] = useState(0);
   const [layerColors, setLayerColors] = useState<Record<string, string>>({});
-  const [activeLayerId, setActiveLayerId] = useState<string | null>(null);
-
-  // Text state
+  const [previewColors, setPreviewColors] = useState<Record<string, string> | null>(null);
   const [textInput, setTextInput] = useState("YOUR TEXT");
   const [textColor, setTextColor] = useState("#000000");
 
+  const [hiddenLayerIds, setHiddenLayerIds] = useState<string[]>([]);
+  const [lockedLayerIds, setLockedLayerIds] = useState<string[]>([]);
+
+  const toggleLayerVisibility = (layerId: string) => {
+    setHiddenLayerIds((prev) =>
+      prev.includes(layerId) ? prev.filter((id) => id !== layerId) : [...prev, layerId]
+    );
+  };
+
+  const toggleLayerLock = (layerId: string) => {
+    setLockedLayerIds((prev) =>
+      prev.includes(layerId) ? prev.filter((id) => id !== layerId) : [...prev, layerId]
+    );
+  };
+
+  const {
+    groups,
+    setGroups,
+    selectedLayerIds,
+    setSelectedLayerIds,
+    createGroup,
+    renameGroup,
+    toggleGroupLock,
+    toggleGroupVisibility,
+    deleteGroup,
+    duplicateGroup,
+    assignLayersToGroup,
+    renameLayerLabel,
+    removeLayerFromGroup,
+    selectGroup,
+  } = useLayerGroups();
+
   const canvasRef = useRef<ProductCanvasRef>(null);
   const colorInputRef = useRef<HTMLInputElement>(null);
+  const layerRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  const handleLayersDetected = useCallback(
+    (detectedLayers: Array<{ id: string; label: string; defaultColor: string; layerType: string }>) => {
+      setProduct((prev) => {
+        if (!prev) return prev;
+        const existingIds = new Set((prev.customizableParts || []).map((p) => p.id));
+        const newParts = detectedLayers
+          .filter((l) => !existingIds.has(l.id))
+          .map((l) => ({
+            id: l.id,
+            label: l.label,
+            defaultColor: l.defaultColor,
+            isEditable: true,
+            layerType: l.layerType,
+          }));
+
+        if (newParts.length === 0) return prev;
+
+        return {
+          ...prev,
+          customizableParts: [...prev.customizableParts, ...newParts],
+        };
+      });
+
+      setLayerColors((prev) => {
+        const next = { ...prev };
+        let changed = false;
+        detectedLayers.forEach((l) => {
+          if (!next[l.id]) {
+            next[l.id] = l.defaultColor || "#FFFFFF";
+            changed = true;
+          }
+        });
+        return changed ? next : prev;
+      });
+    },
+    []
+  );
 
   useEffect(() => {
     if (!productId) return;
@@ -285,7 +836,7 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
         }
 
         if (parsedProduct.customizableParts && parsedProduct.customizableParts.length > 0) {
-          setActiveLayerId(parsedProduct.customizableParts[0].id);
+          setSelectedLayerIds([parsedProduct.customizableParts[0].id]);
         }
 
         setLoading(false);
@@ -319,15 +870,110 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
       });
   }, [productId]);
 
-  const handleSelectLayer = (layerId: string) => {
+  const partsMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    product?.customizableParts?.forEach((p) => {
+      map[p.id] = p.label || p.id;
+    });
+    return map;
+  }, [product]);
+
+  const handleLayerSelect = (layerId: string, isMultiSelect = false, isRangeSelect = false) => {
     setActiveTab("colors");
-    setActiveLayerId(layerId);
-    setTimeout(() => {
-      if (colorInputRef.current) {
-        colorInputRef.current.focus();
-        colorInputRef.current.click();
+
+    // Auto-register newly detected SVG layer into customizableParts if missing
+    setProduct((prevProduct) => {
+      if (!prevProduct) return prevProduct;
+      const exists = prevProduct.customizableParts.some((p) => p.id === layerId);
+      if (!exists) {
+        const newPart = {
+          id: layerId,
+          label: layerId.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+          defaultColor: "#FFFFFF",
+          isEditable: true,
+        };
+        return {
+          ...prevProduct,
+          customizableParts: [...prevProduct.customizableParts, newPart],
+        };
       }
-    }, 100);
+      return prevProduct;
+    });
+
+    setLayerColors((prev) => {
+      if (!prev[layerId]) {
+        return { ...prev, [layerId]: "#FFFFFF" };
+      }
+      return prev;
+    });
+
+    if (isRangeSelect && selectedLayerIds.length > 0 && product?.customizableParts) {
+      const allIds = product.customizableParts.map((p) => p.id);
+      const lastId = selectedLayerIds[selectedLayerIds.length - 1];
+      const idx1 = allIds.indexOf(lastId);
+      const idx2 = allIds.indexOf(layerId);
+      if (idx1 !== -1 && idx2 !== -1) {
+        const start = Math.min(idx1, idx2);
+        const end = Math.max(idx1, idx2);
+        const range = allIds.slice(start, end + 1);
+        setSelectedLayerIds(Array.from(new Set([...selectedLayerIds, ...range])));
+      } else {
+        setSelectedLayerIds([layerId]);
+      }
+    } else if (isMultiSelect) {
+      if (selectedLayerIds.includes(layerId)) {
+        if (selectedLayerIds.length > 1) {
+          setSelectedLayerIds(selectedLayerIds.filter((id) => id !== layerId));
+        }
+      } else {
+        setSelectedLayerIds([...selectedLayerIds, layerId]);
+      }
+    } else {
+      setSelectedLayerIds([layerId]);
+    }
+
+    setTimeout(() => {
+      if (layerRefs.current[layerId]) {
+        layerRefs.current[layerId]?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    }, 50);
+  };
+
+  const handleSelectAllLayers = () => {
+    if (product?.customizableParts) {
+      setSelectedLayerIds(product.customizableParts.map((p) => p.id));
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedLayerIds([]);
+  };
+
+  const handleSwatchHover = (color: string) => {
+    if (selectedLayerIds.length === 0) return;
+    setPreviewColors((prev) => {
+      const next = { ...(prev || layerColors) };
+      selectedLayerIds.forEach((id) => {
+        next[id] = color;
+      });
+      return next;
+    });
+  };
+
+  const handleSwatchLeave = () => {
+    setPreviewColors(null);
+  };
+
+  const handleBatchColorChange = (color: string) => {
+    if (selectedLayerIds.length === 0) return;
+    setPreviewColors(null);
+    setLayerColors((prev) => {
+      const next = { ...prev };
+      selectedLayerIds.forEach((id) => {
+        next[id] = color;
+      });
+      return next;
+    });
   };
 
   const handleAddText = () => {
@@ -364,13 +1010,6 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
     }
   };
 
-  const handleColorChange = (layerId: string, color: string) => {
-    setLayerColors((prev) => ({
-      ...prev,
-      [layerId]: color,
-    }));
-  };
-
   if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-[#f4f5f7]">
@@ -397,8 +1036,12 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
   }
 
   const currentView = product.views && product.views.length > 0 ? product.views[activeViewIndex] : null;
-  const activeSvgUrl = resolveUrl(currentView?.svgUrl || product.svgUrl || (product.images && product.images[0]) || "");
+  const rawSvgPath = currentView?.svgUrl || product.svgUrl || "";
+  const activeSvgUrl = resolveUrl(rawSvgPath);
   const activeSvgRaw = currentView?.svgRaw || product.svgRaw || undefined;
+
+  const activeColorMap = previewColors || layerColors;
+  const activeLayerColor = selectedLayerIds.length > 0 ? (activeColorMap[selectedLayerIds[0]] || "#FFFFFF") : "#FFFFFF";
 
   return (
     <div className="flex h-screen bg-[#f4f5f7] overflow-hidden -m-8">
@@ -424,56 +1067,70 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
 
       {/* Main Content Area */}
       <div className="flex flex-1 w-full h-full p-8 pt-24 gap-6">
-        
+
         {/* Left Pane: Preview Area */}
-        <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center p-8 relative overflow-hidden">
+        <div className="flex-1 bg-slate-100 rounded-xl shadow-inner border border-gray-200 flex items-center justify-center p-8 relative overflow-hidden">
           <div className="relative w-full h-full min-h-[500px] flex items-center justify-center">
-             <div className="absolute inset-0 bg-gray-50/50 rounded-lg overflow-hidden flex flex-col items-center justify-center p-6">
-                
-                {/* Overlay Action Tools */}
-                <div className="absolute top-4 right-4 z-20 flex gap-2">
-                  <Button variant="outline" size="icon" onClick={handleDelete} className="bg-white hover:bg-red-50 text-red-500 hover:text-red-600 shadow-sm border-gray-200" title="Delete Selected Item">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+            <div className="absolute inset-0 bg-slate-200/60 rounded-lg overflow-hidden flex flex-col items-center justify-center p-6 border border-slate-300/50">
 
-                {/* SVG Vector Preview & Dynamic Color Patching */}
-                {(activeSvgUrl || activeSvgRaw) ? (
-                  <div className="relative w-full h-full flex items-center justify-center">
-                    <DynamicSvgRenderer 
-                      svgUrl={activeSvgUrl} 
-                      svgRaw={activeSvgRaw} 
-                      colors={layerColors} 
-                      selectedLayerId={activeLayerId}
-                      onLayerSelect={handleSelectLayer}
-                    />
-                    <div className="absolute inset-0 pointer-events-none [&_canvas]:pointer-events-auto">
-                      <ProductCanvas 
-                        ref={canvasRef} 
-                        shapeName={currentView?.name || "Product View"} 
-                        tintColor="transparent" 
-                        customShapeUrl=""
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <ProductCanvas 
-                    ref={canvasRef} 
-                    shapeName={currentView?.name || "Product View"} 
-                    tintColor="transparent" 
-                    customShapeUrl=""
+              {/* Overlay Action Tools */}
+              <div className="absolute top-4 right-4 z-20 flex gap-2">
+                <Button variant="outline" size="icon" onClick={handleDelete} className="bg-white hover:bg-red-50 text-red-500 hover:text-red-600 shadow-sm border-gray-200" title="Delete Selected Item">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* SVG Vector Preview & Dynamic Color Patching */}
+              {(activeSvgUrl || activeSvgRaw) ? (
+                <div className="relative w-full h-full flex items-center justify-center">
+                  <DynamicSvgRenderer
+                    key={currentView?.id || activeViewIndex}
+                    svgUrl={activeSvgUrl}
+                    svgRaw={activeSvgRaw}
+                    colors={activeColorMap}
+                    selectedLayerIds={selectedLayerIds}
+                    partsMap={partsMap}
+                    hiddenLayerIds={hiddenLayerIds}
+                    lockedLayerIds={lockedLayerIds}
+                    onLayerSelect={handleLayerSelect}
+                    onLayersDetected={handleLayersDetected}
                   />
-                )}
+                  <div className="absolute inset-0 pointer-events-none [&_canvas]:pointer-events-auto">
+                    <ProductCanvas
+                      ref={canvasRef}
+                      shapeName={currentView?.name || "Product View"}
+                      tintColor="transparent"
+                      customShapeUrl=""
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center p-8 text-center space-y-3 bg-white/80 backdrop-blur-xs rounded-2xl border border-gray-200 shadow-sm max-w-md">
+                  <Layers className="h-10 w-10 text-blue-500 mx-auto" />
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-bold text-gray-900">No SVG Vector Template Uploaded</h3>
+                    <p className="text-xs text-gray-500">
+                      Product <strong>{product.name}</strong> has no SVG template file linked yet. Upload an SVG template to configure vector customization layers.
+                    </p>
+                  </div>
+                  <Link href={`/dashboard/products/${product.id}`}>
+                    <Button size="sm" className="text-xs h-8">
+                      <Upload className="h-3.5 w-3.5 mr-1.5" /> Upload SVG Template
+                    </Button>
+                  </Link>
+                </div>
+              )}
 
-             </div>
+            </div>
           </div>
         </div>
 
+
         {/* Right Pane: Controls */}
-        <div className="w-[400px] flex flex-col gap-4">
+        <div className="w-[420px] flex flex-col gap-4">
           <Card className="flex-1 border-gray-100 shadow-sm flex flex-col overflow-hidden bg-white">
             <CardContent className="p-4 flex flex-col h-full gap-4">
-              
+
               {/* Tabs Header */}
               <div className="grid grid-cols-4 gap-2">
                 {tabs.map((tab) => {
@@ -484,8 +1141,8 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
                       onClick={() => setActiveTab(tab.id)}
                       className={cn(
                         "flex flex-col items-center justify-center py-3 rounded-lg border transition-all text-xs font-medium gap-1.5",
-                        isActive 
-                          ? "bg-blue-600 border-blue-600 text-white shadow-md" 
+                        isActive
+                          ? "bg-blue-600 border-blue-600 text-white shadow-md"
                           : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300"
                       )}
                     >
@@ -498,7 +1155,7 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
 
               {/* Tab Content */}
               <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-                
+
                 {/* VIEWS TAB */}
                 {activeTab === "views" && (
                   <div className="flex flex-col gap-4 pb-4">
@@ -508,13 +1165,13 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
                     {product.views && product.views.length > 0 ? (
                       <div className="grid grid-cols-2 gap-3">
                         {product.views.map((view, i) => (
-                          <div 
+                          <div
                             key={view.id || i}
                             onClick={() => setActiveViewIndex(i)}
                             className={cn(
                               "p-3 rounded-lg border-2 cursor-pointer transition-all shadow-sm flex flex-col items-center justify-center gap-2 group text-center",
-                              activeViewIndex === i 
-                                ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/20" 
+                              activeViewIndex === i
+                                ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/20"
                                 : "border-gray-200 bg-gray-50 hover:border-blue-400"
                             )}
                           >
@@ -546,79 +1203,207 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
                 {/* COLORS TAB */}
                 {activeTab === "colors" && (
                   <div className="flex flex-col gap-4">
-                    <h3 className="font-semibold text-gray-800 text-sm">Layer Customization</h3>
-                    <p className="text-xs text-gray-500">Click any SVG part on the garment or choose a layer below.</p>
+                    {/* Layer Group Management System */}
+                    <LayerGroupManager
+                      groups={groups}
+                      allParts={product.customizableParts || []}
+                      colorMap={activeColorMap}
+                      selectedLayerIds={selectedLayerIds}
+                      activeSvgClickedId={selectedLayerIds.length > 0 ? selectedLayerIds[selectedLayerIds.length - 1] : null}
+                      onCreateGroup={createGroup}
+                      onSelectGroup={selectGroup}
+                      onToggleLock={toggleGroupLock}
+                      onToggleVisibility={toggleGroupVisibility}
+                      onDeleteGroup={deleteGroup}
+                      onDuplicateGroup={duplicateGroup}
+                      onSelectLayer={(id) => handleLayerSelect(id, false, false)}
+                      onRenameLayer={renameLayerLabel}
+                      onRemoveLayer={removeLayerFromGroup}
+                      onAssignLayers={assignLayersToGroup}
+                      onLiveSelectionChange={(selectedIds) => setSelectedLayerIds(selectedIds)}
+                      onGroupColorChange={(groupId, newColor) => {
+                        const targetGroup = groups.find((g) => g.id === groupId);
+                        if (!targetGroup) return;
+                        setLayerColors((prev) => {
+                          const next = { ...prev };
+                          targetGroup.layers.forEach((l) => {
+                            next[l.id] = newColor;
+                          });
+                          return next;
+                        });
+                      }}
+                    />
+
+                    {/* SVG Structure Manager */}
+                    <SvgStructureManager
+                      objects={(product.customizableParts || []).map((p) => ({
+                        id: p.id,
+                        name: p.label || p.id,
+                        type:
+                          (p as any).layerType ||
+                          (p.id.startsWith("text_")
+                            ? "TEXT"
+                            : p.id.startsWith("image_")
+                              ? "IMAGE"
+                              : p.id.startsWith("group_")
+                                ? "GROUP"
+                                : "FILL"),
+                        placeholder: (p as any).placeholder,
+                        maxChars: (p as any).maxChars,
+                        minChars: (p as any).minChars,
+                        allowedFormats: (p as any).allowedFormats,
+                        isEditable: p.isEditable,
+                        isLocked: lockedLayerIds.includes(p.id) || Boolean(p.isLocked),
+                        isHidden: hiddenLayerIds.includes(p.id),
+                      }))}
+                      selectedObjectIds={selectedLayerIds}
+                      onSelectObject={(id, isMulti) => handleLayerSelect(id, Boolean(isMulti), false)}
+                      onToggleLock={toggleLayerLock}
+                      onToggleVisibility={toggleLayerVisibility}
+                      onUpdateObject={async (updated) => {
+                        const mapping = (product as any).layerMappings?.find((m: any) => m.elementId === updated.id);
+                        if (mapping) {
+                          try {
+                            const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+                            const res = await fetch(
+                              `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/admin/products/${product.id}/mappings/${mapping.id}`,
+                              {
+                                method: "PUT",
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                                },
+                                body: JSON.stringify({
+                                  placeholder: updated.placeholder,
+                                  maxChars: updated.maxChars,
+                                  minChars: updated.minChars,
+                                  allowedFormatsJson: updated.allowedFormats,
+                                  maxSizeBytes: updated.maxSizeBytes,
+                                  isEditable: updated.isEditable,
+                                  isLocked: updated.isLocked,
+                                }),
+                              }
+                            );
+                            if (res.ok) {
+                              console.log(`Updated settings for ${updated.name}`);
+                            }
+                          } catch (err) {
+                            console.error("Failed to update layer mapping:", err);
+                          }
+                        }
+                      }}
+                    />
+
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                      <div>
+                        <h3 className="font-semibold text-gray-800 text-xs uppercase tracking-wider">Detected SVG Layers</h3>
+                        <p className="text-[10px] text-gray-500">Hold <kbd className="px-1 py-0.5 bg-gray-100 border border-gray-300 rounded text-[9px]">Ctrl</kbd> to multi-select.</p>
+                      </div>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={handleSelectAllLayers}
+                          className="px-2 py-1 text-[11px] font-semibold text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                          title="Select all SVG layers"
+                        >
+                          Select All
+                        </button>
+                        {selectedLayerIds.length > 0 && (
+                          <button
+                            onClick={handleClearSelection}
+                            className="px-2 py-1 text-[11px] font-semibold text-gray-500 hover:bg-gray-100 rounded transition-colors"
+                            title="Clear layer selection"
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                    </div>
 
                     {product.customizableParts && product.customizableParts.length > 0 ? (
-                      <div className="flex flex-col gap-3">
-                        {/* Layer List Chips */}
-                        <div className="flex flex-wrap gap-1.5 pb-1">
+                      <div className="flex flex-col gap-4">
+                        {/* Scrollable Layer Panel List */}
+                        <div className="flex flex-col gap-1.5 max-h-[220px] overflow-y-auto pr-1 border border-gray-100 rounded-xl p-1.5 bg-gray-50/50 custom-scrollbar">
                           {product.customizableParts.map((part) => {
-                            const isSelected = activeLayerId === part.id;
+                            const isSelected = selectedLayerIds.includes(part.id);
                             return (
-                              <button
+                              <div
                                 key={part.id}
-                                onClick={() => setActiveLayerId(part.id)}
+                                ref={(el) => { layerRefs.current[part.id] = el; }}
+                                onClick={(e) => handleLayerSelect(part.id, e.ctrlKey || e.metaKey, e.shiftKey)}
                                 className={cn(
-                                  "px-2.5 py-1 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5",
+                                  "p-2.5 rounded-lg border transition-all cursor-pointer flex items-center justify-between gap-3 text-xs font-semibold select-none",
                                   isSelected
-                                    ? "bg-blue-600 text-white border-blue-600 shadow-sm ring-2 ring-blue-600/30"
-                                    : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                                    ? "bg-blue-50/90 border-blue-600 ring-2 ring-blue-600/20 text-blue-900 shadow-xs"
+                                    : "bg-white border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50/30"
                                 )}
                               >
-                                <span 
-                                  className="w-2.5 h-2.5 rounded-full border border-black/20 shrink-0" 
-                                  style={{ backgroundColor: layerColors[part.id] || "#FFFFFF" }} 
-                                />
-                                {part.label}
-                              </button>
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  <div className={cn(
+                                    "w-4 h-4 rounded flex items-center justify-center border transition-colors shrink-0",
+                                    isSelected ? "bg-blue-600 border-blue-600 text-white" : "border-gray-300 bg-white"
+                                  )}>
+                                    {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                                  </div>
+                                  <span
+                                    className="w-3.5 h-3.5 rounded-full border border-black/20 shrink-0 shadow-xs"
+                                    style={{ backgroundColor: activeColorMap[part.id] || "#FFFFFF" }}
+                                  />
+                                  <span className="truncate">{part.label}</span>
+                                </div>
+                                <span className="text-[10px] font-mono text-gray-400 shrink-0">#{part.id}</span>
+                              </div>
                             );
                           })}
                         </div>
 
-                        <label className="text-xs font-semibold text-gray-700 mt-1">Active Parsed Layer:</label>
-                        <select 
-                          value={activeLayerId || ""}
-                          onChange={(e) => setActiveLayerId(e.target.value)}
-                          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs font-semibold bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          {product.customizableParts.map((part) => (
-                            <option key={part.id} value={part.id}>
-                              {part.label} ({part.id})
-                            </option>
-                          ))}
-                        </select>
-
-                        {activeLayerId && (
-                          <div className="mt-2 p-3 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
+                        {/* Batch & Single Color Customization Box */}
+                        {selectedLayerIds.length > 0 ? (
+                          <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3 shadow-xs">
                             <div className="flex items-center justify-between">
-                              <span className="text-xs font-bold text-gray-800">Color for <span className="text-blue-600">{activeLayerId}</span>:</span>
-                              <input 
+                              <div className="flex items-center gap-2">
+                                <Sparkles className="w-4 h-4 text-blue-600" />
+                                <span className="text-xs font-bold text-gray-800">
+                                  {selectedLayerIds.length === 1 ? (
+                                    <>Color for <span className="text-blue-600 font-extrabold">{partsMap[selectedLayerIds[0]] || selectedLayerIds[0]}</span></>
+                                  ) : (
+                                    <>Recolor <span className="text-blue-600 font-extrabold">{selectedLayerIds.length} Selected Layers</span></>
+                                  )}
+                                </span>
+                              </div>
+                              <input
                                 ref={colorInputRef}
-                                type="color" 
-                                value={layerColors[activeLayerId] || "#FFFFFF"}
-                                onChange={(e) => handleColorChange(activeLayerId, e.target.value)}
+                                type="color"
+                                value={activeLayerColor}
+                                onInput={(e) => handleBatchColorChange((e.target as HTMLInputElement).value)}
+                                onChange={(e) => handleBatchColorChange((e.target as HTMLInputElement).value)}
                                 className="h-8 w-14 border border-gray-300 rounded cursor-pointer p-0"
                               />
                             </div>
 
+                            {/* Preset Swatches with Hover Live Preview */}
                             <div className="grid grid-cols-6 gap-2 pt-1">
                               {PRESET_COLORS.map((color, i) => (
-                                <button 
+                                <button
                                   key={i}
-                                  onClick={() => handleColorChange(activeLayerId, color)}
+                                  onClick={() => handleBatchColorChange(color)}
+                                  onMouseEnter={() => handleSwatchHover(color)}
+                                  onMouseLeave={handleSwatchLeave}
                                   className={cn(
-                                    "w-full aspect-square rounded-full shadow-sm border-2 transition-transform hover:scale-110 flex items-center justify-center relative",
-                                    layerColors[activeLayerId] === color ? "border-blue-600 ring-2 ring-blue-600/30" : "border-gray-200"
+                                    "w-full aspect-square rounded-full shadow-xs border-2 transition-transform hover:scale-110 flex items-center justify-center relative",
+                                    activeLayerColor === color ? "border-blue-600 ring-2 ring-blue-600/30" : "border-gray-200"
                                   )}
                                   style={{ backgroundColor: color }}
                                 >
-                                  {layerColors[activeLayerId] === color && (
+                                  {activeLayerColor === color && (
                                     <Check className={cn("w-3.5 h-3.5", color === "#FFFFFF" ? "text-black" : "text-white")} />
                                   )}
                                 </button>
                               ))}
                             </div>
+                          </div>
+                        ) : (
+                          <div className="p-4 bg-blue-50/50 text-blue-800 text-xs rounded-xl border border-blue-100 text-center font-medium">
+                            Click any SVG layer on the garment or select layers above to customize colors.
                           </div>
                         )}
                       </div>
@@ -635,16 +1420,16 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
                   <div className="flex flex-col gap-4">
                     <h3 className="font-semibold text-gray-800 text-sm">Custom Graphics & Logos</h3>
                     <p className="text-xs text-gray-500 mb-2">Upload graphics to overlay on the product template.</p>
-                    
+
                     <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
                       <div className="flex flex-col items-center justify-center pt-5 pb-6">
                         <Upload className="w-8 h-8 text-gray-400 mb-2" />
                         <p className="mb-1 text-sm text-gray-600"><span className="font-semibold">Click to upload image</span></p>
                         <p className="text-xs text-gray-400">PNG, JPG, SVG (MAX. 5MB)</p>
                       </div>
-                      <input 
-                        type="file" 
-                        className="hidden" 
+                      <input
+                        type="file"
+                        className="hidden"
                         accept="image/png, image/jpeg, image/svg+xml"
                         onChange={handleImageUpload}
                       />
@@ -656,29 +1441,29 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
                 {activeTab === "text" && (
                   <div className="flex flex-col gap-4">
                     <h3 className="font-semibold text-gray-800 text-sm">Add Custom Text</h3>
-                    
+
                     <div className="flex flex-col gap-3">
                       <div>
                         <label className="text-xs font-medium text-gray-600 mb-1 block">Text Content</label>
-                        <input 
-                          type="text" 
+                        <input
+                          type="text"
                           value={textInput}
                           onChange={(e) => setTextInput(e.target.value)}
                           className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                           placeholder="Enter text..."
                         />
                       </div>
-                      
+
                       <div>
                         <label className="text-xs font-medium text-gray-600 mb-1 block">Text Color</label>
                         <div className="flex gap-2">
-                          <input 
-                            type="color" 
+                          <input
+                            type="color"
                             value={textColor}
                             onChange={(e) => setTextColor(e.target.value)}
                             className="h-10 w-16 border border-gray-200 p-0 rounded cursor-pointer"
                           />
-                          <Button 
+                          <Button
                             className="flex-1 bg-black text-white hover:bg-gray-800"
                             onClick={handleAddText}
                           >
@@ -690,10 +1475,10 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
                   </div>
                 )}
               </div>
-              
+
               {/* Bottom Actions */}
               <div className="pt-4 border-t border-gray-100 flex flex-col gap-3">
-                <Button 
+                <Button
                   className="w-full bg-black hover:bg-gray-900 text-white rounded-lg h-11 text-sm font-bold shadow-md"
                   onClick={handleSaveDesign}
                 >

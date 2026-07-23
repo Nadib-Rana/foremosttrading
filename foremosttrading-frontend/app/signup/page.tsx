@@ -52,6 +52,17 @@ export default function SignupPage() {
         address: profileData.address,
         ...(profileData.profileImageUrl ? { profileImageUrl: profileData.profileImageUrl } : {}),
       });
+
+      // Update cached user object in localStorage with fresh profile data
+      try {
+        const freshUser = await api.getMe();
+        if (freshUser) {
+          localStorage.setItem("ft_user", JSON.stringify(freshUser));
+        }
+      } catch (e) {
+        console.error("Failed to sync fresh user profile:", e);
+      }
+
       alert("Profile set up successfully! Account registration complete.");
       window.location.href = "/account";
     } catch (err: any) {

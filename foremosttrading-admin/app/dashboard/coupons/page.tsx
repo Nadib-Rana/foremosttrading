@@ -1,58 +1,70 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Plus, Trash2, Ticket, Check, X, Calendar, AlertCircle } from "lucide-react";
-import { mockDb } from "@/services/mockDb";
+import { useState } from "react";
+import { Plus, Trash2, Ticket, Check, X, Calendar, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  useGetCouponsQuery,
+  useCreateCouponMutation,
+  useDeleteCouponMutation,
+} from "@/lib/store/api/couponApi";
 
 export default function CouponsPage() {
-  const [mounted, setMounted] = useState(false);
-  const [coupons, setCoupons] = useState<any[]>([]);
+  const { data: couponsData, isLoading, refetch } = useGetCouponsQuery(undefined);
+  const [createCoupon, { isLoading: isCreating }] = useCreateCouponMutation();
+  const [deleteCoupon] = useDeleteCouponMutation();
+
   const [code, setCode] = useState("");
   const [discountType, setDiscountType] = useState("percentage");
   const [discountValue, setDiscountValue] = useState(10);
   const [expiryDate, setExpiryDate] = useState("2026-12-31");
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    mockDb.initialize();
-    setCoupons(mockDb.getCoupons());
-    setMounted(true);
-  }, []);
+  const coupons = Array.isArray(couponsData)
+    ? couponsData
+    : couponsData?.coupons || couponsData?.data || [];
 
-  if (!mounted) {
+  if (isLoading) {
     return (
-      <div className="flex h-[50vh] w-full items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-primary"></div>
+      <div className="flex h-[50vh] w-full items-center justify-center text-gray-400">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code) {
       setError("Coupon code is required.");
       return;
     }
-    mockDb.saveCoupon({
-      code: code.toUpperCase().replace(/\s+/g, ""),
-      discountType,
-      discountValue,
-      expiryDate,
-      isActive: true
-    });
-    setCoupons(mockDb.getCoupons());
-    setCode("");
-    setError("");
+    try {
+      await createCoupon({
+        code: code.toUpperCase().replace(/\s+/g, ""),
+        discountType,
+        discountValue,
+        expiryDate,
+        isActive: true,
+      }).unwrap();
+      setCode("");
+      setError("");
+      refetch();
+    } catch (err: any) {
+      setError(err?.data?.message || "Failed to create coupon");
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this coupon?")) {
-      mockDb.deleteCoupon(id);
-      setCoupons(mockDb.getCoupons());
+      try {
+        await deleteCoupon(id).unwrap();
+        refetch();
+      } catch (err) {
+        console.error("Failed to delete coupon:", err);
+      }
     }
   };
 

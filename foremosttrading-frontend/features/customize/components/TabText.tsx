@@ -12,6 +12,14 @@ interface TabTextProps {
   isSaved: boolean;
   versionName: string;
   onVersionNameChange: (name: string) => void;
+  texts?: Array<{
+    id: string;
+    layerName: string;
+    textValue?: string;
+    placeholder?: string;
+    maxChars?: number;
+    fontFamily?: string;
+  }>;
 }
 
 export function TabText({
@@ -22,10 +30,34 @@ export function TabText({
   isSaved,
   versionName,
   onVersionNameChange,
+  texts = [],
 }: TabTextProps) {
   return (
     <div className="flex flex-col h-full min-h-0 justify-between">
       <div className="flex-1 overflow-y-auto min-h-0 mb-4 pr-1 flex flex-col gap-5">
+        {/* Dynamic Backend Text Objects */}
+        {texts.length > 0 && (
+          <div className="space-y-3 pb-3 border-b border-gray-200">
+            <span className="text-[10px] font-black uppercase text-blue-600 tracking-wider block">
+              Backend Vector Text Fields ({texts.length})
+            </span>
+            {texts.map((txt) => (
+              <div key={txt.id} className="flex flex-col gap-1">
+                <label className="text-[11px] font-bold text-gray-700">
+                  {txt.layerName || txt.id}
+                </label>
+                <input
+                  type="text"
+                  value={playerText[txt.id] !== undefined ? playerText[txt.id] : (txt.textValue || "")}
+                  onChange={(e) => onUpdateText({ [txt.id]: e.target.value })}
+                  placeholder={txt.placeholder || "ENTER TEXT"}
+                  maxLength={txt.maxChars || 25}
+                  className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white font-semibold text-gray-800 focus:outline-none focus:border-blue-500 uppercase"
+                />
+              </div>
+            ))}
+          </div>
+        )}
         {/* Name Input */}
         <div className="flex flex-col gap-1.5">
           <label className="text-[10px] font-black uppercase text-gray-500 tracking-wider">

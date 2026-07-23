@@ -1,27 +1,66 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { User, FileText, Package } from "lucide-react";
+import { api } from "@/services/apiService";
 
 interface AccountSidebarProps {
   activeTab: "account" | "designs" | "orders";
 }
 
 export function AccountSidebar({ activeTab }: AccountSidebarProps) {
-  const avatarUrl =
-    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop";
+  const [userName, setUserName] = useState("User Account");
+  const [avatarUrl, setAvatarUrl] = useState("");
+
+  useEffect(() => {
+    api.getMe()
+      .then((user) => {
+        const full =
+          user.fullName ||
+          `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+          user.email?.split("@")[0] ||
+          "User Account";
+        const rawImg = user.profileImageUrl || user.avatarUrl || user.customer?.profileImageUrl || user.customer?.profile?.avatarUrl;
+        if (rawImg && !rawImg.includes("unsplash.com")) {
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+          let finalUrl = rawImg;
+          if (!rawImg.startsWith("http://") && !rawImg.startsWith("https://") && !rawImg.startsWith("data:")) {
+            const clean = rawImg.startsWith("/") ? rawImg : `/${rawImg}`;
+            finalUrl = `${baseUrl}${clean}`;
+          }
+          setAvatarUrl(finalUrl);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const getUserInitials = (n: string) => {
+    if (!n) return "U";
+    const parts = n.trim().split(" ");
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return n.slice(0, 2).toUpperCase();
+  };
 
   return (
     <div className="w-full lg:w-64 bg-white border border-gray-100 rounded-[2rem] p-6 shadow-xs flex flex-col gap-6 select-none">
       {/* User Header Info */}
       <div className="flex items-center gap-3">
-        <img
-          src={avatarUrl}
-          alt="Rodro Khan profile avatar"
-          className="w-10 h-10 rounded-lg object-cover"
-        />
-        <span className="font-heading font-black text-sm text-gray-900 tracking-wide">
-          Rodro Khan
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt={`${userName} profile avatar`}
+            className="w-10 h-10 rounded-lg object-cover border border-gray-100"
+          />
+        ) : (
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#EF892A] to-[#D97310] flex items-center justify-center text-white font-heading font-black text-xs shadow-2xs shrink-0">
+            {getUserInitials(userName)}
+          </div>
+        )}
+        <span className="font-heading font-black text-sm text-gray-900 tracking-wide truncate">
+          {userName}
         </span>
       </div>
 

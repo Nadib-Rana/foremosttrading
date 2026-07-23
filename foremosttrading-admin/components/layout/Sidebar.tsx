@@ -18,7 +18,8 @@ import {
   FileText,
   Image as ImageIcon,
   Bell,
-  Fingerprint
+  Fingerprint,
+  Printer
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -43,6 +44,7 @@ const navigationGroups = [
     items: [
       { name: "Customizer", href: "/dashboard/customizer", icon: Palette },
       { name: "Design Library (SVGs)", href: "/dashboard/design-library", icon: Layers },
+      { name: "Production Queue", href: "/dashboard/production", icon: Printer },
     ]
   },
   {

@@ -17,7 +17,7 @@ export async function fetchApi<T = any>(
   options: RequestInit = {}
 ): Promise<T> {
   const token = typeof window !== 'undefined' ? localStorage.getItem('ft_auth_token') : null;
-  
+
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as any),
@@ -80,4 +80,27 @@ export const api = {
   getOrders: () => fetchApi('/orders'),
   getOrderById: (id: string) => fetchApi(`/orders/${id}`),
   payOrder: (id: string) => fetchApi(`/orders/${id}/pay`, { method: 'POST' }),
+
+  // Saved Designs
+  saveDesign: (body: any) => fetchApi('/saved-designs', { method: 'POST', body: JSON.stringify(body) }),
+
+  // Storage Upload
+  uploadFile: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const token = typeof window !== 'undefined' ? localStorage.getItem('ft_auth_token') : null;
+    const res = await fetch(`${API_BASE_URL}/upload/file`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const json = await res.json();
+    const payload = json.data || json;
+    let url = payload.url || payload.fileUrl || payload.location;
+    if (url && !url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("data:")) {
+      const cleanPath = url.startsWith("/") ? url : `/${url}`;
+      url = `${API_BASE_URL}${cleanPath}`;
+    }
+    return url;
+  },
 };

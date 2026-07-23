@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Save, ChevronDown } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { Save, ChevronDown, Camera, Loader2, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/services/apiService";
 
@@ -12,35 +12,61 @@ export function PersonalInfoForm() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [loading, setLoading] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     api.getMe()
       .then(user => {
-        setName(`${user.firstName} ${user.lastName}`);
-        setEmail(user.email);
-        setPhone(user.customer?.phoneNumber || "");
-        if (user.customer?.profile) {
-          if (user.customer.profile.dob) {
-            setDob(user.customer.profile.dob.split("T")[0]);
-          }
-          setGender(user.customer.profile.gender || "Male");
-          if (user.customer.profile.avatarUrl) {
-            setAvatarUrl(user.customer.profile.avatarUrl);
+        const first = user.firstName || user.customer?.firstName || "";
+        const last = user.lastName || user.customer?.lastName || "";
+        const computedName = (first || last) ? `${first} ${last}`.trim() : (user.fullName || user.email?.split("@")[0] || "");
+
+        setName(computedName);
+        setEmail(user.email || "");
+        setPhone(user.customer?.phone || user.customer?.phoneNumber || "");
+
+        const customerObj = user.customer;
+        const profileObj = customerObj?.profile || customerObj;
+
+        if (profileObj?.dob || customerObj?.dob) {
+          const rawDob = profileObj?.dob || customerObj?.dob;
+          try {
+            setDob(new Date(rawDob).toISOString().split("T")[0]);
+          } catch (e) {
+            setDob(String(rawDob).split("T")[0]);
           }
         }
-        
-        // Fetch primary address
-        api.getAddresses()
-          .then(addrs => {
-            if (addrs && addrs.length > 0) {
-              const addr = addrs[0];
-              setAddress(`${addr.street}, ${addr.city}, ${addr.state} ${addr.postalCode}, ${addr.country}`);
-            }
-          })
-          .catch(console.error);
-        
+
+        setGender(profileObj?.gender || customerObj?.gender || "Male");
+
+        const rawImg = user.profileImageUrl || user.avatarUrl || profileObj?.avatarUrl || customerObj?.profileImageUrl;
+        if (rawImg && !rawImg.includes("unsplash.com")) {
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+          let finalUrl = rawImg;
+          if (!rawImg.startsWith("http://") && !rawImg.startsWith("https://") && !rawImg.startsWith("data:")) {
+            const clean = rawImg.startsWith("/") ? rawImg : `/${rawImg}`;
+            finalUrl = `${baseUrl}${clean}`;
+          }
+          setAvatarUrl(finalUrl);
+        }
+
+        if (profileObj?.address || customerObj?.address) {
+          setAddress(profileObj?.address || customerObj?.address || "");
+        } else {
+          // Fetch primary address as fallback
+          api.getAddresses()
+            .then(addrs => {
+              if (addrs && addrs.length > 0) {
+                const addr = addrs[0];
+                setAddress(`${addr.street || ""}, ${addr.city || ""}, ${addr.state || ""} ${addr.postalCode || ""}, ${addr.country || ""}`.replace(/^,\s*/, ""));
+              }
+            })
+            .catch(console.error);
+        }
+
         setLoading(false);
       })
       .catch(err => {
@@ -49,6 +75,25 @@ export function PersonalInfoForm() {
       });
   }, []);
 
+  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingAvatar(true);
+    try {
+      const uploadedUrl = await api.uploadFile(file);
+      if (uploadedUrl) {
+        setAvatarUrl(uploadedUrl);
+        await api.setupProfile({ profileImageUrl: uploadedUrl });
+      }
+    } catch (err: any) {
+      alert("Failed to upload profile picture: " + (err.message || "Upload error"));
+    } finally {
+      setUploadingAvatar(false);
+      e.target.value = "";
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -56,11 +101,21 @@ export function PersonalInfoForm() {
         dob: dob || undefined,
         gender: gender || undefined,
         address: address || undefined,
+        profileImageUrl: avatarUrl || undefined,
       });
       alert("Changes saved successfully!");
     } catch (err: any) {
       alert(err.message || "Failed to update profile details");
     }
+  };
+
+  const getUserInitials = (n: string) => {
+    if (!n) return "U";
+    const parts = n.trim().split(" ");
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return n.slice(0, 2).toUpperCase();
   };
 
   return (
@@ -73,13 +128,64 @@ export function PersonalInfoForm() {
         Personal Information
       </h2>
 
-      {/* Large Image Preview */}
-      <div className="mb-6">
-        <img
-          src={avatarUrl}
-          alt="Rodro Khan avatar edit preview"
-          className="w-24 h-24 rounded-2xl object-cover shadow-3xs border border-gray-50"
-        />
+      {/* Profile Avatar Upload Section */}
+      <div className="mb-6 flex items-center gap-4">
+        <div className="relative group">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarFileChange}
+            className="hidden"
+          />
+
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={`${name} profile avatar`}
+              className="w-24 h-24 rounded-2xl object-cover shadow-3xs border border-gray-100"
+            />
+          ) : (
+            <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#EF892A] to-[#D97310] flex items-center justify-center text-white font-heading font-black text-2xl shadow-3xs border border-gray-100">
+              {getUserInitials(name)}
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploadingAvatar}
+            className="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white cursor-pointer"
+            title="Change Profile Picture"
+          >
+            {uploadingAvatar ? (
+              <Loader2 className="w-6 h-6 animate-spin" />
+            ) : (
+              <Camera className="w-6 h-6" />
+            )}
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploadingAvatar}
+            className="text-xs font-bold border-gray-200 hover:bg-gray-50 flex items-center gap-1.5 h-8 px-3 rounded-lg"
+          >
+            {uploadingAvatar ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Camera className="w-3.5 h-3.5 text-gray-500" />
+            )}
+            {uploadingAvatar ? "Uploading..." : "Upload Photo"}
+          </Button>
+          <span className="text-[10px] text-gray-400 font-medium">
+            Allowed JPG, PNG or WEBP (Max 5MB)
+          </span>
+        </div>
       </div>
 
       {/* Input Fields Container */}

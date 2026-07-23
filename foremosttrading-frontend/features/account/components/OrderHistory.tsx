@@ -78,16 +78,15 @@ export function OrderHistory() {
                 fontSize: 24,
                 textColor: "#FFFFFF"
               };
-              
+
               const isSelected = selectedOrder?.id === order.id;
 
               return (
                 <div
                   key={order.id}
                   onClick={() => setSelectedOrder(order)}
-                  className={`flex flex-col md:flex-row items-center justify-between border rounded-2xl p-4 sm:p-5 gap-6 cursor-pointer transition-all ${
-                    isSelected ? "bg-orange-50/20 border-[#EF892A]" : "bg-[#F9F9F9] border-gray-100 hover:border-gray-200"
-                  }`}
+                  className={`flex flex-col md:flex-row items-center justify-between border rounded-2xl p-4 sm:p-5 gap-6 cursor-pointer transition-all ${isSelected ? "bg-orange-50/20 border-[#EF892A]" : "bg-[#F9F9F9] border-gray-100 hover:border-gray-200"
+                    }`}
                 >
                   {/* Thumbnail */}
                   <div className="bg-white border border-gray-100 rounded-xl p-2.5 flex items-center justify-center w-full md:w-44 h-28 overflow-hidden shadow-3xs flex-shrink-0">
@@ -125,12 +124,11 @@ export function OrderHistory() {
 
                   {/* Right Status / Price Block */}
                   <div className="flex flex-col items-center md:items-end gap-3 flex-shrink-0">
-                    <span className={`font-bold text-[10px] tracking-wider px-3 py-1.5 rounded-full flex items-center gap-1 uppercase ${
-                      order.orderStatus === "DELIVERED" ? "bg-green-600 text-white" :
-                      order.orderStatus === "SHIPPING" ? "bg-blue-600 text-white" :
-                      order.orderStatus === "PRINTING" ? "bg-purple-600 text-white" :
-                      "bg-yellow-500 text-white"
-                    }`}>
+                    <span className={`font-bold text-[10px] tracking-wider px-3 py-1.5 rounded-full flex items-center gap-1 uppercase ${order.orderStatus === "DELIVERED" ? "bg-green-600 text-white" :
+                        order.orderStatus === "SHIPPING" ? "bg-blue-600 text-white" :
+                          order.orderStatus === "PRINTING" ? "bg-purple-600 text-white" :
+                            "bg-yellow-500 text-white"
+                      }`}>
                       <Check className="w-3.5 h-3.5" />
                       {order.orderStatus}
                     </span>
@@ -155,12 +153,10 @@ export function OrderHistory() {
           {/* Timeline Status Track */}
           <div className="flex flex-col lg:flex-row items-center justify-between gap-4 mt-2">
             {/* Step 1: Active In Transit */}
-            <div className={`flex-1 w-full lg:w-auto flex items-center gap-3.5 border rounded-2xl p-4 shadow-3xs ${
-              activeStep >= 1 ? "bg-[#FFF7ED] border-[#EF892A]" : "bg-[#F9F9F9] border-gray-150"
-            }`}>
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                activeStep >= 1 ? "bg-[#EF892A] text-white" : "bg-gray-250 text-gray-500"
+            <div className={`flex-1 w-full lg:w-auto flex items-center gap-3.5 border rounded-2xl p-4 shadow-3xs ${activeStep >= 1 ? "bg-[#FFF7ED] border-[#EF892A]" : "bg-[#F9F9F9] border-gray-150"
               }`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${activeStep >= 1 ? "bg-[#EF892A] text-white" : "bg-gray-250 text-gray-500"
+                }`}>
                 <Package className="w-5 h-5" />
               </div>
               <div>
@@ -172,20 +168,17 @@ export function OrderHistory() {
             {/* Connector Line 1 */}
             <div className="flex lg:flex-col items-center justify-center w-full lg:w-16 h-8 lg:h-auto relative">
               <div className={`w-0.5 lg:w-full h-8 lg:h-0.5 absolute ${activeStep >= 2 ? "bg-[#EF892A]" : "bg-gray-200"}`} />
-              <div className={`w-3.5 h-3.5 rounded-full border-2 bg-white relative z-10 flex items-center justify-center ${
-                activeStep >= 2 ? "border-[#EF892A]" : "border-gray-300"
-              }`}>
+              <div className={`w-3.5 h-3.5 rounded-full border-2 bg-white relative z-10 flex items-center justify-center ${activeStep >= 2 ? "border-[#EF892A]" : "border-gray-300"
+                }`}>
                 {activeStep >= 2 && <div className="w-1.5 h-1.5 rounded-full bg-[#EF892A]" />}
               </div>
             </div>
 
             {/* Step 2: Shipped */}
-            <div className={`flex-1 w-full lg:w-auto flex items-center gap-3.5 border rounded-2xl p-4 shadow-3xs ${
-              activeStep >= 2 ? "bg-[#FFF7ED] border-[#EF892A]" : "bg-[#F9F9F9] border-gray-150"
-            }`}>
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                activeStep >= 2 ? "bg-[#EF892A] text-white" : "bg-gray-200 text-gray-500"
+            <div className={`flex-1 w-full lg:w-auto flex items-center gap-3.5 border rounded-2xl p-4 shadow-3xs ${activeStep >= 2 ? "bg-[#FFF7ED] border-[#EF892A]" : "bg-[#F9F9F9] border-gray-150"
               }`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${activeStep >= 2 ? "bg-[#EF892A] text-white" : "bg-gray-200 text-gray-500"
+                }`}>
                 <Truck className="w-5 h-5" />
               </div>
               <div>
@@ -197,20 +190,17 @@ export function OrderHistory() {
             {/* Connector Line 2 */}
             <div className="flex lg:flex-col items-center justify-center w-full lg:w-16 h-8 lg:h-auto relative">
               <div className={`w-0.5 lg:w-full h-8 lg:h-0.5 absolute ${activeStep >= 3 ? "bg-[#EF892A]" : "bg-gray-200"}`} />
-              <div className={`w-3.5 h-3.5 rounded-full border-2 bg-white relative z-10 flex items-center justify-center ${
-                activeStep >= 3 ? "border-[#EF892A]" : "border-gray-300"
-              }`}>
+              <div className={`w-3.5 h-3.5 rounded-full border-2 bg-white relative z-10 flex items-center justify-center ${activeStep >= 3 ? "border-[#EF892A]" : "border-gray-300"
+                }`}>
                 {activeStep >= 3 && <div className="w-1.5 h-1.5 rounded-full bg-[#EF892A]" />}
               </div>
             </div>
 
             {/* Step 3: Delivered */}
-            <div className={`flex-1 w-full lg:w-auto flex items-center gap-3.5 border rounded-2xl p-4 shadow-3xs ${
-              activeStep >= 3 ? "bg-[#FFF7ED] border-[#EF892A]" : "bg-[#F9F9F9] border-gray-150"
-            }`}>
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                activeStep >= 3 ? "bg-[#EF892A] text-white" : "bg-gray-200 text-gray-500"
+            <div className={`flex-1 w-full lg:w-auto flex items-center gap-3.5 border rounded-2xl p-4 shadow-3xs ${activeStep >= 3 ? "bg-[#FFF7ED] border-[#EF892A]" : "bg-[#F9F9F9] border-gray-150"
               }`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${activeStep >= 3 ? "bg-[#EF892A] text-white" : "bg-gray-200 text-gray-500"
+                }`}>
                 <Box className="w-5 h-5" />
               </div>
               <div>

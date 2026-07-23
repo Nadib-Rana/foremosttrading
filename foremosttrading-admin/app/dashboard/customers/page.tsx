@@ -1,30 +1,34 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Users, Mail, DollarSign, ShoppingBag, MapPin, Eye, FileText } from "lucide-react";
-import { mockDb, MockCustomer } from "@/services/mockDb";
+import { useState } from "react";
+import { Users, Mail, DollarSign, ShoppingBag, MapPin, Eye, FileText, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useGetAdminCustomersQuery } from "@/lib/store/api/authApi";
 
 export default function CustomersPage() {
-  const [mounted, setMounted] = useState(false);
-  const [customers, setCustomers] = useState<MockCustomer[]>([]);
-  const [selectedCustomer, setSelectedCustomer] = useState<MockCustomer | null>(null);
+  const { data: customersData, isLoading } = useGetAdminCustomersQuery(undefined);
+  const [selectedCustomer, setSelectedCustomer] = useState<any | null>(null);
 
-  useEffect(() => {
-    mockDb.initialize();
-    const list = mockDb.getCustomers();
-    setCustomers(list);
-    if (list.length > 0) {
-      setSelectedCustomer(list[0]);
-    }
-    setMounted(true);
-  }, []);
+  const rawCustomers = Array.isArray(customersData)
+    ? customersData
+    : customersData?.customers || customersData?.data || [];
 
-  if (!mounted) {
+  const customers = rawCustomers.map((c: any) => ({
+    id: c.id,
+    name: `${c.firstName || ''} ${c.lastName || ''}`.trim() || 'Valued Customer',
+    email: c.email || 'customer@example.com',
+    orders: c.totalOrders || 0,
+    totalSpent: c.totalSpent || 0,
+    createdAt: c.createdAt ? new Date(c.createdAt).toLocaleDateString() : 'Recent',
+  }));
+
+  const activeCustomer = selectedCustomer || customers[0] || null;
+
+  if (isLoading) {
     return (
-      <div className="flex h-[50vh] w-full items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-primary"></div>
+      <div className="flex h-[50vh] w-full items-center justify-center text-gray-400">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -55,19 +59,19 @@ export default function CustomersPage() {
                   <tr 
                     key={c.id} 
                     className={`hover:bg-muted/30 transition-colors ${
-                      selectedCustomer?.id === c.id ? "bg-primary/5" : ""
+                      activeCustomer?.id === c.id ? "bg-primary/5" : ""
                     }`}
                   >
                     <td className="p-3 flex items-center gap-3">
                       <div className="h-8.5 w-8.5 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                        {c.name.split(' ').map(n => n[0]).join('')}
+                        {c.name.split(' ').map((n: string) => n[0]).join('')}
                       </div>
                       <div>
                         <h4 className="font-bold text-foreground">{c.name}</h4>
                         <span className="text-[10px] text-muted-foreground block">{c.email}</span>
                       </div>
                     </td>
-                    <td className="p-3 font-semibold text-muted-foreground">{c.ordersCount} Orders</td>
+                    <td className="p-3 font-semibold text-muted-foreground">{c.orders} Orders</td>
                     <td className="p-3 font-bold text-foreground">${c.totalSpent.toFixed(2)}</td>
                     <td className="p-3 text-right">
                       <Button 
@@ -87,7 +91,7 @@ export default function CustomersPage() {
         </Card>
 
         {/* Right Side: Customer Detailed Inspect Block */}
-        {selectedCustomer && (
+        {activeCustomer && (
           <Card className="border border-border shadow-sm bg-card h-fit">
             <CardHeader className="border-b pb-3.5">
               <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Customer Profile</CardTitle>
@@ -95,9 +99,9 @@ export default function CustomersPage() {
             <CardContent className="p-5 space-y-5 text-xs">
               {/* Client meta details */}
               <div className="space-y-1.5">
-                <h3 className="text-sm font-extrabold text-foreground">{selectedCustomer.name}</h3>
+                <h3 className="text-sm font-extrabold text-foreground">{activeCustomer.name}</h3>
                 <span className="text-[11px] text-muted-foreground flex items-center gap-1">
-                  <Mail className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" /> {selectedCustomer.email}
+                  <Mail className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" /> {activeCustomer.email}
                 </span>
               </div>
 
@@ -105,11 +109,11 @@ export default function CustomersPage() {
               <div className="grid grid-cols-2 gap-3 bg-secondary/15 p-3 rounded-lg border">
                 <div>
                   <span className="text-[10px] text-muted-foreground block font-semibold">Total Revenue</span>
-                  <span className="text-sm font-black text-foreground">${selectedCustomer.totalSpent.toFixed(2)}</span>
+                  <span className="text-sm font-black text-foreground">${activeCustomer.totalSpent.toFixed(2)}</span>
                 </div>
                 <div>
                   <span className="text-[10px] text-muted-foreground block font-semibold">Completed Runs</span>
-                  <span className="text-sm font-black text-foreground">{selectedCustomer.ordersCount} runs</span>
+                  <span className="text-sm font-black text-foreground">{activeCustomer.orders} runs</span>
                 </div>
               </div>
 

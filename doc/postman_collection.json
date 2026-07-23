@@ -1,0 +1,367 @@
+{
+  "info": {
+    "_postman_id": "8f3b2a1c-9d4e-4f56-a1b2-c3d4e5f6a7b8",
+    "name": "ForemostTrading Production API Collection v2.1",
+    "description": "Complete production API Postman collection for ForemostTrading e-commerce & apparel customization platform including SVG upload, layer parsing, layer grouping, config schema, cart, checkout, orders, and production export workflows.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200/201', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.accessToken) {",
+                  "    pm.environment.set('token', jsonData.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/v1/admin/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "v1", "admin", "login"]
+            }
+          }
+        },
+        {
+          "name": "Customer Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/v1/customer/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "v1", "customer", "login"]
+            }
+          }
+        },
+        {
+          "name": "Current User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/v1/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "v1", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "SVG Upload & Staging",
+      "item": [
+        {
+          "name": "POST /uploads/svg (Vector Layer Parser)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.uploadId) {",
+                  "    pm.environment.set('uploadId', jsonData.uploadId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "sample_jersey.svg"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/uploads/svg",
+              "host": ["{{baseUrl}}"],
+              "path": ["uploads", "svg"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products & Multi-View Setup",
+      "item": [
+        {
+          "name": "Admin Create Product (With Multi-View SVG Uploads)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set('productId', jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pro Match Football Kit\",\n  \"slug\": \"pro-match-kit\",\n  \"description\": \"High-performance multi-view customizable kit\",\n  \"basePrice\": 199.00,\n  \"categoryId\": \"cat_football\",\n  \"isCustomizable\": true,\n  \"uploadId\": \"{{uploadId}}\",\n  \"views\": [\n    { \"name\": \"FRONT\", \"uploadId\": \"{{uploadId}}\" },\n    { \"name\": \"BACK\", \"uploadId\": \"{{uploadId}}\" }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "products"]
+            }
+          }
+        },
+        {
+          "name": "GET /products/:idOrSlug/config-schema",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}/config-schema",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}", "config-schema"]
+            }
+          }
+        },
+        {
+          "name": "PUT /admin/products/:productId/mappings/:mappingId",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"placeholder\": \"YOUR NAME\",\n  \"maxChars\": 15,\n  \"minChars\": 1,\n  \"isEditable\": true,\n  \"isLocked\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/products/{{productId}}/mappings/{{mappingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "products", "{{productId}}", "mappings", "{{mappingId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "SVG Layer Groups",
+      "item": [
+        {
+          "name": "POST /products/:productId/layer-groups (Create Group)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set('groupId', jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Main Body\",\n  \"displayOrder\": 1,\n  \"isLocked\": false,\n  \"isVisible\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}/layer-groups",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}", "layer-groups"]
+            }
+          }
+        },
+        {
+          "name": "POST /products/:productId/layer-groups/:groupId/layers (Assign Layers)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"layerElementIds\": [\"jersey_body\", \"body_front\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}/layer-groups/{{groupId}}/layers",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}", "layer-groups", "{{groupId}}", "layers"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cart & Checkout Workflow",
+      "item": [
+        {
+          "name": "POST /cart/items (Add Custom Kit to Cart)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 1,\n  \"layerColors\": {\n    \"jersey_body\": \"#FF0000\",\n    \"sleeves\": \"#FFFFFF\"\n  },\n  \"playerText\": {\n    \"name\": \"SMITH\",\n    \"number\": \"10\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cart/items",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart", "items"]
+            }
+          }
+        },
+        {
+          "name": "POST /checkout (Validate & Calculate Tax/Shipping)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cartId\": \"{{cartId}}\",\n  \"shippingAddressId\": \"addr_123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkout",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders & Production Queue",
+      "item": [
+        {
+          "name": "POST /orders (Create Order)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set('orderId', jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cartId\": \"{{cartId}}\",\n  \"paymentMethod\": \"CREDIT_CARD\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders"]
+            }
+          }
+        },
+        {
+          "name": "POST /admin/production/:id/export (Generate SVG Print File)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/production/{{productionQueueId}}/export",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "production", "{{productionQueueId}}", "export"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

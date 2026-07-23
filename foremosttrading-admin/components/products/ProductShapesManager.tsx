@@ -47,7 +47,7 @@ export function ProductShapesManager({ productId }: { productId: string }) {
       alert("Shape uploaded successfully!");
     } catch (error: any) {
       console.error(error);
-      alert(error?.data?.message || "An error occurred");
+      alert(error?.data?.message || error?.message || "An error occurred");
     }
   };
 

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { UploadCloud, CheckCircle, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { api } from "@/services/apiService";
 
 interface TabElementsProps {
   onSave: () => void;
@@ -12,6 +13,12 @@ interface TabElementsProps {
   onUploadFile: (url: string) => void;
   versionName: string;
   onVersionNameChange: (name: string) => void;
+  imagePlaceholders?: Array<{
+    id: string;
+    layerName: string;
+    allowedFormats?: string[];
+    maxSizeBytes?: number;
+  }>;
 }
 
 export function TabElements({
@@ -22,23 +29,44 @@ export function TabElements({
   onUploadFile,
   versionName,
   onVersionNameChange,
+  imagePlaceholders = [],
 }: TabElementsProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const simulateUpload = () => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
     setIsUploading(true);
-    setTimeout(() => {
+    try {
+      const url = await api.uploadFile(file);
+      if (url) {
+        onUploadFile(url);
+      }
+    } catch (err) {
+      console.error("File upload failed:", err);
+      // Fallback file name display if storage endpoint returns local path
+      onUploadFile(URL.createObjectURL(file));
+    } finally {
       setIsUploading(false);
-      onUploadFile(`Logo-${uploadedFiles.length + 1}.png`);
-    }, 1500);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   return (
     <div className="flex flex-col h-full min-h-0 justify-between">
       <div className="flex-1 overflow-y-auto min-h-0 mb-4 pr-1 flex flex-col gap-4">
         {/* Upload Zone matching screenshot */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          accept="image/*,.svg"
+          className="hidden"
+        />
         <div
-          onClick={simulateUpload}
+          onClick={() => fileInputRef.current?.click()}
           className={`h-48 border-2 border-dashed border-gray-200 hover:border-blue-500 rounded-2xl bg-white flex flex-col items-center justify-center p-6 cursor-pointer transition-all ${isUploading ? "opacity-70 pointer-events-none" : ""
             }`}
         >

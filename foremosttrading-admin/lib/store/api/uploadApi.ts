@@ -9,7 +9,14 @@ export const uploadApi = baseApi.injectEndpoints({
         body: formData,
       }),
     }),
+    uploadSvg: builder.mutation({
+      query: (formData) => ({
+        url: '/uploads/svg',
+        method: 'POST',
+        body: formData,
+      }),
+    }),
   }),
 });
 
-export const { useUploadFileMutation } = uploadApi;
+export const { useUploadFileMutation, useUploadSvgMutation } = uploadApi;

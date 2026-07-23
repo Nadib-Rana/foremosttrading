@@ -44,7 +44,9 @@ export const ProductCanvas = forwardRef<ProductCanvasRef, ProductCanvasProps>(
           width: clientWidth,
           height: clientHeight,
           preserveObjectStacking: true,
+          backgroundColor: "transparent",
         });
+        canvas.setBackgroundColor("transparent", canvas.renderAll.bind(canvas));
         fabricCanvasRef.current = canvas;
 
         // Cleanup on unmount
