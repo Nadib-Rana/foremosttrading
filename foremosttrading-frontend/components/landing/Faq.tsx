@@ -7,7 +7,7 @@ const faqs = [
   {
     question: "How long does production take?",
     answer:
-      "WarmWelcome is a trusted accommodation platform that connects students with verified hosts offering safe, comfortable places to stay. We focus on transparency, trust, and community to ensure a welcoming experience for both guests and hosts.",
+      "Standard custom orders ship within 2 to 3 weeks after final design approval. Express production (7–10 business days) is also available for urgent team orders.",
   },
   {
     question: "What's the minimum order?",

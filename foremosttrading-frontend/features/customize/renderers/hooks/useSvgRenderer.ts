@@ -1,24 +1,47 @@
 import { useState, useEffect } from "react";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
+function getFullSvgUrl(url: string): string {
+  if (!url) return "";
+  const trimmed = url.trim();
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("data:")) {
+    return trimmed;
+  }
+  const clean = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  return `${API_BASE_URL}${clean}`;
+}
+
 // Module-level in-memory cache for SVG assets
 const svgCache = new Map<string, string>();
 const pendingFetches = new Map<string, Promise<string>>();
 
-export function useSvgRenderer(svgUrl: string) {
+export function useSvgRenderer(svgUrl?: string, svgRaw?: string) {
+  const fullUrl = svgUrl ? getFullSvgUrl(svgUrl) : "";
+
   const [svgContent, setSvgContent] = useState<string | null>(() => {
-    return svgUrl ? svgCache.get(svgUrl) || null : null;
+    if (svgRaw) return svgRaw;
+    return fullUrl ? svgCache.get(fullUrl) || null : null;
   });
   const [loading, setLoading] = useState<boolean>(() => {
-    return svgUrl ? !svgCache.has(svgUrl) : false;
+    if (svgRaw) return false;
+    return fullUrl ? !svgCache.has(fullUrl) : false;
   });
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!svgUrl) return;
+    if (svgRaw) {
+      setSvgContent(svgRaw);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    if (!fullUrl) return;
 
     // Fast path: resolve instantly from memory cache in 0ms
-    if (svgCache.has(svgUrl)) {
-      setSvgContent(svgCache.get(svgUrl)!);
+    if (svgCache.has(fullUrl)) {
+      setSvgContent(svgCache.get(fullUrl)!);
       setLoading(false);
       setError(null);
       return;
@@ -29,23 +52,23 @@ export function useSvgRenderer(svgUrl: string) {
     setError(null);
 
     // Deduplicate in-flight fetch requests for the same URL
-    let fetchPromise = pendingFetches.get(svgUrl);
+    let fetchPromise = pendingFetches.get(fullUrl);
     if (!fetchPromise) {
-      fetchPromise = fetch(svgUrl)
+      fetchPromise = fetch(fullUrl)
         .then((res) => {
           if (!res.ok) throw new Error("SVG load failed (" + res.status + ")");
           return res.text();
         })
         .then((text) => {
-          svgCache.set(svgUrl, text);
-          pendingFetches.delete(svgUrl);
+          svgCache.set(fullUrl, text);
+          pendingFetches.delete(fullUrl);
           return text;
         })
         .catch((err) => {
-          pendingFetches.delete(svgUrl);
+          pendingFetches.delete(fullUrl);
           throw err;
         });
-      pendingFetches.set(svgUrl, fetchPromise);
+      pendingFetches.set(fullUrl, fetchPromise);
     }
 
     fetchPromise
@@ -56,7 +79,7 @@ export function useSvgRenderer(svgUrl: string) {
         }
       })
       .catch((err) => {
-        console.error("[useSvgRenderer] fetch error:", err);
+        console.warn("[useSvgRenderer] fetch warning:", err?.message || err);
         if (isMounted) {
           setError("Failed to load product SVG.");
           setLoading(false);
@@ -66,7 +89,7 @@ export function useSvgRenderer(svgUrl: string) {
     return () => {
       isMounted = false;
     };
-  }, [svgUrl]);
+  }, [fullUrl]);
 
   return { svgContent, loading, error };
 }

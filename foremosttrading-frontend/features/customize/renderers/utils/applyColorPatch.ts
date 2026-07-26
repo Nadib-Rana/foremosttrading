@@ -33,18 +33,6 @@ export const applyColorPatches = (svgEl: SVGSVGElement, colors: Record<string, s
     const el = findSvgElement(svgEl, elementId);
     if (!el) return;
 
-    // Skip applying if color is white default and element already has a valid dark/colored fill
-    const currentFill = el.getAttribute("fill") || el.style.fill;
-    if (
-      (color === "#FFFFFF" || color === "#ffffff") &&
-      currentFill &&
-      currentFill !== "#FFFFFF" &&
-      currentFill !== "#ffffff" &&
-      currentFill !== "none"
-    ) {
-      return;
-    }
-
     applyColorToNode(el, color, svgEl);
   });
 };

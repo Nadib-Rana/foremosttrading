@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { KitColors, PlayerText } from "../types";
 import { cn } from "@/lib/utils";
 import { getProductRenderer, DynamicSvgRenderer } from "../renderers";
@@ -13,10 +14,12 @@ interface KitPreviewProps {
   productId?: string;
   /** Presigned MinIO URL for the product's uploaded SVG — when set, DynamicSvgRenderer is used */
   svgUrl?: string;
+  svgRaw?: string;
   isThumbnail?: boolean;
   selectedLayerId?: string | null;
   selectedLayerIds?: string[];
   onLayerSelect?: (elementId: string, isMultiSelect?: boolean, isRangeSelect?: boolean) => void;
+  onLayersDetected?: (layers: Array<{ id: string; label: string; defaultColor: string; layerType: string }>) => void;
 }
 
 export function KitPreview({
@@ -27,20 +30,25 @@ export function KitPreview({
   className,
   productId = "soccer-jersey",
   svgUrl,
+  svgRaw,
   isThumbnail = false,
   selectedLayerId,
   selectedLayerIds,
   onLayerSelect,
+  onLayersDetected,
 }: KitPreviewProps) {
-  // When a backend SVG URL is available, use the dynamic renderer
-  const useDynamic = Boolean(svgUrl);
+  const [svgFailed, setSvgFailed] = useState(false);
+
+  // When a backend SVG URL or raw SVG string is available and hasn't failed, use the dynamic renderer
+  const useDynamic = (Boolean(svgUrl) || Boolean(svgRaw)) && !svgFailed;
   const Renderer = getProductRenderer(productId);
 
   const renderContent = () => {
     if (useDynamic) {
       return (
         <DynamicSvgRenderer
-          svgUrl={svgUrl!}
+          svgUrl={svgUrl}
+          svgRaw={svgRaw}
           colors={colors}
           playerText={playerText}
           visibleParts={visibleParts}
@@ -48,6 +56,8 @@ export function KitPreview({
           selectedLayerId={selectedLayerId}
           selectedLayerIds={selectedLayerIds}
           onLayerSelect={onLayerSelect}
+          onLayersDetected={onLayersDetected}
+          onError={() => setSvgFailed(true)}
         />
       );
     }

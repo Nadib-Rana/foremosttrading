@@ -2,9 +2,6 @@ import { ProductSchema, ProductColors, PlayerText, TeamPlayer } from "../types";
 import { SOCCER_JERSEY_SCHEMA } from "../schemas/soccerJerseySchema";
 import { api } from "@/services/apiService";
 
-/**
- * Interface representing the payload structure for saving a customized design.
- */
 export interface SaveConfigurationPayload {
   productId: string;
   versionName: string;
@@ -14,34 +11,56 @@ export interface SaveConfigurationPayload {
   players: TeamPlayer[];
 }
 
-/**
- * Response payload structure from saving a design configuration.
- */
 export interface SaveConfigurationResponse {
   success: boolean;
   designId: string;
   message?: string;
 }
 
-/**
- * Fetches a product schema configuration by ID from the backend with fallback.
- * @param productId Product identifier (e.g., "soccer-jersey").
- */
+const schemaCache = new Map<string, ProductSchema>();
+
 export async function fetchProductSchema(productId: string): Promise<ProductSchema> {
   const target = productId || "soccer-jersey";
 
-  // 1. Try to fetch product schema from NestJS API endpoint GET /products/:idOrSlug/config-schema
+  if (schemaCache.has(target)) {
+    return schemaCache.get(target)!;
+  }
+
   try {
     const res = await api.getProductConfigSchema(target);
     if (res && res.id) {
-      const parts = res.customizableParts && res.customizableParts.length > 0
-        ? res.customizableParts
-        : SOCCER_JERSEY_SCHEMA.customizableParts;
+      let parts: any[] = [];
+      if (Array.isArray(res.customizableParts) && res.customizableParts.length > 0) {
+        const validCustomParts = res.customizableParts.filter(
+          (p: any) => !p.id?.match(/^(path|rect|circle|polygon|polyline|g|ellipse|line)_\d+$/i)
+        );
+        if (validCustomParts.length > 0) parts = validCustomParts;
+      }
+
+      if (parts.length === 0 && Array.isArray(res.views) && res.views.length > 0) {
+        const allLayers = res.views.flatMap((v: any) => v.layers || []);
+        parts = allLayers
+          .filter((l: any) => {
+            if (l.layerType === 'TEXT' || l.layerType === 'IMAGE' || l.isEditable === false) return false;
+            const lid = l.layerName || l.label || l.elementId || l.id || "";
+            return !lid.match(/^(path|rect|circle|polygon|polyline|g|ellipse|line)_\d+$/i);
+          })
+          .map((l: any) => ({
+            id: l.elementId || l.id,
+            label: l.layerName || l.label || l.elementId || l.id,
+            defaultColor: l.defaultColorValue || l.defaultColor || '#FFFFFF',
+          }));
+      }
+
+      if (!parts || parts.length === 0) {
+        parts = SOCCER_JERSEY_SCHEMA.customizableParts;
+      }
+
       const patterns = res.patterns && res.patterns.length > 0
         ? res.patterns
         : SOCCER_JERSEY_SCHEMA.patterns;
 
-      return {
+      const resultSchema: ProductSchema = {
         id: res.id || target,
         slug: res.slug || target,
         name: res.name || "Custom Kit",
@@ -50,7 +69,10 @@ export async function fetchProductSchema(productId: string): Promise<ProductSche
         svgUrl: res.svgUrl || undefined,
         customizableParts: parts,
         patterns: patterns,
-        fonts: res.fonts && res.fonts.length > 0 ? res.fonts : SOCCER_JERSEY_SCHEMA.fonts,
+        fonts: res.fonts && Array.isArray(res.fonts) && res.fonts.length > 0 ? res.fonts : SOCCER_JERSEY_SCHEMA.fonts,
+        colorPalettes: Array.isArray(res.colorPalettes) ? res.colorPalettes : [],
+        sizeCharts: Array.isArray(res.sizeCharts) ? res.sizeCharts : [],
+        priceRules: Array.isArray(res.priceRules) ? res.priceRules : [],
         supportedTabs: res.supportedTabs || SOCCER_JERSEY_SCHEMA.supportedTabs,
         defaultColors: Object.keys(res.defaultColors || {}).length > 0 ? res.defaultColors : SOCCER_JERSEY_SCHEMA.defaultColors,
         defaultPattern: res.defaultPattern || SOCCER_JERSEY_SCHEMA.defaultPattern,
@@ -60,16 +82,18 @@ export async function fetchProductSchema(productId: string): Promise<ProductSche
         layerGroups: res.layerGroups || [],
         images: res.images || [],
       };
+
+      schemaCache.set(target, resultSchema);
+      return resultSchema;
     }
   } catch (err) {
     console.warn("Failed to fetch config-schema from API for target:", target, err);
   }
 
-  // 2. Try fetching product info by slug directly
   try {
     const product = await api.getProductBySlug(target);
     if (product) {
-      return {
+      const resultSchema: ProductSchema = {
         ...SOCCER_JERSEY_SCHEMA,
         id: product.id || target,
         slug: product.slug || target,
@@ -78,23 +102,23 @@ export async function fetchProductSchema(productId: string): Promise<ProductSche
         basePrice: Number(product.basePrice) || 149.99,
         images: product.images?.map((i: any) => i.imageUrl || i) || [],
       };
+      schemaCache.set(target, resultSchema);
+      return resultSchema;
     }
   } catch (err) {
     console.warn("Failed to fetch product by slug:", err);
   }
 
-  // 3. Fallback to default SOCCER_JERSEY_SCHEMA so customizer page ALWAYS renders cleanly
-  return {
+  const fallbackSchema: ProductSchema = {
     ...SOCCER_JERSEY_SCHEMA,
     id: target,
     slug: target,
   };
+
+  schemaCache.set(target, fallbackSchema);
+  return fallbackSchema;
 }
 
-/**
- * Saves a dynamic product customization configuration payload.
- * @param payload The complete configuration payload.
- */
 export async function saveProductConfiguration(
   payload: SaveConfigurationPayload
 ): Promise<SaveConfigurationResponse> {

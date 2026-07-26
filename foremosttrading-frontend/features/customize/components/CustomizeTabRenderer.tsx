@@ -47,7 +47,28 @@ export function CustomizeTabRenderer({
           isSaved={custom.isSaved}
           versionName={custom.versionName}
           onVersionNameChange={custom.setVersionName}
-          parts={custom.schema.customizableParts}
+          parts={custom.parts || custom.schema.customizableParts || []}
+          layerGroups={schema.layerGroups}
+          selectedLayerIds={custom.activePartToEdit ? [custom.activePartToEdit] : []}
+          onSelectGroup={(group) => {
+            if (group.layers && group.layers.length > 0) {
+              custom.setActivePartToEdit(group.layers[0].id || (group.layers[0] as any).elementId);
+            }
+          }}
+          onSelectLayer={(layerId) => {
+            custom.setActivePartToEdit(layerId);
+          }}
+          onGroupColorChange={(groupId, newColor) => {
+            const group = schema.layerGroups?.find((g: any) => g.id === groupId);
+            if (group && group.layers) {
+              group.layers.forEach((l: any) => {
+                const lid = l.id || l.elementId;
+                if (lid) custom.changeColor(lid, newColor);
+              });
+            } else {
+              custom.changeColor(groupId, newColor);
+            }
+          }}
         />
       )}
       {custom.activeTab === "elements" && (

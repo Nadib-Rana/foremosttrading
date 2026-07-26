@@ -2,22 +2,20 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
-import { useCustomize } from "@/features/customize/hooks/useCustomize";
-import { KitPreview } from "@/features/customize/components/KitPreview";
-import { TabContainer } from "@/features/customize/components/TabContainer";
-import { CustomizeTabRenderer } from "@/features/customize/components/CustomizeTabRenderer";
-import { Accordions } from "@/features/customize/components/Accordions";
-import { SizeGuide } from "@/features/customize/components/SizeGuide";
 import { fetchProductSchema } from "@/features/customize/api/customizeApi";
 import { ProductSchema } from "@/features/customize/types";
 import { SOCCER_JERSEY_SCHEMA } from "@/features/customize/schemas/soccerJerseySchema";
 import { Loader2 } from "lucide-react";
+import { CustomizeWorkspace } from "./CustomizeWorkspace";
 
 function CustomizePageContent({ initialProductId }: { initialProductId: string | null }) {
+  const [isMounted, setIsMounted] = useState(false);
   const [schema, setSchema] = useState<ProductSchema | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     const targetId = initialProductId || "soccer-jersey";
@@ -34,9 +32,9 @@ function CustomizePageContent({ initialProductId }: { initialProductId: string |
       });
   }, [initialProductId]);
 
-  if (loading || !schema) {
+  if (!isMounted || loading || !schema) {
     return (
-      <div className="flex-1 flex items-center justify-center py-24 text-gray-400">
+      <div className="flex-1 flex items-center justify-center py-24 text-gray-400" suppressHydrationWarning>
         <Loader2 className="h-8 w-8 animate-spin text-[#EF892A]" />
         <span className="ml-3 text-sm font-medium">Loading product customizer…</span>
       </div>
@@ -52,105 +50,10 @@ function CustomizePageInner() {
   return <CustomizePageContent initialProductId={productId} />;
 }
 
-function CustomizeWorkspace({ schema }: { schema: ProductSchema }) {
-  const custom = useCustomize(schema);
-  const [activeViewIndex, setActiveViewIndex] = useState(0);
-
-  const activeSvgUrl = schema.views && schema.views.length > 0
-    ? schema.views[activeViewIndex]?.svgUrl || schema.svgUrl
-    : schema.svgUrl;
-
-  const handleNextFromText = () => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("foremost_customizer_colors", JSON.stringify(custom.colors));
-      localStorage.setItem("foremost_customizer_pattern", custom.pattern);
-      localStorage.setItem("foremost_customizer_playerText", JSON.stringify(custom.playerText));
-      localStorage.setItem("foremost_customizer_visibleParts", JSON.stringify(custom.visibleParts));
-      window.location.href = "/customize/materials";
-    }
-  };
-
-  return (
-    <main className="min-h-screen bg-[#F9F9F9] text-gray-900 flex flex-col">
-      <Navbar theme="light" />
-
-      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="mb-8 text-center sm:text-left">
-          <h1 className="font-heading text-3xl md:text-4xl font-black uppercase tracking-tight text-gray-900">
-            {schema.name}
-          </h1>
-          <p className="text-sm font-black text-[#EF892A] uppercase mt-1 tracking-wider">
-            {schema.basePrice ? `$${Number(schema.basePrice).toFixed(2)}` : "Customize Your Kit"}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch mb-8">
-          <div className="lg:col-span-7 flex flex-col h-[350px] sm:h-[450px] lg:h-[650px] min-h-0 bg-white border border-gray-100 rounded-2xl relative overflow-hidden">
-            <KitPreview
-              colors={custom.colors}
-              pattern={custom.pattern}
-              playerText={custom.playerText}
-              visibleParts={custom.visibleParts}
-              productId={schema.id}
-              svgUrl={activeSvgUrl}
-              selectedLayerId={custom.activePartToEdit}
-              onLayerSelect={(layerId) => {
-                custom.setActiveTab("colors");
-                custom.setActivePartToEdit(layerId);
-              }}
-            />
-
-            {schema.views && schema.views.length > 1 && (
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-white/90 backdrop-blur-md p-1 rounded-xl shadow-md border border-gray-200 z-10">
-                {schema.views.map((v, idx) => (
-                  <button
-                    key={v.id || idx}
-                    type="button"
-                    onClick={() => setActiveViewIndex(idx)}
-                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
-                      activeViewIndex === idx
-                        ? "bg-primary text-white shadow-2xs"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    {v.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="lg:col-span-5 bg-white border border-gray-100 rounded-3xl p-4 sm:p-5 shadow-sm flex flex-col justify-between h-full lg:h-[650px] overflow-hidden">
-            <TabContainer
-              activeTab={custom.activeTab}
-              setActiveTab={custom.setActiveTab}
-              tabs={custom.tabs}
-            />
-
-            <CustomizeTabRenderer
-              custom={custom}
-              schema={schema}
-              handleNextFromText={handleNextFromText}
-            />
-          </div>
-        </div>
-
-        <div className="w-full mb-8">
-          <Accordions />
-        </div>
-
-        <SizeGuide />
-      </div>
-
-      <Footer />
-    </main>
-  );
-}
-
 export default function CustomizePage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#F9F9F9]">
+      <div className="min-h-screen flex items-center justify-center bg-[#F9F9F9]" suppressHydrationWarning>
         <Loader2 className="h-8 w-8 animate-spin text-[#EF892A]" />
       </div>
     }>

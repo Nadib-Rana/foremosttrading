@@ -1,3 +1,4 @@
+import React, { memo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -54,7 +55,7 @@ const categories = [
   },
 ];
 
-export function ShopTheLine() {
+export const ShopTheLine = memo(function ShopTheLine() {
   return (
     <section className="w-full py-8 md:py-12 bg-[#F4F5F7]">
       <div className="container mx-auto px-4 sm:px-6">
@@ -80,6 +81,7 @@ export function ShopTheLine() {
                 fill
                 sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 20vw"
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
+                loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-90 transition-opacity group-hover:opacity-100" />
               <div className="absolute bottom-0 left-0 p-4 md:p-6 w-full">
@@ -93,4 +95,4 @@ export function ShopTheLine() {
       </div>
     </section>
   );
-}
+});

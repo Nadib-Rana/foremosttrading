@@ -25,7 +25,9 @@ export function CustomerLayerGroupPanel({
   onSelectLayer,
   onGroupColorChange,
 }: CustomerLayerGroupPanelProps) {
-  const assignedLayerIds = new Set(groups.flatMap((g) => g.layers.map((l) => l.id)));
+  const assignedLayerIds = new Set(
+    (groups || []).flatMap((g) => (g.layers || []).map((l: any) => l.id || l.elementId))
+  );
   const unassignedParts = allParts.filter((p) => !assignedLayerIds.has(p.id));
 
   return (
@@ -39,8 +41,8 @@ export function CustomerLayerGroupPanel({
       </div>
 
       {/* Layer Groups List */}
-      <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
-        {groups.map((group) => (
+      <div className="space-y-2.5">
+        {(groups || []).map((group) => (
           <CustomerGroupRow
             key={group.id}
             group={group}
@@ -62,7 +64,7 @@ export function CustomerLayerGroupPanel({
               <CustomerLayerRow
                 key={part.id}
                 layer={{ id: part.id, displayLabel: part.label || part.id, displayOrder: 0 }}
-                color={colorMap[part.id]}
+                color={colorMap[part.id] || part.defaultColor || "#FFFFFF"}
                 isSelected={selectedLayerIds.includes(part.id)}
                 onSelect={onSelectLayer}
               />

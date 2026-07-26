@@ -7,20 +7,30 @@ import { applyColorPatches } from "../utils/applyColorPatch";
 import { applyTextPatches } from "../utils/applyTextPatch";
 import { applySelectionPatch } from "../utils/applySelectionPatch";
 import { applyVisibilityPatches, setupSvgDimensions } from "../utils/svgDomUtils";
+import { extractSvgLayers } from "../utils/extractSvgLayers";
+import { injectFabricFilter } from "../utils/injectFabricFilter";
 import { LayerTooltip } from "./LayerTooltip";
 import { MockupToolbar } from "./MockupToolbar";
 import { FabricTextureOverlay } from "./FabricTextureOverlay";
 
 export function SvgCanvas({
   svgUrl,
+  svgRaw,
   colors,
   playerText,
   visibleParts,
   selectedLayerId,
   selectedLayerIds = [],
   onLayerSelect,
+  onLayersDetected,
+  onError,
 }: DynamicSvgRendererProps) {
-  const { svgContent, loading, error } = useSvgRenderer(svgUrl);
+  const { svgContent, loading, error } = useSvgRenderer(svgUrl, svgRaw);
+
+  useEffect(() => {
+    if (error && onError) onError();
+  }, [error, onError]);
+
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const [isRealisticMode, setIsRealisticMode] = useState<boolean>(true);
   const [fabricTexture, setFabricTexture] = useState<"mesh" | "cotton" | "smooth">("mesh");
@@ -30,35 +40,6 @@ export function SvgCanvas({
     : selectedLayerId
     ? [selectedLayerId]
     : [];
-
-  const injectFabricFilter = (svgEl: SVGSVGElement) => {
-    let defs = svgEl.querySelector("defs");
-    if (!defs) {
-      defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-      svgEl.insertBefore(defs, svgEl.firstChild);
-    }
-
-    let filter = defs.querySelector("#photorealistic-fabric-filter");
-    if (!filter) {
-      filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
-      filter.setAttribute("id", "photorealistic-fabric-filter");
-      filter.setAttribute("x", "-5%");
-      filter.setAttribute("y", "-5%");
-      filter.setAttribute("width", "110%");
-      filter.setAttribute("height", "110%");
-
-      filter.innerHTML = `
-        <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" result="noise" />
-        <feColorMatrix type="matrix" values="0 0 0 0 0.1  0 0 0 0 0.1  0 0 0 0 0.1  0 0 0 0.12 0" in="noise" result="fabricNoise" />
-        <feDiffuseLighting in="noise" lighting-color="#ffffff" surfaceScale="1.5" result="lightMap">
-          <feDistantLight azimuth="45" elevation="60" />
-        </feDiffuseLighting>
-        <feBlend mode="multiply" in="SourceGraphic" in2="lightMap" result="shaded" />
-        <feBlend mode="overlay" in="shaded" in2="fabricNoise" result="finalOutput" />
-      `;
-      defs.appendChild(filter);
-    }
-  };
 
   const applyPatches = useCallback(() => {
     if (!svgContainerRef.current) return;
@@ -72,18 +53,31 @@ export function SvgCanvas({
     applyVisibilityPatches(svgEl, visibleParts);
     setupSvgDimensions(svgEl);
 
-    if (isRealisticMode) {
-      svgEl.style.filter = "drop-shadow(0px 18px 25px rgba(0,0,0,0.22))";
-    } else {
-      svgEl.style.filter = "none";
-    }
+    svgEl.style.filter = isRealisticMode
+      ? "drop-shadow(0px 18px 25px rgba(0,0,0,0.22))"
+      : "none";
   }, [colors, playerText, visibleParts, activeSelectedIds, isRealisticMode]);
+
+  const onLayersDetectedRef = useRef(onLayersDetected);
+  useEffect(() => {
+    onLayersDetectedRef.current = onLayersDetected;
+  }, [onLayersDetected]);
 
   useEffect(() => {
     if (!svgContent || !svgContainerRef.current) return;
     svgContainerRef.current.innerHTML = svgContent;
+
+    const svgEl = svgContainerRef.current.querySelector("svg");
+    if (svgEl && onLayersDetectedRef.current) {
+      const cacheKey = svgUrl || (svgContent.length > 500 ? svgContent.slice(0, 200) : svgContent);
+      const detected = extractSvgLayers(svgEl, cacheKey);
+      if (detected.length > 0) {
+        onLayersDetectedRef.current(detected);
+      }
+    }
+
     applyPatches();
-  }, [svgContent, applyPatches]);
+  }, [svgContent, applyPatches, svgUrl]);
 
   useEffect(() => {
     if (!svgContent || !svgContainerRef.current) return;

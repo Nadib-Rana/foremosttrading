@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { LogoMark } from "@/components/layout/Navbar";
@@ -9,10 +9,15 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/services/apiService";
 
 export function LoginForm() {
+  const [isMounted, setIsMounted] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +31,10 @@ export function LoginForm() {
       setErrorMsg(err.message || "Invalid credentials. Please try again.");
     }
   };
+
+  if (!isMounted) {
+    return <div className="w-full max-w-sm flex flex-col items-center min-h-[400px]" />;
+  }
 
   return (
     <form

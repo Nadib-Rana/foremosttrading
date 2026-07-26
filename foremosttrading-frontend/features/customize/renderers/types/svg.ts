@@ -8,7 +8,8 @@ export interface SoccerJerseyRendererProps {
 }
 
 export interface DynamicSvgRendererProps {
-  svgUrl: string;
+  svgUrl?: string;
+  svgRaw?: string;
   colors: ProductColors;
   playerText: PlayerText;
   visibleParts: Record<string, boolean>;
@@ -16,6 +17,8 @@ export interface DynamicSvgRendererProps {
   selectedLayerId?: string | null;
   selectedLayerIds?: string[];
   onLayerSelect?: (elementId: string, isMultiSelect?: boolean, isRangeSelect?: boolean) => void;
+  onLayersDetected?: (layers: Array<{ id: string; label: string; defaultColor: string; layerType: string }>) => void;
+  onError?: () => void;
 }
 
 export interface HoveredBadgeState {

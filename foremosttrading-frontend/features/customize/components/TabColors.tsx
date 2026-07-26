@@ -48,9 +48,9 @@ export function TabColors({
   onGroupColorChange,
 }: TabColorsProps) {
   return (
-    <div className="flex flex-col h-full min-h-0 justify-between">
+    <div className="flex-1 flex flex-col h-full min-h-0 justify-between">
       <div className="flex-1 overflow-y-auto min-h-0 mb-4 pr-1 flex flex-col gap-3">
-        {layerGroups && layerGroups.length > 0 && onSelectGroup && onSelectLayer && (
+        {layerGroups && layerGroups.length > 0 && onSelectGroup && onSelectLayer ? (
           <CustomerLayerGroupPanel
             groups={layerGroups}
             allParts={parts}
@@ -60,27 +60,28 @@ export function TabColors({
             onSelectLayer={onSelectLayer}
             onGroupColorChange={onGroupColorChange}
           />
-        )}
-        {parts.map((part) => {
-          const isExpanded = activePartToEdit === part.id;
-          const isLocked = lockedParts[part.id];
-          const isVisible = visibleParts[part.id];
+        ) : (
+          parts.map((part) => {
+            const isExpanded = activePartToEdit === part.id;
+            const isLocked = lockedParts[part.id];
+            const isVisible = visibleParts[part.id];
 
-          return (
-            <ColorPartRow
-              key={part.id}
-              part={part}
-              color={colors[part.id]}
-              isExpanded={isExpanded}
-              isLocked={isLocked}
-              isVisible={isVisible}
-              onToggleExpand={() => !isLocked && setActivePartToEdit(isExpanded ? null : part.id)}
-              onToggleLock={() => toggleLock(part.id)}
-              onToggleVisibility={() => toggleVisibility(part.id)}
-              onChangeColor={(color) => onChangeColor(part.id, color)}
-            />
-          );
-        })}
+            return (
+              <ColorPartRow
+                key={part.id}
+                part={part}
+                color={colors[part.id]}
+                isExpanded={isExpanded}
+                isLocked={isLocked}
+                isVisible={isVisible}
+                onToggleExpand={() => !isLocked && setActivePartToEdit(isExpanded ? null : part.id)}
+                onToggleLock={() => toggleLock(part.id)}
+                onToggleVisibility={() => toggleVisibility(part.id)}
+                onChangeColor={(color) => onChangeColor(part.id, color)}
+              />
+            );
+          })
+        )}
       </div>
 
       <CustomizerTabFooter

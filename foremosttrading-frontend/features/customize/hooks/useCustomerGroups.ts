@@ -8,7 +8,7 @@ export function useCustomerGroups(initialGroups: CustomerLayerGroup[] = []) {
 
   // Select Group -> Selects all child layers in group
   const selectGroup = useCallback((group: CustomerLayerGroup) => {
-    const childIds = group.layers.map((l) => l.id);
+    const childIds = (group.layers || []).map((l: any) => l.id || l.elementId);
     setSelectedLayerIds(childIds);
   }, []);
 

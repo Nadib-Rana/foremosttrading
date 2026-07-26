@@ -99,5 +99,9 @@ export interface ProductSchema {
   imagePlaceholders?: ProductImagePlaceholderSchema[];
   layerGroups?: any[];
   images?: string[];
+  fonts?: any[];
+  colorPalettes?: any[];
+  sizeCharts?: any[];
+  priceRules?: any[];
 }
 
