@@ -15,6 +15,6 @@ const baseQuery = fetchBaseQuery({
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery,
-  tagTypes: ['Product', 'User', 'Auth', 'ProductShape'],
+  tagTypes: ['Product', 'User', 'Auth', 'ProductShape', 'Category', 'Order', 'Production', 'Coupon'],
   endpoints: () => ({}),
 });

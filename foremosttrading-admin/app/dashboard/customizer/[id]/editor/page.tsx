@@ -707,6 +707,10 @@ interface ProductSchema {
     isLocked?: boolean;
   }>;
   defaultColors: Record<string, string>;
+  fonts?: any[];
+  colorPalettes?: any[];
+  sizeCharts?: any[];
+  priceRules?: any[];
 }
 
 export default function CustomizerEditorPage({ params }: { params: Promise<{ id: string }> }) {
@@ -931,6 +935,10 @@ export default function CustomizerEditorPage({ params }: { params: Promise<{ id:
           views: data.views || [],
           customizableParts: data.customizableParts || [],
           defaultColors: data.defaultColors || {},
+          fonts: data.fonts || [],
+          colorPalettes: data.colorPalettes || [],
+          sizeCharts: data.sizeCharts || [],
+          priceRules: data.priceRules || [],
         };
 
         setProduct(parsedProduct);

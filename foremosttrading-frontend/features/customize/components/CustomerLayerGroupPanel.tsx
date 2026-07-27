@@ -4,16 +4,23 @@ import React from "react";
 import { Layers } from "lucide-react";
 import { CustomerLayerGroup } from "../types/groups";
 import { CustomerGroupRow } from "./CustomerGroupRow";
-import { CustomerLayerRow } from "./CustomerLayerRow";
+import { ColorPartRow } from "./ColorPartRow";
 
 interface CustomerLayerGroupPanelProps {
   groups: CustomerLayerGroup[];
-  allParts: { id: string; label: string }[];
+  allParts: { id: string; label: string; defaultColor?: string }[];
   colorMap: Record<string, string>;
   selectedLayerIds: string[];
   onSelectGroup: (group: CustomerLayerGroup) => void;
   onSelectLayer: (layerId: string) => void;
   onGroupColorChange?: (groupId: string, newColor: string) => void;
+  onChangeColor?: (partId: string, newColor: string) => void;
+  lockedParts?: Record<string, boolean>;
+  toggleLock?: (partId: string) => void;
+  visibleParts?: Record<string, boolean>;
+  toggleVisibility?: (partId: string) => void;
+  activePartToEdit?: string | null;
+  setActivePartToEdit?: (partId: string | null) => void;
 }
 
 export function CustomerLayerGroupPanel({
@@ -24,10 +31,22 @@ export function CustomerLayerGroupPanel({
   onSelectGroup,
   onSelectLayer,
   onGroupColorChange,
+  onChangeColor,
+  lockedParts = {},
+  toggleLock = () => {},
+  visibleParts = {},
+  toggleVisibility = () => {},
+  activePartToEdit = null,
+  setActivePartToEdit = () => {},
 }: CustomerLayerGroupPanelProps) {
-  const assignedLayerIds = new Set(
-    (groups || []).flatMap((g) => (g.layers || []).map((l: any) => l.id || l.elementId))
+  const safeGroups = (groups || []).filter(
+    (g) => Array.isArray(g.layers) && g.layers.length > 0
   );
+
+  const assignedLayerIds = new Set(
+    safeGroups.flatMap((g) => (g.layers || []).map((l: any) => l.id || l.elementId))
+  );
+
   const unassignedParts = allParts.filter((p) => !assignedLayerIds.has(p.id));
 
   return (
@@ -42,7 +61,7 @@ export function CustomerLayerGroupPanel({
 
       {/* Layer Groups List */}
       <div className="space-y-2.5">
-        {(groups || []).map((group) => (
+        {safeGroups.map((group) => (
           <CustomerGroupRow
             key={group.id}
             group={group}
@@ -54,21 +73,37 @@ export function CustomerLayerGroupPanel({
           />
         ))}
 
-        {/* Fallback Unassigned Layers */}
+        {/* Fallback & Ungrouped Layers */}
         {unassignedParts.length > 0 && (
-          <div className="pt-2 border-t border-gray-100 space-y-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 px-1">
-              Unassigned Parts
-            </span>
-            {unassignedParts.map((part) => (
-              <CustomerLayerRow
-                key={part.id}
-                layer={{ id: part.id, displayLabel: part.label || part.id, displayOrder: 0 }}
-                color={colorMap[part.id] || part.defaultColor || "#FFFFFF"}
-                isSelected={selectedLayerIds.includes(part.id)}
-                onSelect={onSelectLayer}
-              />
-            ))}
+          <div className="pt-3 border-t border-gray-200 space-y-2">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-gray-500">
+                Ungrouped Parts
+              </span>
+              <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full font-bold">
+                {unassignedParts.length}
+              </span>
+            </div>
+            {unassignedParts.map((part) => {
+              const isExpanded = activePartToEdit === part.id;
+              const isLocked = Boolean(lockedParts[part.id]);
+              const isVisible = visibleParts[part.id] !== false;
+
+              return (
+                <ColorPartRow
+                  key={part.id}
+                  part={part}
+                  color={colorMap[part.id] || part.defaultColor || "#FFFFFF"}
+                  isExpanded={isExpanded}
+                  isLocked={isLocked}
+                  isVisible={isVisible}
+                  onToggleExpand={() => !isLocked && setActivePartToEdit(isExpanded ? null : part.id)}
+                  onToggleLock={() => toggleLock(part.id)}
+                  onToggleVisibility={() => toggleVisibility(part.id)}
+                  onChangeColor={(color) => onChangeColor ? onChangeColor(part.id, color) : null}
+                />
+              );
+            })}
           </div>
         )}
       </div>

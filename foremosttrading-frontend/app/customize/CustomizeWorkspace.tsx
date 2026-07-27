@@ -48,7 +48,8 @@ export function CustomizeWorkspace({ schema }: { schema: ProductSchema }) {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch mb-8">
-          <div className="lg:col-span-7 flex flex-col h-[350px] sm:h-[450px] lg:h-[650px] min-h-0 bg-white border border-gray-100 rounded-2xl relative overflow-hidden">
+          {/* Left Column: 3D Canvas Preview */}
+          <div className="lg:col-span-7 flex flex-col h-[350px] sm:h-[450px] lg:h-[650px] min-h-0 bg-white border border-gray-100 rounded-2xl relative overflow-hidden shadow-sm">
             <KitPreview
               colors={custom.colors}
               pattern={custom.pattern}
@@ -85,7 +86,8 @@ export function CustomizeWorkspace({ schema }: { schema: ProductSchema }) {
             )}
           </div>
 
-          <div className="lg:col-span-5 bg-white border border-gray-100 rounded-3xl p-4 sm:p-5 shadow-sm flex flex-col justify-between h-full lg:h-[650px] overflow-hidden">
+          {/* Right Column: Customizer Tab Control Panel */}
+          <div className="lg:col-span-5 bg-white border border-gray-100 rounded-3xl p-4 sm:p-5 shadow-sm flex flex-col justify-between h-[550px] lg:h-[650px] min-h-0 overflow-hidden">
             <TabContainer
               activeTab={custom.activeTab}
               setActiveTab={custom.setActiveTab}

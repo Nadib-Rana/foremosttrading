@@ -4,7 +4,7 @@ export const orderApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getOrders: builder.query({
       query: () => ({ url: '/admin/orders' }),
-      providesTags: ['Order' as any],
+      providesTags: ['Order'],
     }),
     updateOrderStatus: builder.mutation({
       query: ({ orderId, status }) => ({
@@ -12,18 +12,18 @@ export const orderApi = baseApi.injectEndpoints({
         method: 'PUT',
         body: { status },
       }),
-      invalidatesTags: ['Order' as any],
+      invalidatesTags: ['Order'],
     }),
     getProductionQueue: builder.query({
       query: () => ({ url: '/admin/production/queue' }),
-      providesTags: ['Production' as any],
+      providesTags: ['Production'],
     }),
     exportProductionItem: builder.mutation({
       query: (queueId) => ({
         url: `/admin/production/${queueId}/export`,
         method: 'POST',
       }),
-      invalidatesTags: ['Production' as any],
+      invalidatesTags: ['Production'],
     }),
   }),
 });

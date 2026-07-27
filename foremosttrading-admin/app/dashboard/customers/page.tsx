@@ -21,6 +21,8 @@ export default function CustomersPage() {
     orders: c.totalOrders || 0,
     totalSpent: c.totalSpent || 0,
     createdAt: c.createdAt ? new Date(c.createdAt).toLocaleDateString() : 'Recent',
+    savedDesigns: c.savedDesigns || [],
+    addresses: c.addresses || [],
   }));
 
   const activeCustomer = selectedCustomer || customers[0] || null;
@@ -55,7 +57,7 @@ export default function CustomersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {customers.map((c) => (
+                {customers.map((c: any) => (
                   <tr 
                     key={c.id} 
                     className={`hover:bg-muted/30 transition-colors ${
@@ -109,11 +111,11 @@ export default function CustomersPage() {
               <div className="grid grid-cols-2 gap-3 bg-secondary/15 p-3 rounded-lg border">
                 <div>
                   <span className="text-[10px] text-muted-foreground block font-semibold">Total Revenue</span>
-                  <span className="text-sm font-black text-foreground">${activeCustomer.totalSpent.toFixed(2)}</span>
+                  <span className="text-sm font-black text-foreground">${(activeCustomer.totalSpent || 0).toFixed(2)}</span>
                 </div>
                 <div>
                   <span className="text-[10px] text-muted-foreground block font-semibold">Completed Runs</span>
-                  <span className="text-sm font-black text-foreground">{activeCustomer.orders} runs</span>
+                  <span className="text-sm font-black text-foreground">{activeCustomer.orders || 0} runs</span>
                 </div>
               </div>
 
@@ -122,11 +124,11 @@ export default function CustomersPage() {
                 <h4 className="text-[11px] font-bold text-foreground flex items-center gap-1">
                   <FileText className="h-4 w-4 text-primary" /> Saved Designs
                 </h4>
-                {selectedCustomer.savedDesigns.length === 0 ? (
+                {(!activeCustomer.savedDesigns || activeCustomer.savedDesigns.length === 0) ? (
                   <p className="text-[10px] text-muted-foreground italic">No saved designs found.</p>
                 ) : (
                   <div className="space-y-1.5">
-                    {selectedCustomer.savedDesigns.map((d: any, idx: number) => (
+                    {activeCustomer.savedDesigns.map((d: any, idx: number) => (
                       <div key={idx} className="flex justify-between items-center p-2 border rounded bg-card hover:bg-muted/10">
                         <div>
                           <span className="font-bold text-foreground block">{d.name}</span>
@@ -144,11 +146,11 @@ export default function CustomersPage() {
                 <h4 className="text-[11px] font-bold text-foreground flex items-center gap-1">
                   <MapPin className="h-4 w-4 text-primary" /> Address Record
                 </h4>
-                {selectedCustomer.addresses.length === 0 ? (
+                {(!activeCustomer.addresses || activeCustomer.addresses.length === 0) ? (
                   <p className="text-[10px] text-muted-foreground italic">No address on file.</p>
                 ) : (
                   <div className="space-y-1.5 font-medium text-muted-foreground">
-                    {selectedCustomer.addresses.map((a: any, idx: number) => (
+                    {activeCustomer.addresses.map((a: any, idx: number) => (
                       <div key={idx} className="p-2 border rounded bg-card">
                         <span className="font-bold text-foreground text-[10px] block mb-0.5">{a.label} Address</span>
                         <p className="text-[10px] leading-relaxed">
